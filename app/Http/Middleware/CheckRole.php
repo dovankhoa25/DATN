@@ -14,9 +14,9 @@ class CheckRole
         $user = JWTAuth::parseToken()->authenticate();
 
         
-        if (!$user || !in_array($user->role->name, $roles)) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        // if (!$user || !in_array($user->role->name, $roles)) {
+        //     return response()->json(['error' => 'Unauthorized'], 403);
+        // }
 
         if (!$user || !$user->roles()->whereIn('name', $roles)->exists()) {
             return response()->json(['error' => 'Unauthorized'], 403);

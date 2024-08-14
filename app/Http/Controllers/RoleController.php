@@ -10,10 +10,9 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $roles =  Role::all(); 
-        return response()->json([
-            'role' => new RoleResource($roles),
-        ], 201);
+        $roles =  Role::paginate(10); 
+        return RoleResource::collection($roles);
+        
     }
 
     public function store(Request $request)
