@@ -3,7 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\RoleController;
-
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,8 +25,18 @@ Route::post('register', [AuthController::class, 'register'])->name('api.register
 Route::post('login', [AuthController::class, 'login'])->name('api.login');
 Route::get('user', [AuthController::class, 'getUser'])->middleware('auth');
 
-// roles
-Route::apiResource('roles', RoleController::class);
 
-// customer
-Route::apiResource('customer', CustomerController::class);
+
+Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác viên,Quản trị viên'])->group(function () {
+
+
+    // users
+    Route::apiResource('users', UserController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+
+    // roles+
+ 
+    Route::apiResource('roles', RoleController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+
+    // customer
+    Route::apiResource('customer', CustomerController::class)->middleware('auth' ,'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
+});
