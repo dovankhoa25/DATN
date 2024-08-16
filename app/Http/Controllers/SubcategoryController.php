@@ -17,18 +17,9 @@ class SubcategoryController extends Controller
     public function index()
     {
 
-        $data = Subcategory::all();
+        $data = Subcategory::paginate(10);
         $subcategories = SubcategoryResource::collection($data);
-        if ($subcategories->count() > 0) {
-            return response()->json([
-                'data' => $subcategories,
-                'message' => 'successs'
-            ], 200);
-        } else {
-            return response()->json([
-                'message' => 'Không có Subcategory nào !'
-            ], 200);
-        }
+        return $subcategories;
     }
 
     /**
@@ -45,24 +36,19 @@ class SubcategoryController extends Controller
     public function store(SubcategoryRequest $request)
     {
         // Xử lý tệp ảnh
+        $imgUrl = null;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imageName = date('YmdHi') . $image->getClientOriginalName();
+            $imageName = date('YmdHi') . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('upload/subcategories'), $imageName);
-
-            $Category = Subcategory::create([
-                'name' => $request->get('name'),
-                'description' => $request->get('description'),
-                'image' => $imageName,
-                'categorie_id' => $request->get('categorie_id'),
-            ]);
-        } else {
-            $Category = Subcategory::create([
-                'name' => $request->get('name'),
-                'description' => $request->get('description'),
-                'categorie_id' => $request->get('categorie_id'),
-            ]);
+            $imgUrl = "upload/subcategories/" . $imageName;
         }
+        $Category = Subcategory::create([
+            'name' => $request->get('name'),
+            'description' => $request->get('description'),
+            'image' => $imgUrl,
+            'categorie_id' => $request->get('categorie_id'),
+        ]);
         return response()->json([
             'data' => new SubcategoryResource($Category),
             'message' => 'success'
@@ -91,26 +77,26 @@ class SubcategoryController extends Controller
     public function update(SubcategoryRequest $request, string $id)
     {
         try {
+            $imgUrl = null;
             $subcategory = Subcategory::findOrFail($id);
             if ($request->hasFile('image')) {
+                // delete image old
+                if ($subcategory->image != null) {
+                    unlink(public_path($subcategory->image));
+                }
+
                 $image = $request->file('image');
                 $imageName = date('YmdHi') . $image->getClientOriginalName();
                 $image->move(public_path('upload/subcategories'), $imageName);
-
-                $subcategory->update([
-                    'name' => $request->get('name'),
-                    'description' => $request->get('description'),
-                    'image' => $imageName,
-                    'categorie_id' => $request->get('categorie_id'),
-
-                ]);
-            } else {
-                $subcategory->update([
-                    'name' => $request->get('name'),
-                    'description' => $request->get('description'),
-                    'categorie_id' => $request->get('categorie_id'),
-                ]);
+                $imgUrl = "upload/subcategories/" . $imageName;
             }
+            $subcategory->update([
+                'name' => $request->get('name'),
+                'description' => $request->get('description'),
+                'image' => $imgUrl,
+                'categorie_id' => $request->get('categorie_id'),
+
+            ]);
             return response()->json([
                 'data' => new SubcategoryResource($subcategory),
                 'message' => 'success',

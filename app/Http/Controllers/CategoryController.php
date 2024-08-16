@@ -17,14 +17,11 @@ class CategoryController extends Controller
     public function index()
     {
         try {
-            $data = Category::all();
+            $data = Category::paginate(10);
             $categories = CategoryResource::collection($data);
-            return response()->json([
-                'data' => $categories,
-                'message' => 'success'
-            ], 200);
+            return $categories;
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'User rỗng'], 404);
+            return response()->json(['error' => 'Categories rỗng'], 404);
         }
     }
 
@@ -38,24 +35,19 @@ class CategoryController extends Controller
     public function store(CategoryRequest $request)
     {
         // Xử lý tệp ảnh
+        $imgUrl = null;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imageName = date('YmdHi') . $image->getClientOriginalName();
+            $imageName = date('YmdHi') . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('upload/categories'), $imageName);
-
-            $Category = Category::create([
-                'name' => $request->get('name'),
-                'description' => $request->get('description'),
-                'image' => $imageName,
-            ]);
-        } else {
-            $Category = Category::create([
-                'name' => $request->get('name'),
-                'description' => $request->get('description'),
-            ]);
+            $imgUrl = "upload/categories/" . $imageName;
         }
 
-
+        $Category = Category::create([
+            'name' => $request->get('name'),
+            'description' => $request->get('description'),
+            'image' => $imgUrl,
+        ]);
 
         return response()->json([
             'data' => new CategoryResource($Category),
@@ -85,23 +77,24 @@ class CategoryController extends Controller
     public function update(CategoryRequest $request, string $id)
     {
         try {
+            $imgUrl = null;
             $category = Category::findOrFail($id);
             if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $imageName = date('YmdHi') . $image->getClientOriginalName();
-                $image->move(public_path('upload/categories'), $imageName);
+                // delete image old
+                if ($category->image != null) {
+                    unlink(public_path($category->image));
+                }
 
-                $category->update([
-                    'name' => $request->get('name'),
-                    'description' => $request->get('description'),
-                    'image' => $imageName,
-                ]);
-            } else {
-                $category->update([
-                    'name' => $request->get('name'),
-                    'description' => $request->get('description'),
-                ]);
+                $image = $request->file('image');
+                $imageName = date('YmdHi') . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('upload/categories'), $imageName);
+                $imgUrl = "upload/categories/" . $imageName;
             }
+            $category->update([
+                'name' => $request->get('name'),
+                'description' => $request->get('description'),
+                'image' => $imgUrl,
+            ]);
             return response()->json([
                 'data' => new CategoryResource($category),
                 'message' => 'success',

@@ -48,3 +48,6 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
     // sub-categories
     Route::apiResource('subcategory', SubcategoryController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
 });
+Route::apiResource('category', CategoryController::class);
+
+Route::apiResource('subcategory', SubcategoryController::class);

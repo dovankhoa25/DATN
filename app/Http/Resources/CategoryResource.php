@@ -20,7 +20,7 @@ class CategoryResource extends JsonResource
             'description' => $this->description,
             'image' => $this->image,
             'status' => $this->status,
-            'subcategories' => $this->subcategories,
+            // 'subcategories' => $this->subcategories, // subcategories thuộc từng category
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
