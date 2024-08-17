@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SizeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,3 +27,5 @@ Route::post('login', [AuthController::class, 'login'])->name('api.login');
 Route::get('user', [AuthController::class, 'getUser'])->middleware('auth');
 
 Route::apiResource('sizes', SizeController::class);
+
+Route::apiResource('payments', PaymentController::class);

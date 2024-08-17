@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SizeRequest;
+use App\Http\Resources\SizeResource;
 use App\Models\Size;
 use Illuminate\Http\Request;
 
@@ -13,23 +15,24 @@ class SizeController extends Controller
     public function index()
     {
         $listSize = Size::all();
-        return response()->json($listSize);
-        // dd($listSize);
+        $sizeCollection = SizeResource::collection($listSize);
+        return response()->json($sizeCollection, 200);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(SizeRequest $request)
     {
-        $request -> all();
+        $sizedata = $request->all();
 
-        $size = Size::create([
-            'name' => $request['name'],
-            'status' => $request['status']
-        ]);
-
-        return response()->json($size, 201);
+        $size = Size::create($sizedata);
+        $sizeCollection = new SizeResource($size);
+        if ($size) {
+            return response()->json($sizeCollection, 201);
+        } else {
+            return response()->json(['error', 'Thêm size thất bại']);
+        }
     }
 
     /**
@@ -37,23 +40,30 @@ class SizeController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $size = Size::FindorFail($id);
+        $sizeCollection = new SizeResource($size);
+        if ($size) {
+            return response()->json($sizeCollection, 200);
+        } else {
+            return response()->json(['error', 'Không tìm thấy size theo id']);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(SizeRequest $request, string $id)
     {
         $size = Size::FindorFail($id);
-        $request -> all();
-        
-        $size -> update([
-            'name' => $request['name'],
-            'status' => $request['status']
-        ]);
+        $sizeData = $request->all();
 
-        return response()->json($size, 200);
+        $res = $size->update($sizeData);
+        $sizeCollection = new SizeResource($size);
+        if ($res) {
+            return response()->json($sizeCollection, 200);
+        } else {
+            return response()->json(['error', 'Sửa size thất bại']);
+        }
     }
 
     /**

@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Size extends Model
+class Payment extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'name',
         'status',
@@ -16,8 +15,7 @@ class Size extends Model
         'updated_at'
     ];
 
-    public $table = 'sizes';
+    public $table = 'payments';
     
     public $timestamp = false;
-    
 }
