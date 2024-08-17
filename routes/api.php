@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,12 +33,21 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
 
 
     // users
-    Route::apiResource('users', UserController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('users', UserController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
     // roles+
- 
-    Route::apiResource('roles', RoleController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+
+    Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
     // customer
-    Route::apiResource('customer', CustomerController::class)->middleware('auth' ,'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
+    Route::apiResource('customer', CustomerController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
+
+    // categories
+    Route::apiResource('category', CategoryController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
+
+    // sub-categories
+    Route::apiResource('subcategory', SubcategoryController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
 });
+Route::apiResource('category', CategoryController::class);
+
+Route::apiResource('subcategory', SubcategoryController::class);
