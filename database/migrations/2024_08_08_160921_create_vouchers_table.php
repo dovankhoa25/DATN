@@ -17,6 +17,7 @@ return new class extends Migration
             $table->boolean('status')->default(true);
             $table->string('image')->nullable();
             $table->foreignId('customer_id')->constrained('customers');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
