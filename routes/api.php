@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VoucherController;
 use Illuminate\Http\Request;
@@ -30,9 +32,8 @@ Route::get('user', [AuthController::class, 'getUser'])->middleware('auth');
 
 Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác viên,Quản trị viên'])->group(function () {
     // users
-    Route::apiResource('users', UserController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('users', UserController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
-    // roles+
     Route::apiResource('roles', RoleController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
 
     // customer
@@ -43,4 +44,5 @@ Route::apiResource('customers', CustomerController::class);
 
 Route::post('vouchers', [VoucherController::class, 'store'])->middleware('auth');
 Route::get('vouchers/{id}', [VoucherController::class, 'show'])->middleware('auth');
+
 

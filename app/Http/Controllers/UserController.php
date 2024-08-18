@@ -72,11 +72,9 @@ class UserController extends Controller
             return response()->json([
                 'user' => new UserResource($user),
             ], 200);
-
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'User không tồn tại'], 404);
         }
-        
     }
 
     public function destroy(string $id)
