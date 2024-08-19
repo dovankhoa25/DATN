@@ -17,7 +17,7 @@ class CustomerRequest extends BaseApiRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'phone_number' => ['required','regex:/(84|0[3|5|7|8|9])+([0-9]{8})\b/g'],
+            'phone_number' => ['required'],
             'diemthuong' => 'nullable|integer',
             'user_id' => 'nullable|exists:users,id',
         ];
@@ -31,6 +31,7 @@ class CustomerRequest extends BaseApiRequest
             'name.max' => 'Tên không được vượt quá 255 ký tự.',
             
             'phone_number.required' => 'Số điện thoại là bắt buộc.',
+            'phone_number.unique' => 'Số điện thoại đã tồn tại.',
             'phone_number.regex' => 'Số điện thoại không hợp lệ.',
             
             'diemthuong.integer' => 'Điểm thưởng phải là một số nguyên.',

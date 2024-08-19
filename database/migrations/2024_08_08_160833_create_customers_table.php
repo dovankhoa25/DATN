@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('phone_number');
             $table->integer('diemthuong')->default(0);
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
