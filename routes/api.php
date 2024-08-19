@@ -1,12 +1,17 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SizeController;
+
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VoucherController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -45,4 +50,10 @@ Route::apiResource('customers', CustomerController::class);
 Route::post('vouchers', [VoucherController::class, 'store'])->middleware('auth');
 Route::get('vouchers/{id}', [VoucherController::class, 'show'])->middleware('auth');
 
+
+
+
+Route::apiResource('sizes', SizeController::class);
+
+Route::apiResource('payments', PaymentController::class);
 
