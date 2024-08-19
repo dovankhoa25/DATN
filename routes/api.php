@@ -42,18 +42,22 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
     Route::apiResource('roles', RoleController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
 
     // customer
-    
+    Route::apiResource('customers', CustomerController::class);
     // voucher
+    Route::post('vouchers', [VoucherController::class, 'store'])->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::get('vouchers/{id}', [VoucherController::class, 'show'])->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+
+    // sizes
+    Route::apiResource('sizes', SizeController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    // payments
+    Route::apiResource('payments', PaymentController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+
 });
-Route::apiResource('customers', CustomerController::class);
-
-Route::post('vouchers', [VoucherController::class, 'store'])->middleware('auth');
-Route::get('vouchers/{id}', [VoucherController::class, 'show'])->middleware('auth');
 
 
 
 
-Route::apiResource('sizes', SizeController::class);
 
-Route::apiResource('payments', PaymentController::class);
+
+
 
