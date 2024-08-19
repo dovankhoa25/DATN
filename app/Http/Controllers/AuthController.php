@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -25,7 +26,11 @@ class AuthController extends Controller
 
         $token = JWTAuth::fromUser($user);
 
-        return response()->json(compact('user', 'token'), 201);
+        return response()->json([
+            'user' => new UserResource($user),
+            'token' => $token,
+        ], 201);
+        
     }
 
 
@@ -51,7 +56,9 @@ class AuthController extends Controller
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            return response()->json(compact('user'));
+            return response()->json([
+                'user' => new UserResource($user),
+            ], 201);
         } catch (JWTException $e) {
             
             return response()->json(['error' => 'Token không hợp lệ or hết hạn'], 401);
