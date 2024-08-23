@@ -5,6 +5,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SubcategoryController;
+use App\Http\Controllers\TablesController;
+use App\Http\Controllers\TimeOrderTableController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -51,3 +53,6 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
 Route::apiResource('category', CategoryController::class);
 
 Route::apiResource('subcategory', SubcategoryController::class);
+
+Route::apiResource('tables', TablesController::class);
+Route::apiResource('time_order_table', TimeOrderTableController::class);
