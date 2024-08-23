@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SizeController;
 
@@ -52,7 +52,11 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
     // payments
     Route::apiResource('payments', PaymentController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
 
+    //cart
+    Route::apiResource('carst', CartController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
 });
+
+
 
 
 
