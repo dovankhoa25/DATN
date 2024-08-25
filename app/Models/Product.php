@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use HasFactory;
+
     protected $fillable = ['name', 'thumbnail', 'status', 'sub_categories_id'];
 
     // Mối quan hệ với ProductDetail
+  
     public function productDetails()
     {
         return $this->hasMany(ProductDetail::class);
@@ -21,4 +23,5 @@ class Product extends Model
     {
         return $this->hasManyThrough(Image::class, ProductDetail::class);
     }
+
 }
