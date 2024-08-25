@@ -9,9 +9,19 @@ class ProductDetail extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['size_id', 'price', 'quantity', 'product_id', 'sale', 'status'];
+
+    // quan hệ Product
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+
+    //  quan hệ Image
+    public function images()
+    {
+        return $this->hasMany(Image::class);
     }
 
     public function size()
