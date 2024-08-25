@@ -7,6 +7,7 @@ use App\Http\Controllers\SizeController;
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\UserController;
@@ -51,6 +52,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
     Route::apiResource('sizes', SizeController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
     // payments
     Route::apiResource('payments', PaymentController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+
+    Route::apiResource('products', PaymentController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
 
 });
 
