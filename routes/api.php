@@ -1,6 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+<<<<<<< Updated upstream
+=======
+use App\Http\Controllers\BillController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SizeController;
+
+>>>>>>> Stashed changes
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\RoleController;
@@ -56,3 +63,5 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
     // timeOrderTable
     Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
 });
+
+
