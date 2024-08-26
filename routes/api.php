@@ -53,6 +53,6 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
     Route::apiResource('payments', PaymentController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
     //cart
-    // Route::apiResource('carst', CartController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('carts', CartController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
 });
-Route::apiResource('carts', CartController::class);
+
