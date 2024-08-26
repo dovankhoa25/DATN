@@ -23,7 +23,7 @@ class TimeOrderTableRequest extends BaseApiRequest
     {
         return [
             'table_id' => 'required|exists:tables,id',
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'exists:users,id',
             'phone_number' => 'required|integer|digits_between:10,15',
             'date_oder' => 'required|date',
             'time_oder' => 'required|date_format:H:i:s',
@@ -38,7 +38,6 @@ class TimeOrderTableRequest extends BaseApiRequest
             'table_id.required' => 'table_id là bắt buộc',
             'table_id.exists' => 'table_id phải nằm trong bảng tables',
 
-            'user_id.required' => 'user_id là bắt buộc',
             'user_id.exists' => 'user_id phải nằm trong bảng users',
 
             'phone_number.required' => 'phone_number là bắt buộc',
