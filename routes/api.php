@@ -63,13 +63,10 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
     //Bill detail
     Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
     
+    // tables
+    Route::apiResource('tables', TablesController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
+
+    // timeOrderTable
+    Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
 
 });
-
-
-
-
-
-
-
-
