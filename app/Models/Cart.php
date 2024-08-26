@@ -4,12 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+// use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
 class Cart extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'ma_bill',
@@ -33,6 +33,7 @@ class Cart extends Model
                 'pro.thumbnail as product_thumbnail',
                 'pro_detail.price as product_price',
                 'pro_detail.sale as product_sale',
+                'pro_detail.quantity as product_quantity',
 
                 'size.name as size_name'
             )
@@ -46,7 +47,7 @@ class Cart extends Model
         return $query;
     }
 
-    public function cartById(int $id)
+    public function cartByBillCode(string $ma_bill)
     {
         $query = DB::table('carts as cart')
             ->select(
@@ -65,7 +66,7 @@ class Cart extends Model
             ->join('products as pro', 'pro_detail.product_id', '=', 'pro.id')
             ->join('sizes as size', 'pro_detail.size_id', '=', 'size.id')
             ->orderBy('cart.id')
-            ->where('cart.id', $id)
+            ->where('cart.ma_bill', $ma_bill)
             ->paginate(7);
     
         return $query;

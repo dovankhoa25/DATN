@@ -6,6 +6,7 @@ use App\Http\Requests\CartRequest;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
@@ -18,7 +19,8 @@ class CartController extends Controller
         $data = $objCart->listCart();
         return response()->json([
             'data' => $data,
-            'message' => 'success'], 200);
+            'message' => 'success'
+        ], 200);
     }
 
     /**
@@ -26,33 +28,62 @@ class CartController extends Controller
      */
     public function store(CartRequest $request)
     {
-        $data = $request->all();
-        $res = Cart::create($data);
+
+        $productDetail = DB::table('product_details')
+            ->select('quantity')
+            ->where('id', $request->get('product_detail_id'))
+            ->first();
+
+        if ($request->quantity > $productDetail->quantity) {
+            return response()->json([
+                'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
+                'message' => 'error'
+            ], 400);
+        }
+
+        $res = Cart::create([
+            'ma_bill' => $request->get('ma_bill'),
+            'product_detail_id' => $request->get('product_detail_id'),
+            'quantity' => $request->get('quantity'),
+        ]);
         $cartCollection = new CartResource($res);
-        if($res){
+        if ($res) {
+            // $productDetail->decrement('quantity', $request->get('quantity'));
+            DB::table('product_details')
+                ->where('id', $request->get('product_detail_id'))
+                ->decrement('quantity', $request->get('quantity'));
+
             return response()->json([
                 'data' => $cartCollection,
-                'message' => 'success'], 201);
-        }else{
-            return response()->json(['error'=>'Thêm thất bại']);
+                'message' => 'success'
+            ], 201);
+        } else {
+            return response()->json(['error' => 'Thêm thất bại']);
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
-    {
-        $checkId = Cart::findOrFail($id);
-        if($checkId){
+    public function show(string $ma_bill)
+    { //theo ma_bill
+        // $checkId = Cart::findOrFail($ma_bill);
+        // if ($checkId) {
             $objCart = new Cart();
-            $data = $objCart->cartById($id);
-            return response()->json([
-                'data' => $data,
-                'message' => 'success'], 200);
-        }else{
-            return response()->json(['message'=>'id không tồn tại'], 404);
-        }
+            $data = $objCart->cartByBillCode($ma_bill);
+
+            if ($data->total() > 0) {
+                return response()->json([
+                    'data' => $data,
+                    'message' => 'success'
+                ], 200);
+            } else {
+                return response()->json(['message' => 'Mã bill không tồn tại'], 404);
+            }
+            
+        // } else {
+            // return response()->json(['message' => 'Mã bill không tồn tại'], 404);
+        // }
     }
 
     /**
@@ -60,16 +91,72 @@ class CartController extends Controller
      */
     public function update(CartRequest $request, string $id)
     {
-        $data = $request->all();
         $cart = Cart::findOrFail($id);
-        $res = $cart->update($data);
-        $cartCollection = new CartResource($cart);
-        if($res){
+    
+        $oldProductDetail = DB::table('product_details')
+            ->select('quantity')
+            ->where('id', $cart->product_detail_id)
+            ->first();
+    
+        $newProductDetail = DB::table('product_details')
+            ->select('quantity')
+            ->where('id', $request->get('product_detail_id'))
+            ->first();
+    
+        if ($request->quantity > $newProductDetail->quantity) {
+            return response()->json([
+                'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm mới.',
+                'message' => 'error'
+            ], 400);
+        }
+    
+        DB::beginTransaction();
+        try {
+            if ($cart->product_detail_id != $request->get('product_detail_id')) {
+            
+                DB::table('product_details')
+                    ->where('id', $cart->product_detail_id)
+                    ->increment('quantity', $cart->quantity);
+    
+                DB::table('product_details')
+                    ->where('id', $request->get('product_detail_id'))
+                    ->decrement('quantity', $request->get('quantity'));
+    
+                $cart->update([
+                    'ma_bill' => $request->get('ma_bill'),
+                    'product_detail_id' => $request->get('product_detail_id'),
+                    'quantity' => $request->get('quantity'),
+                ]);
+            } else {
+                $quantityDifference = $request->quantity - $cart->quantity;
+    
+                if ($quantityDifference != 0) {
+                    if ($quantityDifference > 0) {
+                        DB::table('product_details')
+                            ->where('id', $request->get('product_detail_id'))
+                            ->decrement('quantity', $quantityDifference);
+                    } else {
+                        DB::table('product_details')
+                            ->where('id', $request->get('product_detail_id'))
+                            ->increment('quantity', -$quantityDifference);
+                    }
+                    $cart->update([
+                        'quantity' => $request->get('quantity'),
+                    ]);
+                }
+            }
+    
+            // Commit transaction
+            DB::commit();
+            $cartCollection = new CartResource($cart);
             return response()->json([
                 'data' => $cartCollection,
-                'message' => 'success'], 200);
-        }else{
-            return response()->json(['error'=>'Thêm thất bại']);
+                'message' => 'Cập nhật giỏ hàng thành công'
+            ], 200);
+        } catch (\Exception $e) {
+            // Rollback transaction nếu có lỗi
+            DB::rollBack();
+            return response()->json(['error' => 'Cập nhật giỏ hàng thất bại', 'details' => $e->getMessage()], 500);
         }
     }
 
@@ -81,10 +168,10 @@ class CartController extends Controller
         $cart = Cart::findOrFail($id);
 
         $res = $cart->delete();
-        if($res){
-            return response()->json(['message'=>'success'], 204);
-        }else{
-            return response()->json(['error'=>'Xóa thất bại']);
+        if ($res) {
+            return response()->json(['message' => 'success'], 204);
+        } else {
+            return response()->json(['error' => 'Xóa thất bại']);
         }
     }
 }
