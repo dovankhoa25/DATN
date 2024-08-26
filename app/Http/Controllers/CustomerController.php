@@ -14,14 +14,8 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = Customer::all();
-        $total = $customers->count();
-
-        return response()->json([
-            'data' => CustomerResource::collection($customers),
-            'total' => $total,
-            'status' => 'success',
-        ]);
+        $customers = Customer::paginate(10);
+        return CustomerResource::collection($customers);
     }
 
     /**
@@ -37,9 +31,8 @@ class CustomerController extends Controller
         ]);
 
         return response()->json([
-            'data' => new CustomerResource($customer),
-            'status' => 'success',
-        ]);
+            'data' => new CustomerResource($customer)
+        ], 201);
     }
 
     /**
@@ -48,9 +41,8 @@ class CustomerController extends Controller
     public function show(Customer $customer)
     {
         return response()->json([
-            'data' => new CustomerResource($customer),
-            'status' => 'success',
-        ]);
+            'data' => new CustomerResource($customer)
+        ], 200);
     }
 
     /**
@@ -58,7 +50,6 @@ class CustomerController extends Controller
      */
     public function update(CustomerRequest $request, Customer $customer)
     {
-
         $customer->update([
             "name" => $request->get('name'),
             "phone_number" => $request->get('phone_number'),
@@ -66,9 +57,8 @@ class CustomerController extends Controller
         ]);
 
         return response()->json([
-            'data' => new CustomerResource($customer),
-            'status' => 'success',
-        ]);
+            'data' => new CustomerResource($customer)
+        ], 200);
     }
 
     /**
@@ -79,8 +69,7 @@ class CustomerController extends Controller
         $customer->delete();
 
         return response()->json([
-            'status' => 'success',
             'message' => 'Customer deleted successfully',
-        ]);
+        ], 200);
     }
 }

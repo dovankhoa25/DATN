@@ -26,6 +26,7 @@ class UserController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'User rỗng'], 404);
         }
+        
     }
 
     /**

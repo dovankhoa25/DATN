@@ -11,9 +11,7 @@ class CreateImagesTable extends Migration
         Schema::create('images', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('status');
             $table->foreignId('product_detail_id')->constrained('product_details');
-            
             $table->timestamps();
         });
     }
