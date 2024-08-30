@@ -1,12 +1,18 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+
 use App\Http\Controllers\CartController;
+
+use App\Http\Controllers\BillController;
+use App\Http\Controllers\BillDetailController;
+
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SizeController;
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\UserController;
@@ -52,7 +58,23 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
     // payments
     Route::apiResource('payments', PaymentController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
+
     //cart
     Route::apiResource('carts', CartController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
-});
 
+
+    Route::apiResource('products', PaymentController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+
+
+    // Bills
+    Route::apiResource('bills', BillController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    //Bill detail
+    Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    
+    // tables
+    Route::apiResource('tables', TablesController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
+
+    // timeOrderTable
+    Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
+
+});
