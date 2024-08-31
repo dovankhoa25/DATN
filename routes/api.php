@@ -15,6 +15,8 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SubcategoryController;
+use App\Http\Controllers\TablesController;
+use App\Http\Controllers\TimeOrderTableController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VoucherController;
 
@@ -41,40 +43,40 @@ Route::get('user', [AuthController::class, 'getUser'])->middleware('auth');
 
 
 
-Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác viên,Quản trị viên'])->group(function () {
+Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(function () {
     // users
-    Route::apiResource('users', UserController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('users', UserController::class)->middleware('auth', 'checkRole:qtv,admin');
 
-    Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     // customer
-    Route::apiResource('customers', CustomerController::class);
+    Route::apiResource('customers', CustomerController::class)->middleware('auth', 'checkRole:qtv,admin');
     // voucher
-    Route::post('vouchers', [VoucherController::class, 'store'])->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
-    Route::get('vouchers/{id}', [VoucherController::class, 'show'])->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
+    Route::post('vouchers', [VoucherController::class, 'store'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::get('vouchers/{id}', [VoucherController::class, 'show'])->middleware('auth', 'checkRole:qtv,admin');
 
     // sizes
-    Route::apiResource('sizes', SizeController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('sizes', SizeController::class)->middleware('auth', 'checkRole:qtv,admin');
     // payments
-    Route::apiResource('payments', PaymentController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('payments', PaymentController::class)->middleware('auth', 'checkRole:qtv,admin');
 
 
     //cart
-    Route::apiResource('carts', CartController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('carts', CartController::class)->middleware('auth', 'checkRole:qtv,admin');
 
 
-    Route::apiResource('products', PaymentController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('products', PaymentController::class)->middleware('auth', 'checkRole:qtv,admin');
 
 
     // Bills
-    Route::apiResource('bills', BillController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
     //Bill detail
-    Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth', 'checkRole:qtv,admin');
     
     // tables
-    Route::apiResource('tables', TablesController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
+    Route::apiResource('tables', TablesController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     // timeOrderTable
-    Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:Cộng tác viên,Supper Admin,Quản trị viên');
+    Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:qtv,admin');
 
 });
