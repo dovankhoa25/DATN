@@ -41,35 +41,31 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:Supper Admin,Cộng tác 
     // users
     Route::apiResource('users', UserController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
-    Route::apiResource('roles', RoleController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
     // customer
     Route::apiResource('customers', CustomerController::class);
     // voucher
-    Route::post('vouchers', [VoucherController::class, 'store'])->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
-    Route::get('vouchers/{id}', [VoucherController::class, 'show'])->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::post('vouchers', [VoucherController::class, 'store'])->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
+    Route::get('vouchers/{id}', [VoucherController::class, 'show'])->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
     // sizes
-    Route::apiResource('sizes', SizeController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('sizes', SizeController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
     // payments
-    Route::apiResource('payments', PaymentController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('payments', PaymentController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
 
-    Route::apiResource('products', PaymentController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('products', PaymentController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
 
     // Bills
-    Route::apiResource('bills', BillController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
+    Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
     //Bill detail
-    Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth' ,'checkRole:Supper Admin,Quản trị viên');
-    
+    Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 
+    //category
+    Route::apiResource('category', CategoryController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
+
+    //subcategory
+    Route::apiResource('subcategory', SubcategoryController::class)->middleware('auth', 'checkRole:Supper Admin,Quản trị viên');
 });
-
-
-
-
-
-
-
-
