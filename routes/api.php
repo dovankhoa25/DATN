@@ -67,8 +67,9 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     Route::apiResource('products', PaymentController::class)->middleware('auth', 'checkRole:qtv,admin');
 
-
+    // category
     Route::apiResource('category', CategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+    // subcategory
     Route::apiResource('subcategory', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 
 
