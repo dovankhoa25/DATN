@@ -14,7 +14,7 @@ class SizeController extends Controller
      */
     public function index()
     {
-        $listSize = Size::all();
+        $listSize = Size::paginate(10);
         $sizeCollection = SizeResource::collection($listSize);
         return response()->json($sizeCollection, 200);
     }
