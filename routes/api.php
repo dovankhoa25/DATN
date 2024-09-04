@@ -71,16 +71,20 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     Route::apiResource('products', ProductController::class)->middleware('auth', 'checkRole:qtv,admin');
 
+    // category
+    Route::apiResource('category', CategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+    // subcategory
+    Route::apiResource('subcategory', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+
 
     // Bills
     Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
     //Bill detail
     Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth', 'checkRole:qtv,admin');
-    
+
     // tables
     Route::apiResource('tables', TablesController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     // timeOrderTable
     Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:qtv,admin');
-
 });
