@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Image;
@@ -42,7 +43,7 @@ class ProductController extends Controller
         $product = Product::create([
             'name' => $request->name,
             'thumbnail' => $this->storeImage($request->file('thumbnail'), 'product/thumbal'),
-            'status' => $request->status,
+            'status' => 1,
             'sub_categories_id' => $request->sub_categories_id,
         ]);
 

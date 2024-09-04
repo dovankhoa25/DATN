@@ -1,24 +1,25 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\AuthController;
 
-use App\Http\Controllers\CartController;
 
-use App\Http\Controllers\BillController;
-use App\Http\Controllers\BillDetailController;
+use App\Http\Controllers\Admin\CartController;
 
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\SizeController;
+use App\Http\Controllers\Admin\BillController;
+use App\Http\Controllers\Admin\BillDetailController;
 
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\SubcategoryController;
-use App\Http\Controllers\TablesController;
-use App\Http\Controllers\TimeOrderTableController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\SizeController;
+
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SubcategoryController;
+use App\Http\Controllers\Admin\TablesController;
+use App\Http\Controllers\Admin\TimeOrderTableController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VoucherController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -49,11 +50,14 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:qtv,admin');
 
+    //cate
+    Route::apiResource('category', CategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+
     // customer
     Route::apiResource('customers', CustomerController::class)->middleware('auth', 'checkRole:qtv,admin');
     // voucher
-    Route::post('vouchers', [VoucherController::class, 'store'])->middleware('auth', 'checkRole:qtv,admin');
-    Route::get('vouchers/{id}', [VoucherController::class, 'show'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('vouchers', VoucherController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     // sizes
     Route::apiResource('sizes', SizeController::class)->middleware('auth', 'checkRole:qtv,admin');
@@ -65,7 +69,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::apiResource('carts', CartController::class)->middleware('auth', 'checkRole:qtv,admin');
 
 
-    Route::apiResource('products', PaymentController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('products', ProductController::class)->middleware('auth', 'checkRole:qtv,admin');
 
 
     // Bills

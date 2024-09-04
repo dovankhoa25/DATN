@@ -12,9 +12,12 @@ class Voucher extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        "name",
-        "status",
-        "image",
-        "customer_id",
+        'name',
+        'value',
+        'image',
+        'status',
+        'customer_id',
+        'expiration_date',
     ];
+    
 }

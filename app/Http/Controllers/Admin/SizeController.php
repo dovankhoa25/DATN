@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\SizeRequest;
 use App\Http\Resources\SizeResource;
 use App\Models\Size;
@@ -15,8 +16,8 @@ class SizeController extends Controller
     public function index()
     {
         $listSize = Size::paginate(10);
-        $sizeCollection = SizeResource::collection($listSize);
-        return response()->json($sizeCollection, 200);
+        // $sizeCollection = SizeResource::collection($listSize);
+        return SizeResource::collection($listSize,200);
     }
 
     /**

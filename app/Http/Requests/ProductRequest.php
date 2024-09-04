@@ -11,7 +11,7 @@ class ProductRequest extends BaseApiRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -25,7 +25,7 @@ class ProductRequest extends BaseApiRequest
             // Validation cho Product
             'name' => 'required|string|max:255',
             'thumbnail' => 'required|string|max:255',
-            'status' => 'required|boolean',
+            'status' => 'boolean',
             'sub_categories_id' => 'required|exists:sub_categories,id',
             
             // Validation cho Product Detail
@@ -57,7 +57,7 @@ class ProductRequest extends BaseApiRequest
         'thumbnail.string' => 'Đường dẫn ảnh đại diện phải là chuỗi ký tự.',
         'thumbnail.max' => 'Đường dẫn ảnh đại diện không được vượt quá 255 ký tự.',
         
-        'status.required' => 'Trạng thái sản phẩm là bắt buộc.',
+        // 'status.required' => 'Trạng thái sản phẩm là bắt buộc.',
         'status.boolean' => 'Trạng thái sản phẩm phải là kiểu boolean.',
         
         'sub_categories_id.required' => 'Danh mục con là bắt buộc.',

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\CustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
@@ -27,7 +28,8 @@ class CustomerController extends Controller
         $customer = Customer::create([
             "name" => $request->get('name'),
             "phone_number" => $request->get('phone_number'),
-            "user_id" => $request->get('user_id') || null
+            "diemthuong" => 0,
+            "user_id" => $request->get('user_id') ?: null
         ]);
 
         return response()->json([

@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('status')->default(true);
+            $table->decimal('value', 8, 2);
             $table->string('image')->nullable();
-            $table->foreignId('customer_id')->constrained('customers');
+            $table->date('expiration_date')->nullable();
+            $table->boolean('status')->default(true);
+            $table->foreignId('customer_id')->nullable()->constrained('customers');
             $table->softDeletes();
             $table->timestamps();
         });
