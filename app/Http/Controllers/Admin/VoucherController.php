@@ -67,7 +67,7 @@ class VoucherController extends Controller
         
         return response()->json([
             'message' => 'Thêm Mới Thành Công!',
-            'voucher' => $voucher
+            'data' => $voucher
         ],201);
 
     }

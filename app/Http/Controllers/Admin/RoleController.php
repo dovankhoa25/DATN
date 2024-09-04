@@ -27,7 +27,7 @@ class RoleController extends Controller
         $role = Role::create($validatedData);
 
         return response()->json([
-            'role' => new RoleResource($role),
+            'data' => new RoleResource($role),
         ], 201);
     }
 
@@ -35,7 +35,7 @@ class RoleController extends Controller
     {
         $role = Role::findOrFail($id);
         return response()->json([
-            'role' => new RoleResource($role),
+            'data' => new RoleResource($role),
         ], 201);
     }
 
@@ -52,7 +52,7 @@ class RoleController extends Controller
         $role->update($validatedData);
     
         return response()->json([
-            'role' => new RoleResource($role),
+            'data' => new RoleResource($role),
         ], 201);
     }
 

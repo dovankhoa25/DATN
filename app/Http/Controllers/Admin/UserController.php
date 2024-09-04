@@ -22,7 +22,7 @@ class UserController extends Controller
             $users = User::paginate(10);
 
             return response()->json([
-                'user' => new UserCollection($users),
+                'data' => new UserCollection($users),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'User rỗng'], 404);
@@ -47,7 +47,7 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
             return response()->json([
-                'user' => new UserResource($user),
+                'data' => new UserResource($user),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'User không tồn tại'], 404);
@@ -72,7 +72,7 @@ class UserController extends Controller
                 'password' => Hash::make($validatedData['password']),
             ]);
             return response()->json([
-                'user' => new UserResource($user),
+                'data' => new UserResource($user),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'User không tồn tại'], 404);

@@ -17,7 +17,7 @@ class PaymentController extends Controller
     {
         $listPayment = Payment::paginate(10);
         $paymentCollection = PaymentResource::collection($listPayment);
-        return response()->json($paymentCollection, 200);
+        return $paymentCollection;
     }
 
     /**

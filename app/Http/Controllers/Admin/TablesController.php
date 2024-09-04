@@ -41,7 +41,7 @@ class TablesController extends Controller
                 'description' => $request->get('description'),
             ]);
             return response()->json([
-                'table' => new TableResource($table),
+                'data' => new TableResource($table),
                 'message' => 'success'
             ], 201);
         } catch (ModelNotFoundException $e) {

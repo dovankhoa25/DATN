@@ -54,7 +54,7 @@ class TimeOrderTableController extends Controller
                     'description' => $request->get('description'),
                 ]);
                 return response()->json([
-                    'table' => new TimeOrderTableResource($timeOrderTable),
+                    'data' => new TimeOrderTableResource($timeOrderTable),
                     'message' => 'success'
                 ], 201);
             } else {
@@ -79,7 +79,7 @@ class TimeOrderTableController extends Controller
         try {
             $timeOrderTable = TimeOrderTable::findOrFail($id);
             return response()->json([
-                'timeOrderTable' => new TimeOrderTableResource($timeOrderTable),
+                'data' => new TimeOrderTableResource($timeOrderTable),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'timeOrderTable không tồn tại'], 404);

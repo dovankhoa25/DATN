@@ -44,7 +44,7 @@ class BillDetailController extends Controller
         try {
             $bill = BillDetail::findOrFail($id);
             return response()->json([
-                'bill' => new BillDetailResource($bill),
+                'data' => new BillDetailResource($bill),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Chi tiết hoá đơn không tồn tại'], 404);
