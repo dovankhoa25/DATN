@@ -88,5 +88,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     // timeOrderTable
     Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:qtv,admin');
 });
+Route::prefix('client')->middleware(['auth',  'checkRole:customer'])->group( function(){
+    Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth', 'checkRole:customer');
+});
 
-Route::apiResource('online_cart', OnlineCartController::class);
