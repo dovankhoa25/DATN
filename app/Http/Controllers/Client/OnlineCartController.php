@@ -21,14 +21,14 @@ class OnlineCartController extends Controller
     {
         // try {
         //     $user = JWTAuth::parseToken()->authenticate();
-    
+
         //     if (!$user) {
         //         return response()->json(['message' => 'Người dùng không tồn tại'], 404);
         //     }
-    
+
         //     $objOnlCart = new OnlineCart();
         //     $data = $objOnlCart->onlCartByUserId($user->id);
-    
+
         //     if ($data->total() > 0) {
         //         return response()->json([
         //             'data' => $data,
@@ -37,7 +37,7 @@ class OnlineCartController extends Controller
         //     } else {
         //         return response()->json(['message' => 'Giỏ hàng trống'], 404);
         //     }
-    
+
         // } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
         //     return response()->json(['message' => 'Không thể lấy thông tin người dùng từ token'], 500);
         // }
@@ -47,12 +47,18 @@ class OnlineCartController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(OnlCartRequest $request)
-    {
+    { //không sửa giá lấy user theo token
         $productDetail = DB::table('product_details')
-            ->select('quantity')
+            ->select('quantity', 'price', 'sale')
             ->where('id', $request->get('product_detail_id'))
             ->first();
 
+        $price = $productDetail->sale ?? $productDetail->price;
+        
+        $user = JWTAuth::parseToken()->authenticate();
+        if (!$user) {
+            return response()->json(['message' => 'Người dùng không tồn tại'], 404);
+        }
         if ($request->quantity > $productDetail->quantity) {
             return response()->json([
                 'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
@@ -61,10 +67,10 @@ class OnlineCartController extends Controller
         }
 
         $res = OnlineCart::create([
-            'user_id' => $request->get('user_id'),
+            'user_id' => $user->id,
             'product_detail_id' => $request->get('product_detail_id'),
             'quantity' => $request->get('quantity'),
-            'price' => $request->get('price'),
+            'price' => $price * $request->get('quantity'),
         ]);
         $onlCartCollection = new OnlCartResource($res);
         if ($res) {
@@ -80,7 +86,7 @@ class OnlineCartController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show( Request $request, int $idUser)
+    public function show(Request $request, int $idUser)
     {
         $objOnlCart = new OnlineCart();
         $validated = $request->validate([
@@ -110,12 +116,25 @@ class OnlineCartController extends Controller
             return response()->json(['message' => 'Không tìm thấy thông tin giỏ hàng cần sửa'], 404);
         }
 
+        $productDetail = DB::table('product_details')
+            ->select('quantity', 'price', 'sale')
+            ->where('id', $request->get('product_detail_id'))
+            ->first();
+
+        $price = $productDetail->sale ?? $productDetail->price;
+        if ($request->quantity > $productDetail->quantity) {
+            return response()->json([
+                'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
+                'message' => 'error'
+            ], 400);
+        }
+
         // Cập nhật giỏ hàng
         DB::table('online_cart')
             ->where('id', $id)
             ->update([
                 'quantity' => $request->get('quantity'),
-                'price' => $request->get('price'),
+                'price' => $price * $request->get('quantity'),
                 'updated_at' => now()
             ]);
         $updatedCartItem = DB::table('online_cart')->where('id', $id)->first();
@@ -123,7 +142,8 @@ class OnlineCartController extends Controller
         $onlCartCollection = new OnlCartResource($updatedCartItem);
         return response()->json([
             'data' => $onlCartCollection,
-            'message' => 'success'], 200);
+            'message' => 'success'
+        ], 200);
     }
 
 
