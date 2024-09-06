@@ -15,9 +15,13 @@ use Illuminate\Support\Facades\Storage;
 class ProductController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with(['productDetails.images'])->paginate(20);
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100'
+        ]);
+        $perPage = $validated['per_page'] ?? 10;
+        $products = Product::with(['productDetails.images'])->paginate($perPage);
 
         return ProductResource::collection($products);
     }

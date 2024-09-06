@@ -9,9 +9,14 @@ use Illuminate\Http\Request;
 
 class RoleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $roles =  Role::paginate(10); 
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100'
+        ]);
+        $perPage = $validated['per_page'] ?? 10;
+        $roles =  Role::paginate($perPage); 
+
         return RoleResource::collection($roles);
         
     }

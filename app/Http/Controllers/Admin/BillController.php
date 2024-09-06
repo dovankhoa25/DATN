@@ -15,9 +15,13 @@ class BillController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $bills = Bill::paginate(10);
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100'
+        ]);
+        $perPage = $validated['per_page'] ?? 10;
+        $bills = Bill::paginate($perPage);
         return BillResource::collection($bills);
     }
 

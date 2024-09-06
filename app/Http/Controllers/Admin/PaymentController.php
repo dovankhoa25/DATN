@@ -13,9 +13,13 @@ class PaymentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $listPayment = Payment::paginate(10);
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100'
+        ]);
+        $perPage = $validated['per_page'] ?? 10;
+        $listPayment = Payment::paginate($perPage);
         $paymentCollection = PaymentResource::collection($listPayment);
         return $paymentCollection;
     }

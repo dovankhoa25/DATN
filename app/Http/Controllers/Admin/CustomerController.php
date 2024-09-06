@@ -13,9 +13,13 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $customers = Customer::paginate(10);
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100'
+        ]);
+        $perPage = $validated['per_page'] ?? 10;
+        $customers = Customer::paginate($perPage);
         return CustomerResource::collection($customers);
     }
 

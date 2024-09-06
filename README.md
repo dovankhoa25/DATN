@@ -1,5 +1,5 @@
 1. khởi động dự án
-
+    - thống nhất các bảng có status : true là hoạt động , failed là ngưng hoạt động
 2. role :
     - admin ( chức vụ toàn hệ thống)
     - qtv ( dưới qtv không dùng được 1 số module)

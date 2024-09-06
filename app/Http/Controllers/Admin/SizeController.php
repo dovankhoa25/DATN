@@ -13,9 +13,13 @@ class SizeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $listSize = Size::paginate(10);
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100'
+        ]);
+        $perPage = $validated['per_page'] ?? 10;
+        $listSize = Size::paginate($perPage);
         // $sizeCollection = SizeResource::collection($listSize);
         return SizeResource::collection($listSize,200);
     }

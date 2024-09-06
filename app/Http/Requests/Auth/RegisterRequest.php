@@ -16,7 +16,6 @@ class RegisterRequest extends BaseApiRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
         ];
@@ -25,7 +24,6 @@ class RegisterRequest extends BaseApiRequest
     public function messages()
     {
         return [
-            'name.required' => 'Tên là bắt buộc.',
             'email.required' => 'Email là bắt buộc.',
             'email.email' => 'Email phải là một địa chỉ email hợp lệ.',
             'email.unique' => 'Email này đã được sử dụng.',
