@@ -80,10 +80,14 @@ class OnlineCartController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $idUser)
+    public function show( Request $request, int $idUser)
     {
         $objOnlCart = new OnlineCart();
-        $data = $objOnlCart->onlCartByUserId($idUser);
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100'
+        ]);
+        $perPage = $validated['per_page'] ?? 10;
+        $data = $objOnlCart->onlCartByUserId($idUser)->paginate($perPage);
 
         if ($data->total() > 0) {
             return response()->json([

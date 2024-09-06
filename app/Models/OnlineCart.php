@@ -44,8 +44,7 @@ class OnlineCart extends Model
             ->join('sizes as size', 'pro_detail.size_id', '=', 'size.id')
             ->join('users as user', 'onl_cart.user_id', '=', 'user.id')
             ->orderBy('onl_cart.id')
-            ->where('onl_cart.user_id', $idUser)
-            ->paginate(5);
+            ->where('onl_cart.user_id', $idUser);
     
         return $query;
     }
