@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('thumbnail');
             $table->boolean('status')->default(true);
-            $table->foreignId('sub_categories_id')->constrained('sub_categories');
+            $table->foreignId('category_id')->constrained('categories');
             $table->softDeletes();
             $table->timestamps();
         });
