@@ -24,8 +24,7 @@ class CategoryRequest extends BaseApiRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 
@@ -39,9 +38,6 @@ class CategoryRequest extends BaseApiRequest
             'image.image' => 'image phải là ảnh',
             'image.mimes' => 'image phải đúng định dạng',
             'image.max' => 'image phải < 2048mb',
-
-            'description.required' => 'Mô tả là bắt buộc.',
-            'description.string' => 'Mô tả phải là một chuỗi ký tự.',
         ];
     }
 }

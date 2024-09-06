@@ -21,7 +21,7 @@ class CategoryController extends Controller
                 'per_page' => 'integer|min:1|max:100'
             ]);
             $perPage = $validated['per_page'] ?? 10;
-            $data = Category::paginate($perPage);
+            $data = Category::whereNull('parent_id')->paginate($perPage);
             $categories = CategoryResource::collection($data);
             return $categories;
         } catch (ModelNotFoundException $e) {
@@ -49,8 +49,9 @@ class CategoryController extends Controller
 
         $Category = Category::create([
             'name' => $request->get('name'),
-            'description' => $request->get('description'),
             'image' => $imgUrl,
+            'status' => true,
+            'parent_id' => null
         ]);
 
         return response()->json([
@@ -67,7 +68,7 @@ class CategoryController extends Controller
         try {
             $category = Category::findOrFail($id);
             return response()->json([
-                'category' => new CategoryResource($category),
+                'data' => new CategoryResource($category),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'category không tồn tại'], 404);
@@ -96,7 +97,6 @@ class CategoryController extends Controller
             }
             $category->update([
                 'name' => $request->get('name'),
-                'description' => $request->get('description'),
                 'image' => $imgUrl,
             ]);
             return response()->json([
@@ -115,12 +115,55 @@ class CategoryController extends Controller
     {
         try {
             $category = Category::findOrFail($id);
-            $category->delete(); // Xóa mềm
+            $category->delete();
             return response()->json([
                 'message' => 'xoá category thành công'
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'category không tồn tại'], 404);
+        }
+    }
+
+
+    // Lấy category gốc bên client
+    public function getCategoriesRoot()
+    {
+        try {
+            $categories = Category::whereNull('parent_id')->where('status', true)->get();
+            return response()->json([
+                'data' => $categories,
+                'message' => 'success'
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Categories rỗng'], 404);
+        }
+    }
+
+    // lấy all subcategories dựa trên 1 category cụ thể
+    public function getSubcategories($id)
+    {
+        try {
+            $subCategories = Category::where('parent_id', $id)->where('status', true)->get();
+            return response()->json([
+                'data' => $subCategories,
+                'message' => 'success'
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Category này Không có subcategory nào !'], 404);
+        }
+    }
+
+    // lấy all categories cùng all subcategories
+    public function getAllCateAndAllSubcate()
+    {
+        try {
+            $data = Category::with('subcategories')->whereNull('parent_id')->where('status', true)->get();
+            return response()->json([
+                'data' => $data,
+                'message' => 'success'
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Category này Không có subcategory nào !'], 404);
         }
     }
 }

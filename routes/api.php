@@ -87,4 +87,21 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     // timeOrderTable
     Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:qtv,admin');
+
+
+
+    // Lấy category gốc bên client
+    Route::get('categories-root', [CategoryController::class, 'getCategoriesRoot'])->middleware('auth', 'checkRole:qtv,admin');
+    // lấy all subcategories dựa trên 1 category cụ thể
+    Route::get('category/{id}/subcategories', [CategoryController::class, 'getSubcategories'])->middleware('auth', 'checkRole:qtv,admin');
+    // lấy all categories cùng all subcategories
+    Route::get('categories/subcategories/all', [CategoryController::class, 'getAllCateAndAllSubcate'])->middleware('auth', 'checkRole:qtv,admin');
+
+
+    // Lấy subcategory gốc bên client
+    Route::get('subcategories-root', [SubcategoryController::class, 'getSubCategoriesRoot'])->middleware('auth', 'checkRole:qtv,admin');
+    // lấy all products dựa trên 1 subcategory cụ thể
+    Route::get('subcategories/{subCate_id}/products', [SubcategoryController::class, 'getProducts'])->middleware('auth', 'checkRole:qtv,admin');
+    // lấy all subcategories cùng all products
+    Route::get('subcategories/products/all', [SubcategoryController::class, 'getAllSubcateAndAllProducts'])->middleware('auth', 'checkRole:qtv,admin');
 });
