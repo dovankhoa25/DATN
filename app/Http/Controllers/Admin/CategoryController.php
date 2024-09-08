@@ -12,26 +12,27 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class CategoryController extends Controller
 {
 
-    // lấy all category bao gồm subcategory
     public function index(Request $request)
     {
-        try {
-            $validated = $request->validate([
-                'per_page' => 'integer|min:1|max:100'
-            ]);
-            $perPage = $validated['per_page'] ?? 10;
-            $data = Category::with(['subcategories'])->whereNull('parent_id')->paginate($perPage);
-            $categories = CategoryResource::collection($data);
-            return $categories;
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Category này Không có subcategory nào !'], 404);
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100'
+        ]);
+        $perPage = $validated['per_page'] ?? 10;
+        $categories = Category::with('subcategories')->whereNull('parent_id')->paginate($perPage);
+
+        if ($categories->isEmpty()) {
+            return response()->json(['error' => 'Không có Category nào!'], 404);
         }
+        $categories = CategoryResource::collection($categories);
+
+        return $categories;
     }
 
-    // Thêm mới category or subcategory
+
+
+
     public function store(CategoryRequest $request)
     {
-        // Xử lý tệp ảnh
         $imgUrl = null;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
@@ -53,7 +54,6 @@ class CategoryController extends Controller
         ], 201);
     }
 
-    // show 1 category or subcategory
     public function show($id)
     {
         try {

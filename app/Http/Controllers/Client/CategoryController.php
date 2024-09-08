@@ -23,7 +23,9 @@ class CategoryController extends Controller
                 }
             ])
                 ->where('status', true)
-                ->whereNull('parent_id')->get();
+                ->whereNull('parent_id')
+                ->get();
+
             return CategoryResource::collection($categories);
         } catch (ModelNotFoundException $e) {
             return response()->json([
@@ -32,7 +34,7 @@ class CategoryController extends Controller
         }
     }
 
-    // lấy 1 category cụ thể với subcategory và products
+
     public function show(string $id)
     {
         try {

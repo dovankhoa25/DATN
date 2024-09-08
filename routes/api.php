@@ -22,7 +22,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
-
+use App\Http\Controllers\Client\OnlineCartController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -95,9 +95,14 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::post('category/update/{id}/status', [AdminCategoryController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
 
     // category client
-    Route::apiResource('category-client', ClientCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+
 });
-Route::prefix('client')->middleware(['auth',  'checkRole:customer'])->group( function(){
-    Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth', 'checkRole:customer');
+
+
+Route::prefix('client')->group( function(){
+
+    Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth');
+    
+    Route::apiResource('category', ClientCategoryController::class);
 });
 
