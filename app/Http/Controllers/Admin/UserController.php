@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -31,7 +32,6 @@ class UserController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'User rỗng'], 404);
         }
-        
     }
 
     /**
@@ -94,4 +94,30 @@ class UserController extends Controller
             return response()->json(['error' => 'User không tồn tại'], 404);
         }
     }
+
+    public function getUserRoles(User $user)
+    {
+        $roles = Role::all();
+        $userRoles = $user->roles->pluck('id');
+        return response()->json([
+            'data' => [
+                'roles' => $roles,
+                'userRoles' => $userRoles,
+            ]
+        ]);
+    }
+
+
+    public function updateUserRoles(Request $request, User $user)
+    {
+        $validatedData = $request->validate([
+            'roles' => 'required|array',
+            'roles.*' => 'integer|exists:roles,id',
+        ]);
+  
+        $user->roles()->sync($validatedData['roles']);
+        return response()->json(['message' => 'Update thành công']);
+    }
+
+
 }

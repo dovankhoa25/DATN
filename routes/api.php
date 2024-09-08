@@ -43,13 +43,16 @@ Route::post('login', [AuthController::class, 'login'])->name('api.login');
 Route::get('user', [AuthController::class, 'getUser'])->middleware('auth');
 
 
-
+//power
 Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(function () {
     // users
     Route::apiResource('users', UserController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::get('/user/{user}/roles', [UserController::class, 'getUserRoles']);
+    Route::post('/user/{user}/roles', [UserController::class, 'updateUserRoles']);
 
+    
     //cate
     Route::apiResource('category', CategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
     Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
