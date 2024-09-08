@@ -15,11 +15,17 @@ class Category extends Model
         'name',
         'description',
         'image',
-        'status'
+        'status',
+        'parent_id'
     ];
 
     public function subcategories()
     {
-        return $this->hasMany(Subcategory::class, 'categorie_id', 'id');
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'category_id');
     }
 }

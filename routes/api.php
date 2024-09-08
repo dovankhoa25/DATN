@@ -11,7 +11,7 @@ use App\Http\Controllers\Admin\BillDetailController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\SizeController;
 
-use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
@@ -20,7 +20,9 @@ use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
-use App\Http\Controllers\Client\OnlineCartController;
+
+use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,7 +53,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     //cate
-    Route::apiResource('category', CategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
     Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     // customer
@@ -71,12 +73,6 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     Route::apiResource('products', ProductController::class)->middleware('auth', 'checkRole:qtv,admin');
 
-    // category
-    Route::apiResource('category', CategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
-    // subcategory
-    Route::apiResource('subcategory', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
-
-
     // Bills
     Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
     //Bill detail
@@ -87,6 +83,16 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     // timeOrderTable
     Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:qtv,admin');
+
+
+    // category admin
+    Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+
+    // update status category
+    Route::post('category/update/{id}/status', [AdminCategoryController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
+
+    // category client
+    Route::apiResource('category-client', ClientCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 });
 Route::prefix('client')->middleware(['auth',  'checkRole:customer'])->group( function(){
     Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth', 'checkRole:customer');
