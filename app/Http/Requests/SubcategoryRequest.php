@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SubcategoryRequest extends BaseApiRequest
@@ -23,10 +24,28 @@ class SubcategoryRequest extends BaseApiRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'categorie_id' => 'required|exists:categories,id'
+            'category_id' => 'required|exists:categories,id'
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            // Nếu category_id được gửi trong request
+            if ($this->has('category_id')) {
+                $categoryId = $this->input('category_id');
+
+                // Lấy category có id bằng category_id
+                $category = Category::find($categoryId);
+
+                // Kiểm tra xem category_id có phải là danh mục con của một danh mục khác hay không
+                if ($category && $category->parent_id !== null) {
+                    // Nếu category_id không phải là danh mục gốc (có parent_id khác null), đưa ra lỗi
+                    $validator->errors()->add('category_id', 'Danh mục cha không được là danh mục con của danh mục khác.');
+                }
+            }
+        });
     }
 
     public function messages()
@@ -40,11 +59,8 @@ class SubcategoryRequest extends BaseApiRequest
             'image.mimes' => 'image phải đúng định dạng',
             'image.max' => 'image phải < 2048mb',
 
-            'description.required' => 'Mô tả là bắt buộc.',
-            'description.string' => 'Mô tả phải là một chuỗi ký tự.',
-
-            'categorie_id.required' => 'id category phải bắt buộc',
-            'categorie_id.exists' => 'id category phải tồn tại trong bảng categories',
+            'category_id.required' => 'id category phải bắt buộc',
+            'category_id.exists' => 'id category phải tồn tại trong bảng categories',
         ];
     }
 }

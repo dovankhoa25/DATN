@@ -67,7 +67,7 @@ class Cart extends Model
             ->join('sizes as size', 'pro_detail.size_id', '=', 'size.id')
             ->orderBy('cart.id')
             ->where('cart.ma_bill', $ma_bill)
-            ->paginate(7);
+            ->paginate(5);
     
         return $query;
     }
