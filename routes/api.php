@@ -11,7 +11,7 @@ use App\Http\Controllers\Admin\BillDetailController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\SizeController;
 
-use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
@@ -20,7 +20,7 @@ use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
-
+use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,7 +51,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     //cate
-    Route::apiResource('category', CategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
     Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     // customer
@@ -71,12 +71,6 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     Route::apiResource('products', ProductController::class)->middleware('auth', 'checkRole:qtv,admin');
 
-    // category
-    Route::apiResource('category', CategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
-    // subcategory
-    Route::apiResource('subcategory', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
-
-
     // Bills
     Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
     //Bill detail
@@ -89,19 +83,12 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:qtv,admin');
 
 
+    // category admin
+    Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 
-    // Lấy category gốc bên client
-    Route::get('categories-root', [CategoryController::class, 'getCategoriesRoot'])->middleware('auth', 'checkRole:qtv,admin');
-    // lấy all subcategories dựa trên 1 category cụ thể
-    Route::get('category/{id}/subcategories', [CategoryController::class, 'getSubcategories'])->middleware('auth', 'checkRole:qtv,admin');
-    // lấy all categories cùng all subcategories
-    Route::get('categories/subcategories/all', [CategoryController::class, 'getAllCateAndAllSubcate'])->middleware('auth', 'checkRole:qtv,admin');
+    // update status category
+    Route::post('category/update/{id}/status', [AdminCategoryController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
 
-
-    // Lấy subcategory gốc bên client
-    Route::get('subcategories-root', [SubcategoryController::class, 'getSubCategoriesRoot'])->middleware('auth', 'checkRole:qtv,admin');
-    // lấy all products dựa trên 1 subcategory cụ thể
-    Route::get('subcategories/{subCate_id}/products', [SubcategoryController::class, 'getProducts'])->middleware('auth', 'checkRole:qtv,admin');
-    // lấy all subcategories cùng all products
-    Route::get('subcategories/products/all', [SubcategoryController::class, 'getAllSubcateAndAllProducts'])->middleware('auth', 'checkRole:qtv,admin');
+    // category client
+    Route::apiResource('category-client', ClientCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 });
