@@ -20,7 +20,9 @@ use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
+
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -92,3 +94,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     // category client
     Route::apiResource('category-client', ClientCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 });
+Route::prefix('client')->middleware(['auth',  'checkRole:customer'])->group( function(){
+    Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth', 'checkRole:customer');
+});
+
