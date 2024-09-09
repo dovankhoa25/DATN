@@ -105,4 +105,3 @@ Route::prefix('client')->group( function(){
     
     Route::apiResource('category', ClientCategoryController::class);
 });
-
