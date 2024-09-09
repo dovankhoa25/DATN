@@ -24,8 +24,8 @@ class UserController extends Controller
                 'per_page' => 'integer|min:1|max:100'
             ]);
             $perPage = $validated['per_page'] ?? 10;
-            $users = User::paginate($perPage);
-
+            $users = User::with('roles')->paginate($perPage);
+            
             return new UserCollection($users);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'User rỗng'], 404);

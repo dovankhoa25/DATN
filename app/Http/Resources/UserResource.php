@@ -14,6 +14,8 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'is_locked' => $this->is_locked,
+            'roles' => RoleResource::collection($this->whenLoaded('roles')),
         ];
     }
     

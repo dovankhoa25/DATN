@@ -16,6 +16,7 @@ class UserCollection extends ResourceCollection
     {
         return [
             'data' => UserResource::collection($this->collection),
+            
             // 'meta' => [
             //     'current_page' => $this->currentPage(),
             //     'last_page' => $this->lastPage(),
