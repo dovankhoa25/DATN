@@ -44,15 +44,16 @@ class RoleController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, string $id)
     {
         $role = Role::findOrFail($id);
 
         $validatedData = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'status' => 'sometimes|boolean',
+            'name' => 'required|string|max:255',
+            // 'status' => 'sometimes|boolean', 
         ]);
-    
+        // $validatedData['status'] = true;
+        
 
         $role->update($validatedData);
     
@@ -69,4 +70,6 @@ class RoleController extends Controller
         return response()->json(null, 204); 
         
     }
+
+    
 }

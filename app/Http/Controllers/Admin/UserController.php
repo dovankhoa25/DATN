@@ -25,7 +25,7 @@ class UserController extends Controller
             ]);
             $perPage = $validated['per_page'] ?? 10;
             $users = User::with('roles')->paginate($perPage);
-            
+
             return new UserCollection($users);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'User rỗng'], 404);
@@ -112,10 +112,26 @@ class UserController extends Controller
             'roles' => 'required|array',
             'roles.*' => 'integer|exists:roles,id',
         ]);
-  
+
         $user->roles()->sync($validatedData['roles']);
         return response()->json(['message' => 'Update thành công']);
     }
 
 
+    public function is_locked(Request $request, string $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $user->is_locked = !$user->is_locked;
+            $user->save();
+
+            if ($user->is_locked) {
+                return response()->json(['message' => 'User đã bị khóa'], 200);
+            } else {
+                return response()->json(['message' => 'User đã được mở khóa'], 200);
+            }
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'User không tồn tại'], 404);
+        }
+    }
 }

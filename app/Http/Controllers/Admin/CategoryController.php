@@ -84,10 +84,11 @@ class CategoryController extends Controller
                 $image->move(public_path('upload/categories'), $imageName);
                 $imgUrl = "upload/categories/" . $imageName;
             }
+            
             $category->update([
-                'name' => $request->get('name'),
+                'name' => $request->input('name'),
                 'image' => $imgUrl,
-                'parent_id' => $request->get('parent_id') ?? Null
+                'parent_id' => $request->input('parent_id') ?? Null
             ]);
             return response()->json([
                 'data' => new CategoryResource($category),

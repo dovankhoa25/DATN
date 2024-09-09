@@ -53,6 +53,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:qtv,admin');
     Route::get('/user/{user}/roles', [UserController::class, 'getUserRoles']);
     Route::post('/user/{user}/roles', [UserController::class, 'updateUserRoles']);
+    Route::post('/user/{user}/locked', [UserController::class, 'is_locked']);
 
     
     //cate

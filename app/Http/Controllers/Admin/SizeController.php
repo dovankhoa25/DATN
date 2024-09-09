@@ -30,9 +30,12 @@ class SizeController extends Controller
     public function store(SizeRequest $request)
     {
         $sizedata = $request->all();
-
+        $sizedata['status'] = true;
+       
         $size = Size::create($sizedata);
+
         $sizeCollection = new SizeResource($size);
+
         if ($size) {
             return response()->json($sizeCollection, 201);
         } else {

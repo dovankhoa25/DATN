@@ -23,7 +23,7 @@ class PaymentRequest extends BaseApiRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'status' => ['required', 'integer', 'in: 0, 1']
+            'status' => ['nullable', 'boolean'],
         ];
     }
 
@@ -34,8 +34,6 @@ class PaymentRequest extends BaseApiRequest
             'name.string' => "Tên hình thức thanh toán phải là một chuỗi",
             'name.max' => "Tên hình thức thanh toán tối đa 255 kí tự",
 
-            'status.required' => "Trạng thái là bắt buộc",
-            'status.mimes' => "Trạng thái chỉ được chọn public hoặc private"
         ];
     }
 }

@@ -18,7 +18,7 @@ class SizeRequest extends BaseApiRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'status' => ['required', 'integer', 'in: 0, 1']
+            'status' => ['nullable', 'boolean'],
         ];
     }
 
@@ -29,8 +29,7 @@ class SizeRequest extends BaseApiRequest
             'name.string' => "Tên size phải là một chuỗi",
             'name.max' => "Tên size tối đa 255 kí tự",
 
-            'status.required' => "Trạng thái là bắt buộc",
-            'status.mimes' => "Trạng thái chỉ được chọn public hoặc private"
+
         ];
     }
 }

@@ -30,7 +30,7 @@ class PaymentController extends Controller
     public function store(PaymentRequest $request)
     {
         $paymentData = $request->all();
-
+        $paymentData['status'] = true;
         $payment = Payment::create($paymentData);
         $paymentCollection = new PaymentResource($payment);
         if ($payment) {

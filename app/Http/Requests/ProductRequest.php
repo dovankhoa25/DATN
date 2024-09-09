@@ -24,9 +24,9 @@ class ProductRequest extends BaseApiRequest
         return [
             // Validation cho Product
             'name' => 'required|string|max:255',
-            'thumbnail' => 'required|string|max:255',
+            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'boolean',
-            'sub_categories_id' => 'required|exists:sub_categories,id',
+            'category_id' => 'required|exists:categories,id',
             
             // Validation cho Product Detail
             'product_details' => 'required|array',
@@ -34,12 +34,10 @@ class ProductRequest extends BaseApiRequest
             'product_details.*.price' => 'required|numeric|min:0',
             'product_details.*.quantity' => 'required|integer|min:1',
             'product_details.*.sale' => 'nullable|numeric|min:0',
-            'product_details.*.status' => 'required|boolean',
+            'product_details.*.status' => 'nullable|boolean',
             
             // Validation cho Image
-            'product_details.*.images' => 'required|array',
-            'product_details.*.images.*.name' => 'required|string|max:255',
-            'product_details.*.images.*.status' => 'required|boolean'
+            'product_details.*.images.*.file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 
@@ -54,16 +52,13 @@ class ProductRequest extends BaseApiRequest
         'name.max' => 'Tên sản phẩm không được vượt quá 255 ký tự.',
         
         'thumbnail.required' => 'Ảnh đại diện là bắt buộc.',
-        'thumbnail.string' => 'Đường dẫn ảnh đại diện phải là chuỗi ký tự.',
         'thumbnail.max' => 'Đường dẫn ảnh đại diện không được vượt quá 255 ký tự.',
         
-        // 'status.required' => 'Trạng thái sản phẩm là bắt buộc.',
         'status.boolean' => 'Trạng thái sản phẩm phải là kiểu boolean.',
         
         'sub_categories_id.required' => 'Danh mục con là bắt buộc.',
         'sub_categories_id.exists' => 'Danh mục con không tồn tại.',
         
-        // Product Detail Messages
         'product_details.required' => 'Chi tiết sản phẩm là bắt buộc.',
         'product_details.array' => 'Chi tiết sản phẩm phải là một mảng.',
         
@@ -80,20 +75,11 @@ class ProductRequest extends BaseApiRequest
         
         'product_details.*.sale.numeric' => 'Giá khuyến mãi phải là một số.',
         'product_details.*.sale.min' => 'Giá khuyến mãi không được nhỏ hơn 0.',
-        
-        // 'product_details.*.status.required' => 'Trạng thái chi tiết sản phẩm là bắt buộc.',
-        // 'product_details.*.status.boolean' => 'Trạng thái chi tiết sản phẩm phải là kiểu boolean.',
-        
+
         // Image Messages
         'product_details.*.images.required' => 'Hình ảnh là bắt buộc.',
         'product_details.*.images.array' => 'Hình ảnh phải là một mảng.',
-        
-        'product_details.*.images.*.name.required' => 'Tên hình ảnh là bắt buộc.',
-        'product_details.*.images.*.name.string' => 'Tên hình ảnh phải là chuỗi ký tự.',
-        'product_details.*.images.*.name.max' => 'Tên hình ảnh không được vượt quá 255 ký tự.',
-        
-        // 'product_details.*.images.*.status.required' => 'Trạng thái hình ảnh là bắt buộc.',
-        // 'product_details.*.images.*.status.boolean' => 'Trạng thái hình ảnh phải là kiểu boolean.'
+
     ];
 }
 

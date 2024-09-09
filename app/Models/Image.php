@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Image extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'status', 'product_detail_id'];
+    protected $fillable = ['name','product_detail_id'];
 
     // Mối quan hệ với ProductDetail
     public function productDetail()
