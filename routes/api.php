@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\OnlineCartController;
@@ -55,10 +56,10 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::post('/user/{user}/roles', [UserController::class, 'updateUserRoles']);
     Route::post('/user/{user}/locked', [UserController::class, 'is_locked']);
 
-    
-    //cate
-    Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+
+    // //cate
+    // Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+    // Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     // customer
     Route::apiResource('customers', CustomerController::class)->middleware('auth', 'checkRole:qtv,admin');
@@ -100,10 +101,12 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 });
 
 
-Route::prefix('client')->group( function(){
+Route::prefix('client')->group(function () {
 
     Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth');
-    
-    Route::apiResource('category', ClientCategoryController::class);
-});
 
+    Route::apiResource('category', ClientCategoryController::class);
+
+    // Đổi voucher cho customer
+    Route::post('/change_voucher', [ClientVoucherController::class, 'changeVoucher']);
+});
