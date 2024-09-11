@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\VoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\OnlineCartController;
+use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -64,7 +65,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::put('/user/{user}/roles', [UserController::class, 'updateUserRoles'])->middleware('checkRole:admin');
     Route::put('/user/{user}/locked', [UserController::class, 'is_locked'])->middleware('checkRole:admin');
 
-    
+
     //cate
     Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
     Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
@@ -109,9 +110,16 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 });
 
 
-Route::prefix('client')->group( function(){
+Route::prefix('client')->group(function () {
 
     Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth');
-    
+
     Route::apiResource('category', ClientCategoryController::class);
+
+    Route::prefix('order_table')->middleware('auth')->group(function () {
+        Route::get('/{idTable}', [ClientTimeOrderTableController::class, 'show']);
+        Route::post('/', [ClientTimeOrderTableController::class, 'store']);
+        Route::put('/{id}', [ClientTimeOrderTableController::class, 'update']);
+        Route::delete('/{id}', [ClientTimeOrderTableController::class, 'destroy']);
+    });
 });
