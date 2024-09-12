@@ -28,6 +28,7 @@ class OnlineCart extends Model
                 'onl_cart.id',
                 'onl_cart.quantity',
                 'onl_cart.price',
+                'onl_cart.product_detail_id',
 
                 'pro.name as product_name',
                 'pro.thumbnail as product_thumbnail',
@@ -45,7 +46,7 @@ class OnlineCart extends Model
             ->join('users as user', 'onl_cart.user_id', '=', 'user.id')
             ->orderBy('onl_cart.id')
             ->where('onl_cart.user_id', $idUser);
-    
+
         return $query;
     }
 }
