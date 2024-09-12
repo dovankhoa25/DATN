@@ -73,7 +73,7 @@ class CategoryController extends Controller
         try {
             $imgUrl = null;
             $category = Category::findOrFail($id);
-            if ($request->hasFile('image')) {
+            if ($request->file('image')) {
                 // delete image old
                 if ($category->image != null) {
                     unlink(public_path($category->image));
@@ -84,7 +84,7 @@ class CategoryController extends Controller
                 $image->move(public_path('upload/categories'), $imageName);
                 $imgUrl = "upload/categories/" . $imageName;
             }
-            
+
             $category->update([
                 'name' => $request->input('name'),
                 'image' => $imgUrl,
@@ -134,6 +134,19 @@ class CategoryController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'update status thất bại'], 404);
         }
+    }
+
+    // list category
+    public function listCategories()
+    {
+        $categories = Category::get();
+
+        if ($categories->isEmpty()) {
+            return response()->json(['error' => 'Không có Category nào!'], 404);
+        }
+        $categories = CategoryResource::collection($categories);
+
+        return $categories;
     }
 
 

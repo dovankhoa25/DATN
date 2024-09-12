@@ -82,4 +82,42 @@ class VoucherController extends Controller
             ], 500);
         }
     }
+
+    public function vouchersCustomer()
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+
+            $customer = DB::table('customers')
+                ->where('user_id', $user->id)
+                ->first();
+
+            $vouchers = DB::table('vouchers')
+                ->where('customer_id', $customer->id)
+                ->where('status', true)
+                ->select('id', 'name', 'value', 'expiration_date', 'status', 'created_at', 'updated_at')
+                ->get();
+
+            if ($vouchers->isEmpty()) {
+                return response()->json([
+                    'message' => 'Customer này không có voucher nào.',
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $vouchers,
+            ], 200);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            return response()->json(['error' => 'Token hết hạn'], 401);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return response()->json(['error' => 'Token không hợp lệ'], 401);
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return response()->json(['error' => 'Token không được cung cấp'], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Không lấy được voucher',
+            ], 500);
+        }
+    }
 }

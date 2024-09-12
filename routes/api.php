@@ -96,8 +96,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     // update status category
     Route::post('category/update/{id}/status', [AdminCategoryController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
 
-    // category client
-
+    // all list category
+    Route::get('list/category', [AdminCategoryController::class, 'listCategories'])->middleware('auth', 'checkRole:qtv,admin');
 });
 
 
@@ -109,4 +109,6 @@ Route::prefix('client')->group(function () {
 
     // Đổi voucher cho customer
     Route::post('/change_voucher', [ClientVoucherController::class, 'changeVoucher']);
+    // vouchers của customer
+    Route::get('/vouchers_customer', [ClientVoucherController::class, 'vouchersCustomer']);
 });
