@@ -117,6 +117,7 @@ Route::prefix('client')->group(function () {
     Route::apiResource('category', ClientCategoryController::class);
 
     Route::prefix('order_table')->middleware('auth')->group(function () {
+        Route::get('/', [ClientTimeOrderTableController::class, 'index']);
         Route::get('/{idTable}', [ClientTimeOrderTableController::class, 'show']);
         Route::post('/', [ClientTimeOrderTableController::class, 'store']);
         Route::put('/{id}', [ClientTimeOrderTableController::class, 'update']);
