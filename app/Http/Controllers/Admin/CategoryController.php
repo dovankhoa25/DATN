@@ -73,7 +73,7 @@ class CategoryController extends Controller
         try {
             $imgUrl = null;
             $category = Category::findOrFail($id);
-            if ($request->file('image')) {
+            if ($request->hasFile('image')) {
                 // delete image old
                 if ($category->image != null) {
                     unlink(public_path($category->image));
@@ -87,7 +87,7 @@ class CategoryController extends Controller
 
             $category->update([
                 'name' => $request->input('name'),
-                'image' => $imgUrl,
+                'image' => $imgUrl ? $imgUrl : $category->image,
                 'parent_id' => $request->input('parent_id') ?? Null
             ]);
             return response()->json([

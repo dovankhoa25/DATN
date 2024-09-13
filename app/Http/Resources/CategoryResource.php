@@ -20,8 +20,8 @@ class CategoryResource extends JsonResource
             'image' => $this->image,
             'status' => $this->status,
             'parent_id' => $this->parent_id,
+            'name_parent' => $this->parent ? $this->parent->name : null,
             'subcategory' => CategoryResource::collection($this->whenLoaded('subcategories')),
-            'products' => ProductResource::collection($this->whenLoaded('products')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
