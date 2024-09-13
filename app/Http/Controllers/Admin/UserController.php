@@ -37,7 +37,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
     }
 
     /**
@@ -47,7 +47,7 @@ class UserController extends Controller
     {
 
         try {
-            $user = User::findOrFail($id);
+            $user = User::with('roles')->findOrFail($id);
             return response()->json([
                 'data' => new UserResource($user),
             ], 200);

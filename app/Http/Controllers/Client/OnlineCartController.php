@@ -93,6 +93,26 @@ class OnlineCartController extends Controller
             'per_page' => 'integer|min:1|max:100'
         ]);
         $perPage = $validated['per_page'] ?? 10;
+
+        $cartItems = $objOnlCart->onlCartByUserId($idUser)->get();
+
+        $itemsToRemove = []; 
+        foreach ($cartItems as $item) {
+            $productDetail = DB::table('product_details')
+                ->where('id', $item->product_detail_id)
+                ->first();
+
+            if ($productDetail && $productDetail->quantity < $item->quantity) {
+                $itemsToRemove[] = $item->id; 
+            }
+        }
+
+        if (!empty($itemsToRemove)) {
+            DB::table('online_cart')
+                ->whereIn('id', $itemsToRemove)
+                ->delete();
+        }
+
         $data = $objOnlCart->onlCartByUserId($idUser)->paginate($perPage);
 
         if ($data->total() > 0) {
@@ -104,6 +124,7 @@ class OnlineCartController extends Controller
             return response()->json(['message' => 'Giỏ hàng trống'], 404);
         }
     }
+
 
     /**
      * Update the specified resource in storage.

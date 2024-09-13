@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\SizeController;
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SubcategoryController;
@@ -44,17 +45,25 @@ DELETE /roles/{id} - destroy
 Route::post('register', [AuthController::class, 'register'])->name('api.register');
 Route::post('login', [AuthController::class, 'login'])->name('api.login');
 Route::get('user', [AuthController::class, 'getUser'])->middleware('auth');
+Route::post('logout', [AuthController::class, 'logout'])->middleware('auth');
+
+Route::post('refresh', [AuthController::class, 'refreshToken']);
 
 
 //power
 Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(function () {
+
+    //dash
+    Route::get('dashboard', [DashboardController::class, 'index']);
+
+
     // users
     Route::apiResource('users', UserController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:qtv,admin');
     Route::get('/user/{user}/roles', [UserController::class, 'getUserRoles']);
-    Route::post('/user/{user}/roles', [UserController::class, 'updateUserRoles']);
-    Route::post('/user/{user}/locked', [UserController::class, 'is_locked']);
+    Route::put('/user/{user}/roles', [UserController::class, 'updateUserRoles'])->middleware('checkRole:admin');
+    Route::put('/user/{user}/locked', [UserController::class, 'is_locked'])->middleware('checkRole:admin');
 
 
     // //cate
@@ -106,7 +115,7 @@ Route::prefix('client')->group(function () {
     Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth');
 
     Route::apiResource('category', ClientCategoryController::class);
-
+  
     // Đổi voucher cho customer
     Route::post('/change_voucher', [ClientVoucherController::class, 'changeVoucher']);
     // vouchers của customer
