@@ -107,7 +107,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     // update status category
     Route::post('category/update/{id}/status', [AdminCategoryController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
 
-    // all list category
+    // all list categories
     Route::get('list/category', [AdminCategoryController::class, 'listCategories'])->middleware('auth', 'checkRole:qtv,admin');
 });
 
@@ -118,7 +118,7 @@ Route::prefix('client')->group(function () {
 
     Route::apiResource('category', ClientCategoryController::class);
 
-  
+
     // Đổi voucher cho customer
     Route::post('/change_voucher', [ClientVoucherController::class, 'changeVoucher']);
     // vouchers của customer
@@ -132,5 +132,4 @@ Route::prefix('client')->group(function () {
         Route::put('/{id}', [ClientTimeOrderTableController::class, 'update']);
         Route::delete('/{id}', [ClientTimeOrderTableController::class, 'destroy']);
     });
-
 });

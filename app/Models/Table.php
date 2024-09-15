@@ -12,6 +12,23 @@ class Table extends Model
 
     protected $table = 'tables';
 
+    public function scopeFilter($query, $filters)
+    {
+        if (!empty($filters['table'])) {
+            $query->where('table', 'like', '%' . $filters['table'] . '%');
+        }
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['sort_by']) && !empty($filters['orderby'])) {
+            $query->orderBy($filters['sort_by'], $filters['orderby']);
+        }
+
+        return $query;
+    }
+
     protected $fillable = [
         'table',
         'description',

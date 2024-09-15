@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Category\FillterCategoryRequest;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
@@ -12,33 +13,20 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class CategoryController extends Controller
 {
 
-    public function index(Request $request)
+    public function index(FillterCategoryRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100',
-            'name' => 'string|nullable',
-            'status' => 'boolean|nullable',
-        ]);
+        try {
+            $perPage = $request->get('per_page', 10);
 
-        $perPage = $validated['per_page'] ?? 10;
-
-        $query = Category::with('subcategories')->whereNull('parent_id');
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
+            $categories = Category::with('subcategories')
+                ->filter($request)
+                ->whereNull('parent_id')
+                ->paginate($perPage);
+            return CategoryResource::collection($categories);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy Category'], 404);
         }
-        if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->input('name') . '%');
-        }
-
-
-        $categories = $query->paginate($perPage);
-
-        return CategoryResource::collection($categories);
     }
-
-
-
 
     public function store(CategoryRequest $request)
     {
@@ -145,32 +133,19 @@ class CategoryController extends Controller
         }
     }
 
-    // list category
-    public function listCategories(Request $request)
+    // list categories
+    public function listCategories(FillterCategoryRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100',
-            'name' => 'string|nullable',
-            'status' => 'boolean|nullable',
-        ]);
 
-        $perPage = $validated['per_page'] ?? 10;
+        try {
+            $perPage = $request->get('per_page', 10);
 
-        $query = Category::query();
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
+            $categories = Category::filter($request)->paginate($perPage);
+            return CategoryResource::collection($categories);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy Category'], 404);
         }
-        if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->input('name') . '%');
-        }
-
-
-        $categories = $query->paginate($perPage);
-
-        return CategoryResource::collection($categories);
     }
-
 
     // // Lấy category gốc bên client
     // public function getCategoriesRoot()
