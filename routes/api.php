@@ -25,6 +25,7 @@ use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\OnlineCartController;
+use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -64,6 +65,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::get('/user/{user}/roles', [UserController::class, 'getUserRoles']);
     Route::put('/user/{user}/roles', [UserController::class, 'updateUserRoles'])->middleware('checkRole:admin');
     Route::put('/user/{user}/locked', [UserController::class, 'is_locked'])->middleware('checkRole:admin');
+
 
 
     // //cate
@@ -115,9 +117,20 @@ Route::prefix('client')->group(function () {
     Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth');
 
     Route::apiResource('category', ClientCategoryController::class);
+
   
     // Đổi voucher cho customer
     Route::post('/change_voucher', [ClientVoucherController::class, 'changeVoucher']);
     // vouchers của customer
     Route::get('/vouchers_customer', [ClientVoucherController::class, 'vouchersCustomer']);
+
+
+    Route::prefix('order_table')->middleware('auth')->group(function () {
+        Route::get('/', [ClientTimeOrderTableController::class, 'index']);
+        Route::get('/{idTable}', [ClientTimeOrderTableController::class, 'show']);
+        Route::post('/', [ClientTimeOrderTableController::class, 'store']);
+        Route::put('/{id}', [ClientTimeOrderTableController::class, 'update']);
+        Route::delete('/{id}', [ClientTimeOrderTableController::class, 'destroy']);
+    });
+
 });
