@@ -15,17 +15,26 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
+            'per_page' => 'integer|min:1|max:100',
+            'name' => 'string|nullable',
+            'status' => 'boolean|nullable',
         ]);
+
         $perPage = $validated['per_page'] ?? 10;
-        $categories = Category::with('subcategories')->whereNull('parent_id')->paginate($perPage);
 
-        if ($categories->isEmpty()) {
-            return response()->json(['error' => 'Không có Category nào!'], 404);
+        $query = Category::with('subcategories')->whereNull('parent_id');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
         }
-        $categories = CategoryResource::collection($categories);
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
 
-        return $categories;
+
+        $categories = $query->paginate($perPage);
+
+        return CategoryResource::collection($categories);
     }
 
 

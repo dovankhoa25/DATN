@@ -18,12 +18,23 @@ class TablesController extends Controller
     public function index(Request $request)
     {
         $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
+            'per_page' => 'integer|min:1|max:100',
+            'table' => 'string|nullable',
+            'status' => 'boolean|nullable',
         ]);
         $perPage = $validated['per_page'] ?? 10;
-        $data = Table::paginate($perPage);
-        $tables = TableResource::collection($data);
-        return $tables;
+
+        $query = Table::query();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+        if ($request->filled('table')) {
+            $query->where('table', 'like', '%' . $request->input('table') . '%');
+        }
+
+        $tables = $query->paginate($perPage);
+        return TableResource::collection($tables);
     }
 
     /**
