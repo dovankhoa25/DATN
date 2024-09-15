@@ -146,16 +146,29 @@ class CategoryController extends Controller
     }
 
     // list category
-    public function listCategories()
+    public function listCategories(Request $request)
     {
-        $categories = Category::get();
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100',
+            'name' => 'string|nullable',
+            'status' => 'boolean|nullable',
+        ]);
 
-        if ($categories->isEmpty()) {
-            return response()->json(['error' => 'Không có Category nào!'], 404);
+        $perPage = $validated['per_page'] ?? 10;
+
+        $query = Category::query();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
         }
-        $categories = CategoryResource::collection($categories);
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
 
-        return $categories;
+
+        $categories = $query->paginate($perPage);
+
+        return CategoryResource::collection($categories);
     }
 
 
