@@ -22,7 +22,7 @@ class UserController extends Controller
             // dd($filters);
             
             $perPage = $request['per_page'] ?? 10;
-            $users = User::filter($request)->paginate($perPage);
+            $users = User::with('roles')->filter($request)->paginate($perPage);
             return new UserCollection($users);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Không tìm thấy người dùng'], 404);
