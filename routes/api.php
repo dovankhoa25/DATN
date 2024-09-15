@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\OnlineCartController;
@@ -66,9 +67,10 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::put('/user/{user}/locked', [UserController::class, 'is_locked'])->middleware('checkRole:admin');
 
 
-    //cate
-    Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+
+    // //cate
+    // Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+    // Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     // customer
     Route::apiResource('customers', CustomerController::class)->middleware('auth', 'checkRole:qtv,admin');
@@ -105,8 +107,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     // update status category
     Route::post('category/update/{id}/status', [AdminCategoryController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
 
-    // category client
-
+    // all list category
+    Route::get('list/category', [AdminCategoryController::class, 'listCategories'])->middleware('auth', 'checkRole:qtv,admin');
 });
 
 
@@ -116,6 +118,13 @@ Route::prefix('client')->group(function () {
 
     Route::apiResource('category', ClientCategoryController::class);
 
+  
+    // Đổi voucher cho customer
+    Route::post('/change_voucher', [ClientVoucherController::class, 'changeVoucher']);
+    // vouchers của customer
+    Route::get('/vouchers_customer', [ClientVoucherController::class, 'vouchersCustomer']);
+
+
     Route::prefix('order_table')->middleware('auth')->group(function () {
         Route::get('/', [ClientTimeOrderTableController::class, 'index']);
         Route::get('/{idTable}', [ClientTimeOrderTableController::class, 'show']);
@@ -123,4 +132,5 @@ Route::prefix('client')->group(function () {
         Route::put('/{id}', [ClientTimeOrderTableController::class, 'update']);
         Route::delete('/{id}', [ClientTimeOrderTableController::class, 'destroy']);
     });
+
 });

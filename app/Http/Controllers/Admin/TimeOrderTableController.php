@@ -21,12 +21,28 @@ class TimeOrderTableController extends Controller
     public function index(Request $request)
     {
         $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
+            'per_page' => 'integer|min:1|max:100',
+            'status' => 'in:pending,completed,failed|nullable',
+            'date_oder' => 'date|nullable',
+            'phone_number' => 'integer|nullable',
         ]);
         $perPage = $validated['per_page'] ?? 10;
-        $data = TimeOrderTable::paginate($perPage);
-        $timeOrderTable = TimeOrderTableResource::collection($data);
-        return $timeOrderTable;
+
+        $query = TimeOrderTable::query();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        if ($request->filled('date_oder')) {
+            $query->whereDate('date_oder', $request->input('date_oder'));
+        }
+
+        if ($request->filled('phone_number')) {
+            $query->where('phone_number', $request->input('phone_number'));
+        }
+        $data = $query->paginate($perPage);
+        return TimeOrderTableResource::collection($data);
     }
 
     /**

@@ -15,17 +15,26 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
+            'per_page' => 'integer|min:1|max:100',
+            'name' => 'string|nullable',
+            'status' => 'boolean|nullable',
         ]);
+
         $perPage = $validated['per_page'] ?? 10;
-        $categories = Category::with('subcategories')->whereNull('parent_id')->paginate($perPage);
 
-        if ($categories->isEmpty()) {
-            return response()->json(['error' => 'Không có Category nào!'], 404);
+        $query = Category::with('subcategories')->whereNull('parent_id');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
         }
-        $categories = CategoryResource::collection($categories);
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
 
-        return $categories;
+
+        $categories = $query->paginate($perPage);
+
+        return CategoryResource::collection($categories);
     }
 
 
@@ -84,10 +93,10 @@ class CategoryController extends Controller
                 $image->move(public_path('upload/categories'), $imageName);
                 $imgUrl = "upload/categories/" . $imageName;
             }
-            
+
             $category->update([
                 'name' => $request->input('name'),
-                'image' => $imgUrl,
+                'image' => $imgUrl ? $imgUrl : $category->image,
                 'parent_id' => $request->input('parent_id') ?? Null
             ]);
             return response()->json([
@@ -134,6 +143,19 @@ class CategoryController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'update status thất bại'], 404);
         }
+    }
+
+    // list category
+    public function listCategories()
+    {
+        $categories = Category::get();
+
+        if ($categories->isEmpty()) {
+            return response()->json(['error' => 'Không có Category nào!'], 404);
+        }
+        $categories = CategoryResource::collection($categories);
+
+        return $categories;
     }
 
 
