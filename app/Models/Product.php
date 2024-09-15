@@ -11,6 +11,30 @@ class Product extends Model
 
     protected $fillable = ['name', 'thumbnail', 'status', 'category_id'];
 
+
+    public function scopeFilter($query, $filters)
+    {
+        if (!empty($filters['name'])) {
+            $query->where('name', 'like', '%' . $filters['name'] . '%');
+        }
+
+        if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
+            $query->whereBetween('created_at', [$filters['start_date'], $filters['end_date']]);
+        }
+
+        if (!empty($filters['sort_by']) && !empty($filters['orderby'])) {
+            $query->orderBy($filters['sort_by'], $filters['orderby']);
+        }
+
+        return $query;
+    }
+
+
+
+
+
+
+
     // Mối quan hệ với ProductDetail
   
     public function productDetails()

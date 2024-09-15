@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Customer;
 
 use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
@@ -17,6 +17,7 @@ class CustomerRequest extends BaseApiRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
             'phone_number' => ['required'],
             'diemthuong' => 'nullable|integer',
             'user_id' => 'nullable|exists:users,id',
@@ -30,6 +31,10 @@ class CustomerRequest extends BaseApiRequest
             'name.string' => 'Tên phải là một chuỗi ký tự.',
             'name.max' => 'Tên không được vượt quá 255 ký tự.',
             
+            'email.required' => 'Email là bắt buộc.',
+            'email.email' => 'Email phải là một địa chỉ email hợp lệ.',
+            'email.unique' => 'Email này đã được sử dụng.',
+
             'phone_number.required' => 'Số điện thoại là bắt buộc.',
             'phone_number.unique' => 'Số điện thoại đã tồn tại.',
             'phone_number.regex' => 'Số điện thoại không hợp lệ.',

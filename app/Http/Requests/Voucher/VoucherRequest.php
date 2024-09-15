@@ -1,19 +1,15 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Voucher;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\BaseApiRequest;
+
 
 class VoucherRequest extends BaseApiRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+
     public function authorize(): bool
     {
-        // muốn check điều kiện thì check ở đây
         return true;
     }
 
