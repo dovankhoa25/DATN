@@ -11,6 +11,31 @@ class TimeOrderTable extends Model
     use HasFactory;
     protected $table = 'time_order_table';
 
+    public function scopeFilter($query, $filters)
+    {
+        if (!empty($filters['phone_number'])) {
+            $query->where('phone_number', 'like', '%' . $filters['phone_number'] . '%');
+        }
+
+        if (!empty($filters['date_oder'])) {
+            $query->where('date_oder', $filters['date_oder']);
+        }
+
+        if (!empty($filters['time_oder'])) {
+            $query->where('time_oder', $filters['time_oder']);
+        }
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['sort_by']) && !empty($filters['orderby'])) {
+            $query->orderBy($filters['sort_by'], $filters['orderby']);
+        }
+
+        return $query;
+    }
+
     protected $fillable = [
         'table_id',
         'user_id',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Table\FillterTableRequest;
 use App\Http\Requests\TableRequest;
 use App\Http\Resources\TableResource;
 use App\Models\Table;
@@ -15,26 +16,16 @@ class TablesController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(FillterTableRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100',
-            'table' => 'string|nullable',
-            'status' => 'boolean|nullable',
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
+        try {
+            $perPage = $request->get('per_page', 10);
 
-        $query = Table::query();
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
+            $tables = Table::filter($request)->paginate($perPage);
+            return TableResource::collection($tables);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy Category'], 404);
         }
-        if ($request->filled('table')) {
-            $query->where('table', 'like', '%' . $request->input('table') . '%');
-        }
-
-        $tables = $query->paginate($perPage);
-        return TableResource::collection($tables);
     }
 
     /**
