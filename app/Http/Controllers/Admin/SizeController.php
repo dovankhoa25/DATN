@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Size\FilterSizeRequest;
 use App\Http\Requests\SizeRequest;
 use App\Http\Resources\SizeResource;
 use App\Models\Size;
@@ -13,13 +14,10 @@ class SizeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(FilterSizeRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $listSize = Size::paginate($perPage);
+        $perPage = $request['per_page'] ?? 10;
+        $listSize = Size::filter($request)->paginate($perPage);
         // $sizeCollection = SizeResource::collection($listSize);
         return SizeResource::collection($listSize,200);
     }

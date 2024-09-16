@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Cart\FilterCartRequest;
 use App\Http\Requests\CartRequest;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
@@ -14,10 +15,22 @@ class CartController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(FilterCartRequest $request)
     {
         $objCart = new Cart();
-        $data = $objCart->listCart();
+        $perPage = $request['per_page'] ?? 10;
+
+        $query = $objCart->listCart();
+
+        if (!empty($request['name'])) {
+            $query->where('pro.name', 'like', '%' . $request['name'] . '%');
+        }
+        if (!empty($request['sort_by']) && !empty($request['orderby'])) {
+            $query->orderBy($request['sort_by'], $request['orderby']);
+        }
+
+        $data = $query->paginate($perPage);
+
         return response()->json([
             'data' => $data,
             'message' => 'success'
@@ -67,24 +80,18 @@ class CartController extends Controller
      * Display the specified resource.
      */
     public function show(string $ma_bill)
-    { //theo ma_bill
-        // $checkId = Cart::findOrFail($ma_bill);
-        // if ($checkId) {
-            $objCart = new Cart();
-            $data = $objCart->cartByBillCode($ma_bill);
+    {
+        $objCart = new Cart();
+        $data = $objCart->cartByBillCode($ma_bill);
 
-            if ($data->total() > 0) {
-                return response()->json([
-                    'data' => $data,
-                    'message' => 'success'
-                ], 200);
-            } else {
-                return response()->json(['message' => 'Mã bill không tồn tại'], 404);
-            }
-            
-        // } else {
-            // return response()->json(['message' => 'Mã bill không tồn tại'], 404);
-        // }
+        if ($data) {
+            return response()->json([
+                'data' => $data,
+                'message' => 'success'
+            ], 200);
+        } else {
+            return response()->json(['message' => 'Mã bill không tồn tại'], 404);
+        }
     }
 
     /**
@@ -93,36 +100,36 @@ class CartController extends Controller
     public function update(CartRequest $request, string $id)
     {
         $cart = Cart::findOrFail($id);
-    
+
         $oldProductDetail = DB::table('product_details')
             ->select('quantity')
             ->where('id', $cart->product_detail_id)
             ->first();
-    
+
         $newProductDetail = DB::table('product_details')
             ->select('quantity')
             ->where('id', $request->get('product_detail_id'))
             ->first();
-    
+
         if ($request->quantity > $newProductDetail->quantity) {
             return response()->json([
                 'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm mới.',
                 'message' => 'error'
             ], 400);
         }
-    
+
         DB::beginTransaction();
         try {
             if ($cart->product_detail_id != $request->get('product_detail_id')) {
-            
+
                 DB::table('product_details')
                     ->where('id', $cart->product_detail_id)
                     ->increment('quantity', $cart->quantity);
-    
+
                 DB::table('product_details')
                     ->where('id', $request->get('product_detail_id'))
                     ->decrement('quantity', $request->get('quantity'));
-    
+
                 $cart->update([
                     'ma_bill' => $request->get('ma_bill'),
                     'product_detail_id' => $request->get('product_detail_id'),
@@ -130,7 +137,7 @@ class CartController extends Controller
                 ]);
             } else {
                 $quantityDifference = $request->quantity - $cart->quantity;
-    
+
                 if ($quantityDifference != 0) {
                     if ($quantityDifference > 0) {
                         DB::table('product_details')
@@ -146,7 +153,7 @@ class CartController extends Controller
                     ]);
                 }
             }
-    
+
             // Commit transaction
             DB::commit();
             $cartCollection = new CartResource($cart);
