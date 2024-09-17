@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Table;
 
+use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TableRequest extends BaseApiRequest

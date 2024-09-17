@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Table\FillterTableRequest;
-use App\Http\Requests\TableRequest;
+use App\Http\Requests\Table\TableRequest;
 use App\Http\Resources\TableResource;
 use App\Models\Table;
 use Illuminate\Http\Request;
@@ -44,7 +44,7 @@ class TablesController extends Controller
         try {
             $table = Table::create([
                 'table' => $request->get('table'),
-                'description' => $request->get('description'),
+                'description' => $request->get('description') ?? Null,
             ]);
             return response()->json([
                 'data' => new TableResource($table),
@@ -82,7 +82,7 @@ class TablesController extends Controller
 
             $table->update([
                 'table' => $request->get('table'),
-                'description' => $request->get('description'),
+                'description' => $request->get('description') ?? Null,
             ]);
             return response()->json([
                 'data' => new TableResource($table),
