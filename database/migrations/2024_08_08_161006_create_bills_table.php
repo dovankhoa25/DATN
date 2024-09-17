@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('user_addresses_id')->nullable()->constrained('user_addresses');
 
             $table->dateTime('order_date');
-            $table->decimal('total_amount', 15, 2);
+            $table->decimal('total_amount', 15, 2)->default(0.00);
             $table->string('branch_address')->nullable();
             $table->foreignId('payment_id')->constrained('payments');
             $table->foreignId('voucher_id')->nullable()->constrained('vouchers');
