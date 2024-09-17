@@ -18,4 +18,9 @@ class Payment extends Model
     public $table = 'payments';
     
     public $timestamp = false;
+
+    public function bills()
+    {
+        return $this->hasMany(Bill::class, 'payment_id');
+    }
 }

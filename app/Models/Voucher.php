@@ -11,6 +11,11 @@ class Voucher extends Model
     use HasFactory;
     use SoftDeletes;
 
+    public function bills()
+    {
+        return $this->hasMany(Bill::class, 'voucher_id');
+    }
+
     public function scopeFilter($query, $filters)
     {
         if (!empty($filters['name'])) {

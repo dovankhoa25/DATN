@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Bill\FilterBillRequest;
 use App\Http\Requests\BillRequest;
 use App\Http\Resources\BillResource;
 use App\Models\Bill;
@@ -12,56 +13,42 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class BillController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+
+    public function index(FilterBillRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $bills = Bill::paginate($perPage);
+      
+        $perPage = $request['per_page'] ?? 10;
+        $bills = Bill::filter($request->filters())->paginate($perPage);
         return BillResource::collection($bills);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(BillRequest $request)
     {
-        try {
-            $bill = Bill::create([
-                'ma_bill' => $this->randomMaBill(),
-                'user_id' => $request->get('user_id'),
-                'order_date' => $request->get('order_date'),
-                'total_money' => $request->get('total_money'),
-                'address' => $request->get('address'),
-                'payment_id' => $request->get('payment_id'),
-                'voucher_id' => $request->get('voucher_id'),
-                'note' => $request->get('note'),
-                'status' => 'pending',
-            ]);
-            return response()->json([
-                'data' => new BillResource($bill),
-                'message' => 'success'
-            ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'thêm bill thất bại'], 404);
+        $validatedData = $request->validated();
+
+
+        if ($request->input('order_type') == 'in_restaurant') {
+            $validatedData['table_number'] = $request->input('table_number');
+            $validatedData['branch_address'] = $request->input('branch_address');
+            $validatedData['user_addresses_id'] = null;
+        } else {
+            $validatedData['user_addresses_id'] = $request->input('user_addresses_id');
+            $validatedData['table_number'] = null;
+            $validatedData['branch_address'] = null;
         }
+
+        $bill = Bill::create($validatedData);
+
+        return response()->json([
+            'message' => 'Bill ok',
+            'bill' => $bill
+        ], 201);
+        
     }
 
-    /**
-     * Display the specified resource.
-     */
+
+
     public function show(string $id)
     {
         try {
@@ -74,17 +61,12 @@ class BillController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         try {
@@ -106,9 +88,7 @@ class BillController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(string $id)
     {
         //
