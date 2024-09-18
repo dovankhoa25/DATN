@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TimeOrderTable\FillterTimeOrderTableRequest;
-use App\Http\Requests\TimeOrderTableRequest;
+use App\Http\Requests\TimeOrderTable\TimeOrderTableRequest;
 use App\Http\Resources\TimeOrderTableResource;
 use App\Models\Table;
 use App\Models\TimeOrderTable;
