@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CategoryController extends Controller
 {
-    // all categories -> subcategories -> products
+    // all categories -> subcategories
     public function index()
     {
         try {

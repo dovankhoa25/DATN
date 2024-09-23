@@ -27,6 +27,7 @@ use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\OnlineCartController;
 use App\Http\Controllers\Client\ProductClientController;
+use App\Http\Controllers\Client\TableController;
 use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -118,7 +119,6 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::get('api_key', [ClientKeyController::class, 'index'])->middleware('auth', 'checkRole:qtv,admin');
     Route::post('api_key', [ClientKeyController::class, 'store'])->middleware('auth', 'checkRole:admin');
     Route::put('api_key_status/{id}', [ClientKeyController::class, 'statusKey'])->middleware('auth', 'checkRole:qtv,admin');
-
 });
 
 
@@ -144,9 +144,10 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     });
 
     Route::get('products', [ProductClientController::class, 'getProduct']); // fe lấy cái này theo product k lấy detail 
-    Route::get('products_details', [ProductClientController::class, 'getProductAllWithDetail']);// fe lấy cái này all cả detail 
+    Route::get('products_details', [ProductClientController::class, 'getProductAllWithDetail']); // fe lấy cái này all cả detail 
     Route::get('product/{id}', [ProductClientController::class, 'getProductWithDetailOrID']); // api get theo id product nhé fe
     Route::get('product_cate/{id}', [ProductClientController::class, 'getProductCate']); // api get product theo id cate nhé fe
 
-
+    Route::get('tables', [TableController::class, 'getAllTables']);
+    Route::post('book/table', [TableController::class, 'BookTable']);
 });
