@@ -3,24 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\VoucherRequest;
+use App\Http\Requests\Voucher\FilterVoucherRequest;
+use App\Http\Requests\Voucher\VoucherRequest;
 use App\Http\Resources\VoucherResource;
 use App\Models\Voucher;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class VoucherController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+
+    public function index(FilterVoucherRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $vouchers = Voucher::paginate($perPage);
-        return VoucherResource::collection($vouchers);
+        try {
+            $perPage = $request->get('per_page', 10);
+            $vouchers = Voucher::filter($request->all())->paginate($perPage);
+            return VoucherResource::collection($vouchers);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy voucher'], 404);
+        }
     }
 
   

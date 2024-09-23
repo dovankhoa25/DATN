@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\SizeController;
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ClientKeyController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
@@ -21,9 +22,11 @@ use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\OnlineCartController;
+use App\Http\Controllers\Client\ProductClientController;
 use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -66,9 +69,10 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::put('/user/{user}/locked', [UserController::class, 'is_locked'])->middleware('checkRole:admin');
 
 
-    //cate
-    Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+
+    // //cate
+    // Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+    // Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     // customer
     Route::apiResource('customers', CustomerController::class)->middleware('auth', 'checkRole:qtv,admin');
@@ -77,6 +81,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     // sizes
     Route::apiResource('sizes', SizeController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::put('size_status/{id}', [SizeController::class, 'statusSize'])->middleware('auth', 'checkRole:qtv,admin');
+
     // payments
     Route::apiResource('payments', PaymentController::class)->middleware('auth', 'checkRole:qtv,admin');
 
@@ -105,16 +111,29 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     // update status category
     Route::post('category/update/{id}/status', [AdminCategoryController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
 
-    // category client
+    // all list categories
+    Route::get('list/category', [AdminCategoryController::class, 'listCategories'])->middleware('auth', 'checkRole:qtv,admin');
+
+    // api key client
+    Route::get('api_key', [ClientKeyController::class, 'index'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::post('api_key', [ClientKeyController::class, 'store'])->middleware('auth', 'checkRole:admin');
+    Route::put('api_key_status/{id}', [ClientKeyController::class, 'statusKey'])->middleware('auth', 'checkRole:qtv,admin');
 
 });
 
 
-Route::prefix('client')->group(function () {
+Route::prefix('client')->middleware('check.api.key')->group(function () {
 
     Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth');
 
     Route::apiResource('category', ClientCategoryController::class);
+
+
+    // Đổi voucher cho customer
+    Route::post('/change_voucher', [ClientVoucherController::class, 'changeVoucher']);
+    // vouchers của customer
+    Route::get('/vouchers_customer', [ClientVoucherController::class, 'vouchersCustomer']);
+
 
     Route::prefix('order_table')->middleware('auth')->group(function () {
         Route::get('/', [ClientTimeOrderTableController::class, 'index']);
@@ -123,4 +142,11 @@ Route::prefix('client')->group(function () {
         Route::put('/{id}', [ClientTimeOrderTableController::class, 'update']);
         Route::delete('/{id}', [ClientTimeOrderTableController::class, 'destroy']);
     });
+
+    Route::get('products', [ProductClientController::class, 'getProduct']); // fe lấy cái này theo product k lấy detail 
+    Route::get('products_details', [ProductClientController::class, 'getProductAllWithDetail']);// fe lấy cái này all cả detail 
+    Route::get('product/{id}', [ProductClientController::class, 'getProductWithDetailOrID']); // api get theo id product nhé fe
+    Route::get('product_cate/{id}', [ProductClientController::class, 'getProductCate']); // api get product theo id cate nhé fe
+
+
 });

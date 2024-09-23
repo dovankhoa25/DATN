@@ -3,28 +3,38 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ProductRequest;
+use App\Http\Requests\Product\FilterProductRequest;
+use App\Http\Requests\Product\ProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Image;
 use App\Models\Product;
 use App\Models\ProductDetail;
-use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+
 
 class ProductController extends Controller
 {
 
-    public function index(Request $request)
+    public function index(FilterProductRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $products = Product::with(['productDetails.images'])->paginate($perPage);
+        try {
 
-        return ProductResource::collection($products);
+            $perPage = $request['per_page'] ?? 10;
+
+            $products = Product::with(['productDetails.images'])
+                ->filter($request)
+                ->paginate($perPage);
+
+            return ProductResource::collection($products);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Sản phẩm rỗng'], 404);
+        }
     }
+
+
+
 
 
     public function create()
@@ -165,19 +175,19 @@ class ProductController extends Controller
             }
             DB::commit();
             return new ProductResource($product->load('productDetails.images'));
-
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
-
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $Product)
-    {
-        
+    public function destroy(Product $Product) {
+        $Product = Product::findOrFail($Product);
+        $Product->delete();
+        return response()->json(null, 204); 
     }
+
 }

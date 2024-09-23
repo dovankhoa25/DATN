@@ -4,12 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Customer extends Model
+class Client extends Model
 {
     use HasFactory;
-    use SoftDeletes;
+
+    protected $fillable = [
+        'name',
+        'api_key',
+        'status',
+    ];
 
     public function scopeFilter($query, $filters)
     {
@@ -17,12 +21,8 @@ class Customer extends Model
             $query->where('name', 'like', '%' . $filters['name'] . '%');
         }
 
-        if (!empty($filters['email'])) {
-            $query->where('email', 'like', '%' . $filters['email'] . '%');
-        }
-
-        if (!empty($filters['phone'])) {
-            $query->where('phone', 'like', '%' . $filters['phone'] . '%');
+        if (!empty($filters['api_key'])) {
+            $query->where('api_key', 'like', '%' . $filters['api_key'] . '%');
         }
 
         if (!empty($filters['sort_by']) && !empty($filters['orderby'])) {
@@ -32,15 +32,4 @@ class Customer extends Model
         return $query;
     }
 
-
-
-    protected $fillable = [
-        "name",
-        "email",
-        "phone_number",
-        "diemthuong",
-        "user_id",
-    ];
-
-    protected $table = 'customers';
 }

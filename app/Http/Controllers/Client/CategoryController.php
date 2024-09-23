@@ -17,9 +17,6 @@ class CategoryController extends Controller
             $categories = Category::with([
                 'subcategories' => function ($query) {
                     $query->where('status', true);
-                },
-                'subcategories.products' => function ($query) {
-                    $query->where('status', true);
                 }
             ])
                 ->where('status', true)
@@ -40,9 +37,6 @@ class CategoryController extends Controller
         try {
             $category = Category::with([
                 'subcategories' => function ($query) {
-                    $query->where('status', true);
-                },
-                'subcategories.products' => function ($query) {
                     $query->where('status', true);
                 }
             ])

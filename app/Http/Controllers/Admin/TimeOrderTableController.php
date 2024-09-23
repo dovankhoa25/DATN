@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\TimeOrderTableRequest;
+use App\Http\Requests\TimeOrderTable\FillterTimeOrderTableRequest;
+use App\Http\Requests\TimeOrderTable\TimeOrderTableRequest;
 use App\Http\Resources\TimeOrderTableResource;
 use App\Models\Table;
 use App\Models\TimeOrderTable;
@@ -18,15 +19,16 @@ class TimeOrderTableController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(FillterTimeOrderTableRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $data = TimeOrderTable::paginate($perPage);
-        $timeOrderTable = TimeOrderTableResource::collection($data);
-        return $timeOrderTable;
+        try {
+            $perPage = $request->get('per_page', 10);
+
+            $timeOrderTable = TimeOrderTable::filter($request)->paginate($perPage);
+            return TimeOrderTableResource::collection($timeOrderTable);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy Time order table'], 404);
+        }
     }
 
     /**
