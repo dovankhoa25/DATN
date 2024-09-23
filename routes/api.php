@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\VoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\OnlineCartController;
+use App\Http\Controllers\Client\OrderCartController;
 use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -122,5 +123,12 @@ Route::prefix('client')->group(function () {
         Route::post('/', [ClientTimeOrderTableController::class, 'store']);
         Route::put('/{id}', [ClientTimeOrderTableController::class, 'update']);
         Route::delete('/{id}', [ClientTimeOrderTableController::class, 'destroy']);
+    });
+    Route::prefix('order_cart')->middleware('auth')->group(function () {
+        Route::get('/', [OrderCartController::class, 'index']);
+        Route::get('/{ma_bill}', [OrderCartController::class, 'show']);
+        Route::post('/', [OrderCartController::class, 'store']);
+        Route::put('/{id}', [OrderCartController::class, 'update']);
+        Route::delete('/{id}', [OrderCartController::class, 'destroy']);
     });
 });
