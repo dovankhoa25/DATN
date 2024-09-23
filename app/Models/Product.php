@@ -36,7 +36,7 @@ class Product extends Model
 
 
     // Mối quan hệ với ProductDetail
-  
+
     public function productDetails()
     {
         return $this->hasMany(ProductDetail::class);
@@ -48,4 +48,13 @@ class Product extends Model
         return $this->hasManyThrough(Image::class, ProductDetail::class);
     }
 
+    public function sizes()
+    {
+        return $this->hasManyThrough(Size::class, ProductDetail::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 }

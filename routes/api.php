@@ -145,7 +145,7 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
 
     Route::get('products', [ProductClientController::class, 'getProduct']); // fe lấy cái này theo product k lấy detail 
     Route::get('products_details', [ProductClientController::class, 'getProductAllWithDetail']);// fe lấy cái này all cả detail 
-    Route::get('product/{id}', [ProductClientController::class, 'getProductWithDetailOrID']); // api get theo id product nhé fe
+    Route::get('product/{id}', [ProductClientController::class, 'getProductWithDetailByID']); // api get theo id product nhé fe
     Route::get('product_cate/{id}', [ProductClientController::class, 'getProductCate']); // api get product theo id cate nhé fe
 
 

@@ -16,7 +16,7 @@ class BillController extends Controller
 
     public function index(FilterBillRequest $request)
     {
-      
+
         $perPage = $request['per_page'] ?? 10;
         $bills = Bill::filter($request->filters())->paginate($perPage);
         return BillResource::collection($bills);
@@ -44,7 +44,6 @@ class BillController extends Controller
             'message' => 'Bill ok',
             'bill' => $bill
         ], 201);
-        
     }
 
 
@@ -71,10 +70,36 @@ class BillController extends Controller
     {
         try {
             $request->validate([
-                'status' => 'required|in:pending,completed',
+                'status' => 'required|in:confirmed,preparing,shipping,completed,failed',
             ]);
 
             $bill = Bill::findOrFail($id);
+
+            $validStatuses = [
+                'pending' => 1,
+                'confirmed' => 2,
+                'preparing' => 3,
+                'shipping' => 4,
+                'completed' => 5,
+                'failed' => 6
+            ];
+
+            $currentStatus = $bill->status;
+            $newStatus = $request->input('status');
+
+            if ($bill->order_type !== 'online') {
+                return response()->json(['error' => 'Chỉ có thể cập nhật trạng thái cho đơn hàng online'], 400);
+            }
+
+            
+            if (in_array($currentStatus, ['completed', 'failed'])) {
+                return response()->json(['error' => 'Không thể cập nhật khi trạng thái đã là completed hoặc failed'], 400);
+            }
+            
+            if ($validStatuses[$newStatus] < $validStatuses[$currentStatus]) {
+                return response()->json(['error' => 'Không thể cập nhật trạng ngược lại'], 400);
+            }
+
 
             $bill->status = $request->input('status');
             $bill->save();
