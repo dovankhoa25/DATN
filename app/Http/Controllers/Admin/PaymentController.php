@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Payment\FilterPaymentRequest;
 use App\Http\Requests\PaymentRequest;
 use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
@@ -13,13 +14,10 @@ class PaymentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(FilterPaymentRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $listPayment = Payment::paginate($perPage);
+        $perPage = $request['per_page'] ?? 10;
+        $listPayment = Payment::filter($request)->paginate($perPage);
         $paymentCollection = PaymentResource::collection($listPayment);
         return $paymentCollection;
     }
