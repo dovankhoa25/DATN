@@ -29,7 +29,7 @@ class ProductClientController extends Controller
 
             $perPage = $request['per_page'] ?? 10;
 
-            $products = $products = Product::with(['productDetails.images'])->paginate($perPage);
+            $products = $products = Product::with(['productDetails.images.sizes'])->paginate($perPage);
 
             return response()->json([
                 'data' => $products,
@@ -39,14 +39,16 @@ class ProductClientController extends Controller
 
 
 
-    public function getProductWithDetailOrID(int $id){
+    public function getProductWithDetailByID(int $id){
 
-        $products = Product::with(['productDetails.images'])
+        $products = Product::with(['productDetails.images.sizes.category'])
         ->where('id' ,'=',$id)
         ->first();
+
         return response()->json([
             'data' => $products,
         ],201);
+
     }
 
 

@@ -19,17 +19,37 @@ class BillDetailController extends Controller
     // }
 
 
+    // public function show(string $id)
+    // {
+    //     try {
+    //         $billDetail = BillDetail::where('bill_id', $id)->firstOrFail();
+    //         return response()->json([
+    //             'data' => new BillDetailResource($billDetail),
+    //         ], 200);
+    //     } catch (ModelNotFoundException $e) {
+    //         return response()->json(['error' => 'Chi tiết hoá đơn không tồn tại'], 404);
+    //     }
+    // }
+
     public function show(string $id)
     {
         try {
-            $billDetail = BillDetail::where('bill_id', $id)->firstOrFail();
+           
+            $billDetails = BillDetail::with(['productDetail.product'])
+                ->where('bill_id', $id)
+                ->get();
+            
+            if ($billDetails->isEmpty()) {
+                return response()->json(['error' => 'Chi tiết hóa đơn không tồn tại'], 404);
+            }
+    
             return response()->json([
-                'data' => new BillDetailResource($billDetail),
+                'data' => BillDetailResource::collection($billDetails),
             ], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Chi tiết hoá đơn không tồn tại'], 404);
+            return response()->json(['error' => 'Chi tiết hóa đơn không tồn tại'], 404);
         }
     }
-
-
+    
+    
 }

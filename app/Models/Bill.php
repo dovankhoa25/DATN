@@ -42,6 +42,16 @@ class Bill extends Model
         return $this->belongsTo(voucher::class, 'voucher_id');
     }
 
+    public function UserAddress()
+    {
+        return $this->belongsTo(UserAddress::class, 'user_addresses_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function scopeFilter($query, $filters)
     {
         if (isset($filters['ma_bill'])) {
