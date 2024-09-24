@@ -37,7 +37,8 @@ class ProductController extends Controller
     protected function storeImage($file, $directory)
     {
         if ($file) {
-            return $file->store($directory, 'public');
+            $filePath = $file->store($directory, 'public');
+            return Storage::url($filePath); // Trả về URL công khai
         }
 
         return null;
