@@ -23,7 +23,7 @@ class ProductController extends Controller
 
             $perPage = $request['per_page'] ?? 10;
 
-            $products = Product::with(['productDetails.images'])
+            $products = Product::with(['productDetails.images','category'])
                 ->filter($request)
                 ->paginate($perPage);
 
@@ -31,15 +31,6 @@ class ProductController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Sản phẩm rỗng'], 404);
         }
-    }
-
-
-
-
-
-    public function create()
-    {
-        //
     }
 
 
@@ -61,6 +52,7 @@ class ProductController extends Controller
             $product = Product::create([
                 'name' => $request->name,
                 'thumbnail' => $this->storeImage($request->file('thumbnail'), 'product/thumbal'),
+                'description' => $request->description,
                 'status' => true,
                 'category_id' => $request->category_id,
             ]);
@@ -132,6 +124,7 @@ class ProductController extends Controller
             $product->update([
                 'name' => $request->name,
                 'thumbnail' => $thumbnailPath,
+                'description' => $request->description,
                 'status' => $request->status,
                 'category_id' => $request->category_id,
             ]);

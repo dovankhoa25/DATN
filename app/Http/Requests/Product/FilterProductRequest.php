@@ -19,6 +19,7 @@ class FilterProductRequest extends FormRequest
             'sort_by' => 'string|nullable',
             'orderby' => 'in:asc,desc|nullable',
             'name' => 'string|nullable',
+            'description' => 'string|nullable',
             'start_date' => 'date|nullable',
             'end_date' => 'date|nullable',
         ];
@@ -33,6 +34,7 @@ class FilterProductRequest extends FormRequest
             'sort_by.string' => 'Sắp xếp theo cột phải là chuỗi ký tự.',
             'orderby.in' => 'Kiểu sắp xếp chỉ có thể là asc hoặc desc.',
             'name.string' => 'Tên sản phẩm phải là chuỗi ký tự.',
+            'description.string' => 'Mô tả sản phẩm phải là chuỗi ký tự.',
             'start_date.date' => 'Ngày bắt đầu phải là định dạng ngày hợp lệ.',
             'end_date.date' => 'Ngày kết thúc phải là định dạng ngày hợp lệ.',
         ];
