@@ -15,22 +15,22 @@ class OrderCartController extends Controller
      */
     public function index(Request $request)
     {
-        $objCart = new OrderCart();
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
+        // $objCart = new OrderCart();
+        // $validated = $request->validate([
+        //     'per_page' => 'integer|min:1|max:100'
+        // ]);
+        // $perPage = $validated['per_page'] ?? 10;
 
-        $data = $objCart->listCart()->paginate($perPage);
+        // $data = $objCart->listCart()->paginate($perPage);
 
-        if ($data->total() > 0) {
-            return response()->json([
-                'data' => $data,
-                'message' => 'success'
-            ], 200);
-        } else {
-            return response()->json(['message' => 'Giỏ hàng trống'], 404);
-        }
+        // if ($data->total() > 0) {
+        //     return response()->json([
+        //         'data' => $data,
+        //         'message' => 'success'
+        //     ], 200);
+        // } else {
+        //     return response()->json(['message' => 'Giỏ hàng trống'], 404);
+        // }
     }
 
     /**
@@ -38,12 +38,24 @@ class OrderCartController extends Controller
      */
     public function store(OrderCartRequest $request)
     {
+        $bill = DB::table('bills')
+            ->select('status')
+            ->where('ma_bill', $request->get('ma_bill'))
+            ->first();
+
         $productDetail = DB::table('product_details')
             ->select('quantity', 'price', 'sale')
             ->where('id', $request->get('product_detail_id'))
             ->first();
 
         $price = $productDetail->sale ?? $productDetail->price;
+
+        if($bill->status !== 'pending'){
+            return response()->json([
+                'error' => 'Mã bill này đã hoàn thành xử lí, không thể thêm',
+                'message' => 'error'
+            ], 400);
+        }
 
         if ($request->quantity > $productDetail->quantity) {
             return response()->json([
@@ -79,6 +91,19 @@ class OrderCartController extends Controller
             'per_page' => 'integer|min:1|max:100'
         ]);
         $perPage = $validated['per_page'] ?? 10;
+
+        $bill = DB::table('bills')
+            ->select('status')
+            ->where('ma_bill', $ma_bill)
+            ->first();
+
+        if($bill->status !== 'pending'){
+            return response()->json([
+                'error' => 'Mã bill này đã xử lí xong, không thể xem :)',
+                'message' => 'error'
+            ], 400);
+        }
+
         $data = $objCart->listCart()->where('ma_bill', $ma_bill)->paginate($perPage);
 
         if ($data->total() > 0) {

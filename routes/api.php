@@ -125,7 +125,7 @@ Route::prefix('client')->group(function () {
         Route::delete('/{id}', [ClientTimeOrderTableController::class, 'destroy']);
     });
     Route::prefix('order_cart')->middleware('auth')->group(function () {
-        Route::get('/', [OrderCartController::class, 'index']);
+        // Route::get('/', [OrderCartController::class, 'index']);
         Route::get('/{ma_bill}', [OrderCartController::class, 'show']);
         Route::post('/', [OrderCartController::class, 'store']);
         Route::put('/{id}', [OrderCartController::class, 'update']);
