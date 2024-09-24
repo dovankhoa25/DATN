@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Category\CategoryRequest;
 use App\Http\Requests\Category\FillterCategoryRequest;
-use App\Http\Resources\CategoryResource;
+use App\Http\Resources\Category\CategoryAdminResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,7 +22,7 @@ class CategoryController extends Controller
                 ->filter($request)
                 ->whereNull('parent_id')
                 ->paginate($perPage);
-            return CategoryResource::collection($categories);
+            return CategoryAdminResource::collection($categories);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Không tìm thấy Category'], 404);
         }
@@ -46,7 +46,7 @@ class CategoryController extends Controller
         ]);
 
         return response()->json([
-            'data' => new CategoryResource($Category),
+            'data' => new CategoryAdminResource($Category),
             'message' => 'success'
         ], 201);
     }
@@ -56,7 +56,7 @@ class CategoryController extends Controller
         try {
             $category = Category::with('subcategories')->findOrFail($id);
             return response()->json([
-                'data' => new CategoryResource($category),
+                'data' => new CategoryAdminResource($category),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'category không tồn tại'], 404);
@@ -88,7 +88,7 @@ class CategoryController extends Controller
                 'parent_id' => $request->input('parent_id') ?? Null
             ]);
             return response()->json([
-                'data' => new CategoryResource($category),
+                'data' => new CategoryAdminResource($category),
                 'message' => 'success',
             ], 201);
         } catch (ModelNotFoundException $e) {
@@ -141,7 +141,7 @@ class CategoryController extends Controller
             $perPage = $request->get('per_page', 10);
 
             $categories = Category::filter($request)->paginate($perPage);
-            return CategoryResource::collection($categories);
+            return CategoryAdminResource::collection($categories);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Không tìm thấy Category'], 404);
         }

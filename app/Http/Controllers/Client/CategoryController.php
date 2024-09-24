@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CategoryResource;
+use App\Http\Resources\Category\CategoryClientResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -23,7 +23,7 @@ class CategoryController extends Controller
                 ->whereNull('parent_id')
                 ->get();
 
-            return CategoryResource::collection($categories);
+            return CategoryClientResource::collection($categories);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'Categories rỗng !'
@@ -40,9 +40,10 @@ class CategoryController extends Controller
                     $query->where('status', true);
                 }
             ])
+                ->where('status', true)
                 ->whereNull('parent_id')
                 ->findOrFail($id);
-            return new CategoryResource($category);
+            return new CategoryClientResource($category);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'Không tìm thấy Category !'

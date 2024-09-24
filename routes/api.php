@@ -149,5 +149,5 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     Route::get('product_cate/{id}', [ProductClientController::class, 'getProductCate']); // api get product theo id cate nhé fe
 
     Route::get('tables', [TableController::class, 'getAllTables']);
-    Route::post('book/table', [TableController::class, 'BookTable']);
+    // Route::post('open/table', [TableController::class, 'openTable'])->middleware('auth', 'checkRole:qtv,admin');
 });
