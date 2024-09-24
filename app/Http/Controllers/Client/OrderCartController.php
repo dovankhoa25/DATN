@@ -15,22 +15,38 @@ class OrderCartController extends Controller
      */
     public function index(Request $request)
     {
-        // $objCart = new OrderCart();
-        // $validated = $request->validate([
-        //     'per_page' => 'integer|min:1|max:100'
-        // ]);
-        // $perPage = $validated['per_page'] ?? 10;
+        $bill = DB::table('bills')
+            ->select('status')
+            ->where('ma_bill', $request->get('ma_bill'))
+            ->first();
 
-        // $data = $objCart->listCart()->paginate($perPage);
+        if (!$bill) {
+            return response()->json(['message' => 'Không tìm thấy thông bill'], 404);
+        }
+        
+        if($bill->status !== 'pending'){
+            return response()->json([
+                'error' => 'Mã bill này đã hoàn thành xử lí, không thể hiển thị',
+                'message' => 'error'
+            ], 400);
+        }
 
-        // if ($data->total() > 0) {
-        //     return response()->json([
-        //         'data' => $data,
-        //         'message' => 'success'
-        //     ], 200);
-        // } else {
-        //     return response()->json(['message' => 'Giỏ hàng trống'], 404);
-        // }
+        $objCart = new OrderCart();
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100',
+        ]);
+        $perPage = $validated['per_page'] ?? 10;
+
+        $data = $objCart->listCart()->where('ma_bill', $request->get('ma_bill'))->paginate($perPage);
+
+        if ($data->total() > 0) {
+            return response()->json([
+                'data' => $data,
+                'message' => 'success'
+            ], 200);
+        } else {
+            return response()->json(['message' => 'Giỏ hàng trống'], 404);
+        }
     }
 
     /**
@@ -42,6 +58,13 @@ class OrderCartController extends Controller
             ->select('status')
             ->where('ma_bill', $request->get('ma_bill'))
             ->first();
+        
+        if($bill->status !== 'pending'){
+            return response()->json([
+                'error' => 'Mã bill này đã hoàn thành xử lí, không thể thêm',
+                'message' => 'error'
+            ], 400);
+        }
 
         $productDetail = DB::table('product_details')
             ->select('quantity', 'price', 'sale')
@@ -49,13 +72,6 @@ class OrderCartController extends Controller
             ->first();
 
         $price = $productDetail->sale ?? $productDetail->price;
-
-        if($bill->status !== 'pending'){
-            return response()->json([
-                'error' => 'Mã bill này đã hoàn thành xử lí, không thể thêm',
-                'message' => 'error'
-            ], 400);
-        }
 
         if ($request->quantity > $productDetail->quantity) {
             return response()->json([
@@ -86,16 +102,14 @@ class OrderCartController extends Controller
      */
     public function show(Request $request, string $ma_bill)
     {
-        $objCart = new OrderCart();
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-
         $bill = DB::table('bills')
             ->select('status')
             ->where('ma_bill', $ma_bill)
             ->first();
+        
+        if (!$bill) {
+            return response()->json(['message' => 'Không tìm thấy thông tin bill'], 404);
+        }
 
         if($bill->status !== 'pending'){
             return response()->json([
@@ -103,6 +117,12 @@ class OrderCartController extends Controller
                 'message' => 'error'
             ], 400);
         }
+
+        $objCart = new OrderCart();
+        $validated = $request->validate([
+            'per_page' => 'integer|min:1|max:100'
+        ]);
+        $perPage = $validated['per_page'] ?? 10;
 
         $data = $objCart->listCart()->where('ma_bill', $ma_bill)->paginate($perPage);
 
@@ -125,6 +145,22 @@ class OrderCartController extends Controller
     
         if (!$cartItem) {
             return response()->json(['message' => 'Không tìm thấy thông tin giỏ hàng cần sửa'], 404);
+        }
+
+        $bill = DB::table('bills')
+            ->select('status')
+            ->where('ma_bill', $cartItem->ma_bill)
+            ->first();
+
+        if (!$bill) {
+            return response()->json(['message' => 'Không tìm thấy thông tin bill'], 404);
+        }
+
+        if($bill->status !== 'pending'){
+            return response()->json([
+                'error' => 'Mã bill này đã xử lí xong, không thể sửa :)',
+                'message' => 'error'
+            ], 400);
         }
     
         $validated = $request->validate([
@@ -167,13 +203,13 @@ class OrderCartController extends Controller
      */
     public function destroy(int $id)
     {
-        $cart = OrderCart::findOrFail($id);
+        // $cart = OrderCart::findOrFail($id);
 
-        $res = $cart->delete();
-        if ($res) {
-            return response()->json(['message' => 'success'], 204);
-        } else {
-            return response()->json(['error' => 'Xóa thất bại']);
-        }
+        // $res = $cart->delete();
+        // if ($res) {
+        //     return response()->json(['message' => 'success'], 204);
+        // } else {
+        //     return response()->json(['error' => 'Xóa thất bại']);
+        // }
     }
 }
