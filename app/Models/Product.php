@@ -25,6 +25,9 @@ class Product extends Model
         if (!empty($filters['sort_by']) && !empty($filters['orderby'])) {
             $query->orderBy($filters['sort_by'], $filters['orderby']);
         }
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
 
         return $query;
     }

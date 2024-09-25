@@ -92,6 +92,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
 
     Route::apiResource('products', ProductController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::put('product/{id}/status', [ProductController::class, 'updateStatus'] )->middleware('auth', 'checkRole:qtv,admin');
+    // Route::post('products/{id}', [ProductController::class, 'update']);
 
     // Bills
     Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');

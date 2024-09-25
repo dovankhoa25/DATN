@@ -19,6 +19,7 @@ class FilterProductRequest extends FormRequest
             'sort_by' => 'string|nullable',
             'orderby' => 'in:asc,desc|nullable',
             'name' => 'string|nullable',
+            'status' => 'boolean|nullable',
             'description' => 'string|nullable',
             'start_date' => 'date|nullable',
             'end_date' => 'date|nullable',

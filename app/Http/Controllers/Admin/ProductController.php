@@ -12,7 +12,7 @@ use App\Models\ProductDetail;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -23,7 +23,7 @@ class ProductController extends Controller
 
             $perPage = $request['per_page'] ?? 10;
 
-            $products = Product::with(['productDetails.images','category'])
+            $products = Product::with(['productDetails.images', 'category'])
                 ->filter($request)
                 ->paginate($perPage);
 
@@ -93,13 +93,6 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit()
-    {
-        //
-    }
 
 
     public function update(ProductRequest $request, $id)
@@ -147,10 +140,22 @@ class ProductController extends Controller
                     );
 
                     $currentImages = $productDetail->images->pluck('id')->toArray();
-                    $frontendImageIds = array_filter(array_column($detail['images'], 'id'));
-                    $imagesToDelete = array_diff($currentImages, $frontendImageIds);
 
-                    Image::whereIn('id', $imagesToDelete)->delete();
+                    // $frontendImageIds = array_filter(array_column($detail['images'], 'id'));
+
+                    $frontendImageIds = $detail['image_old'] ?? [];
+
+
+                    $imagesToDelete = array_diff($currentImages, $frontendImageIds);
+                    $imagesToRemove = Image::whereIn('id', $imagesToDelete)->get();
+
+                    foreach ($imagesToRemove as $image) {
+                        if (Storage::exists($image->name)) {
+                            Storage::delete($image->name);
+                        }
+                        $image->delete();
+                    }
+                    // Image::whereIn('id', $imagesToDelete)->delete();
 
                     foreach ($detail['images'] as $img) {
                         if (isset($img['id'])) {
@@ -175,13 +180,31 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Product $Product) {
+
+
+    public function destroy(Product $Product)
+    {
         $Product = Product::findOrFail($Product);
         $Product->delete();
-        return response()->json(null, 204); 
+        return response()->json(null, 204);
     }
 
+
+    
+    public function updateStatus(Request $request, string $id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $product->status = !$product->status;
+            $product->save();
+
+            if ($product->status) {
+                return response()->json(['message' => 'hiện'], 200);
+            } else {
+                return response()->json(['message' => 'ẩn'], 200);
+            }
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'sản phẩm không tồn tại'], 404);
+        }
+    }
 }
