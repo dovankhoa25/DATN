@@ -31,6 +31,7 @@ class ProductClientController extends Controller
             return [
                 'id' => $product->id,
                 'name' => $product->name,
+                'description' => $product->description,
                 'category' => [
                     'id' => $product->category->id,
                     'name' => $product->category->name,
@@ -65,6 +66,7 @@ class ProductClientController extends Controller
                 'id' => $product->id,
                 'name' => $product->name,
                 'thumbnail' => $product->thumbnail,
+                'description' => $product->description,
                 'status' => $product->status,
                 'category' => [
                     'id' => $product->category->id,
@@ -116,6 +118,7 @@ class ProductClientController extends Controller
                 'name' => $product->name,
                 'thumbnail' => $product->thumbnail,
                 'status' => $product->status,
+                'description' => $product->description,
                 'category' => [
                     'id' => $product->category->id,
                     'name' => $product->category->name,
@@ -126,6 +129,7 @@ class ProductClientController extends Controller
                         'id' => $detail->id,
                         'price' => $detail->price,
                         'quantity' => $detail->quantity,
+                        'sale' => $detail->sale,
                         'size' => [
                             'id' => $detail->size->id,
                             'name' => $detail->size->name,
@@ -171,12 +175,17 @@ class ProductClientController extends Controller
                 'id' => $product->id,
                 'name' => $product->name,
                 'thumbnail' => $product->thumbnail,
+                'description' => $product->description,
                 'category' => $product->category->name,
                 'product_details' => $product->productDetails->map(function ($detail) {
                     return [
                         'id' => $detail->id,
                         'price' => $detail->price,
                         'quantity' => $detail->quantity,
+                        'size' => [
+                            'id' => $detail->size->id,
+                            'name' => $detail->size->name,
+                        ],
                         'images' => $detail->images->map(function ($image) {
                             return [
                                 'id' => $image->id,

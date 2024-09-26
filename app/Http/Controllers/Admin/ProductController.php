@@ -157,19 +157,23 @@ class ProductController extends Controller
                     }
                     // Image::whereIn('id', $imagesToDelete)->delete();
 
-                    foreach ($detail['images'] as $img) {
-                        if (isset($img['id'])) {
-                            Image::where('id', $img['id'])->update([
-                                'name' => $img['file'] ? $this->storeImage($img['file'], 'product/images') : null,
-                                'status' => $img['status'] ?? true,
-                            ]);
-                        } else {
-                            Image::create([
-                                'name' => $this->storeImage($img['file'], 'product/images'),
-                                'product_detail_id' => $productDetail->id,
-                            ]);
+
+                    if (isset($detail['images']) && is_array($detail['images']) && count($detail['images']) > 0) {
+                        foreach ($detail['images'] as $img) {
+                            if (isset($img['id'])) {
+                                Image::where('id', $img['id'])->update([
+                                    'name' => $img['file'] ? $this->storeImage($img['file'], 'product/images') : null,
+                                    'status' => $img['status'] ?? true,
+                                ]);
+                            } else {
+                                Image::create([
+                                    'name' => $this->storeImage($img['file'], 'product/images'),
+                                    'product_detail_id' => $productDetail->id,
+                                ]);
+                            }
                         }
                     }
+                    
                 }
             }
             DB::commit();

@@ -59,10 +59,11 @@ class ProductRequest extends BaseApiRequest
                 'product_details.*.status' => 'nullable|boolean',
 
                 // Image
+                'product_details.*.images' => 'nullable|required_without:product_details.*.image_old|array',
                 'product_details.*.images.*.file' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
                 //Image_old
-                'product_details.*.image_old' => 'array',
-                'product_details.*.image_old.*' => 'exists:images,id', 
+                'product_details.*.image_old' => 'nullable|required_without:product_details.*.images|array',
+                'product_details.*.image_old.*' => 'exists:images,id',
             ];
         }
     }
