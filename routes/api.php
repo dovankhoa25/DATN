@@ -26,6 +26,7 @@ use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\OnlineCartController;
 use App\Http\Controllers\Client\OrderCartController;
 use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
+use App\Http\Controllers\Client\UpdateProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -130,5 +131,9 @@ Route::prefix('client')->group(function () {
         Route::post('/', [OrderCartController::class, 'store']);
         Route::put('/{id}', [OrderCartController::class, 'update']);
         // Route::delete('/{id}', [OrderCartController::class, 'destroy']);
+    });
+    Route::prefix('profile')->middleware('auth')->group(function () {
+        Route::get('/', [UpdateProfileController::class, 'index']);
+        Route::put('/{id}', [UpdateProfileController::class, 'update']);
     });
 });
