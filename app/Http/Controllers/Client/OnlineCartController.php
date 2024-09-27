@@ -19,42 +19,41 @@ class OnlineCartController extends Controller
      */
     public function index()
     {
-        // try {
-        //     $user = JWTAuth::parseToken()->authenticate();
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
 
-        //     if (!$user) {
-        //         return response()->json(['message' => 'Người dùng không tồn tại'], 404);
-        //     }
+            if (!$user) {
+                return response()->json(['message' => 'Người dùng không tồn tại'], 404);
+            }
 
-        //     $objOnlCart = new OnlineCart();
-        //     $data = $objOnlCart->onlCartByUserId($user->id);
+            $objOnlCart = new OnlineCart();
+            $data = $objOnlCart->onlCartByUserId($user->id)->get();
 
-        //     if ($data->total() > 0) {
-        //         return response()->json([
-        //             'data' => $data,
-        //             'message' => 'success'
-        //         ], 200);
-        //     } else {
-        //         return response()->json(['message' => 'Giỏ hàng trống'], 404);
-        //     }
-
-        // } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-        //     return response()->json(['message' => 'Không thể lấy thông tin người dùng từ token'], 500);
-        // }
+            if ($data) {
+                return response()->json([
+                    'data' => $data,
+                    'message' => 'success'
+                ], 200);
+            } else {
+                return response()->json(['message' => 'Giỏ hàng trống'], 404);
+            }
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return response()->json(['message' => 'Không thể lấy thông tin người dùng từ token'], 500);
+        }
     }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(OnlCartRequest $request)
-    { //không sửa giá lấy user theo token
+    {
         $productDetail = DB::table('product_details')
             ->select('quantity', 'price', 'sale')
             ->where('id', $request->get('product_detail_id'))
             ->first();
 
         $price = $productDetail->sale ?? $productDetail->price;
-        
+
         $user = JWTAuth::parseToken()->authenticate();
         if (!$user) {
             return response()->json(['message' => 'Người dùng không tồn tại'], 404);
@@ -96,14 +95,14 @@ class OnlineCartController extends Controller
 
         $cartItems = $objOnlCart->onlCartByUserId($idUser)->get();
 
-        $itemsToRemove = []; 
+        $itemsToRemove = [];
         foreach ($cartItems as $item) {
             $productDetail = DB::table('product_details')
                 ->where('id', $item->product_detail_id)
                 ->first();
 
             if ($productDetail && $productDetail->quantity < $item->quantity) {
-                $itemsToRemove[] = $item->id; 
+                $itemsToRemove[] = $item->id;
             }
         }
 
@@ -129,7 +128,7 @@ class OnlineCartController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(OnlCartRequest $request, int $id)
+    public function update(Request $request, int $id)
     {
         $cartItem = DB::table('online_cart')->where('id', $id)->first();
 
@@ -139,7 +138,7 @@ class OnlineCartController extends Controller
 
         $productDetail = DB::table('product_details')
             ->select('quantity', 'price', 'sale')
-            ->where('id', $request->get('product_detail_id'))
+            ->where('id', $cartItem->product_detail_id)
             ->first();
 
         $price = $productDetail->sale ?? $productDetail->price;
@@ -149,12 +148,16 @@ class OnlineCartController extends Controller
                 'message' => 'error'
             ], 400);
         }
+        $validated = $request->validate([
+            'quantity' => 'integer|min:1|max:100'
+        ]);
+        $quantity = $validated['quantity'];
 
         // Cập nhật giỏ hàng
         DB::table('online_cart')
             ->where('id', $id)
             ->update([
-                'quantity' => $request->get('quantity'),
+                'quantity' => $quantity,
                 'price' => $price * $request->get('quantity'),
                 'updated_at' => now()
             ]);

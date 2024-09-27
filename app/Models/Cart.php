@@ -65,7 +65,7 @@ class Cart extends Model
 
             ->where('cart.ma_bill', $ma_bill);
 
-        return $query->get();
+        return $query;
     }
 
     // public function scopeFilter($query, $filters){

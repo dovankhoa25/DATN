@@ -26,11 +26,12 @@ use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\OnlineCartController;
+use App\Http\Controllers\Client\OrderCartController;
 use App\Http\Controllers\Client\ProductClientController;
 use App\Http\Controllers\Client\TableController;
 use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
-
+use App\Http\Controllers\Client\UpdateProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -157,4 +158,17 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     Route::post('open_table', [TableController::class, 'openTable'])->middleware('auth', 'checkRole:qtv,admin');
 
     Route::get('list_payments', [ClientPaymentController::class, 'listPaymentTrue']);
+
+    Route::prefix('order_cart')->middleware('auth')->group(function () {
+        Route::get('/', [OrderCartController::class, 'index']);
+        Route::get('/{ma_bill}', [OrderCartController::class, 'show']);
+        Route::post('/', [OrderCartController::class, 'store']);
+        Route::put('/{id}', [OrderCartController::class, 'update']);
+        // Route::delete('/{id}', [OrderCartController::class, 'destroy']);
+    });
+
+    Route::prefix('profile')->middleware('auth')->group(function () {
+        Route::get('/', [UpdateProfileController::class, 'index']);
+        Route::put('/{id}', [UpdateProfileController::class, 'update']);
+    });
 });

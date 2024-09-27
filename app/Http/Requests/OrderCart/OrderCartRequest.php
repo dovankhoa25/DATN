@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Cart;
+namespace App\Http\Requests\OrderCart;
 
 use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CartRequest extends BaseApiRequest
+class OrderCartRequest extends BaseApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

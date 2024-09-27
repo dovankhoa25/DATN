@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Cart\CartRequest;
 use App\Http\Requests\Cart\FilterCartRequest;
-use App\Http\Requests\CartRequest;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use Illuminate\Http\Request;
@@ -79,10 +79,18 @@ class CartController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $ma_bill)
+    public function show(FilterCartRequest $request, string $ma_bill)
     {
         $objCart = new Cart();
-        $data = $objCart->cartByBillCode($ma_bill);
+        $query = $objCart->cartByBillCode($ma_bill);
+        if (!empty($request['name'])) {
+            $query->where('pro.name', 'like', '%' . $request['name'] . '%');
+        }
+        if (!empty($request['sort_by']) && !empty($request['orderby'])) {
+            $query->orderBy($request['sort_by'], $request['orderby']);
+        }
+
+        $data = $query->get();
 
         if ($data) {
             return response()->json([
