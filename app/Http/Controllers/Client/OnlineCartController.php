@@ -47,7 +47,7 @@ class OnlineCartController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(OnlCartRequest $request)
-    { //không sửa giá lấy user theo token
+    { 
         $productDetail = DB::table('product_details')
             ->select('quantity', 'price', 'sale')
             ->where('id', $request->get('product_detail_id'))
