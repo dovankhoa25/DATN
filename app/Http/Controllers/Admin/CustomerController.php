@@ -3,36 +3,38 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CustomerRequest;
+use App\Http\Requests\Customer\CustomerRequest;
+use App\Http\Requests\Customer\FilterCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    
+    public function index(FilterCustomerRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $customers = Customer::paginate($perPage);
-        return CustomerResource::collection($customers);
+        try {
+            $perPage = $request->get('per_page', 10);
+            // $customers = Customer::filter($request->all())->paginate($perPage);
+            $customers = Customer::filter($request)->paginate($perPage);
+            return CustomerResource::collection($customers);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy khách hàng'], 404);
+        }
     }
+    
 
-    /**
-     * Store a newly created resource in storage.
-     */
+   
     public function store(CustomerRequest $request)
     {
 
-        $customer = Customer::create([
+        $customer = Customer::create(   [
             "name" => $request->get('name'),
+            "email" => $request->get('email'),
             "phone_number" => $request->get('phone_number'),
-            "diemthuong" => 0,
+            "diemthuong" => $request->get('diemthuong') ?: 0,
             "user_id" => $request->get('user_id') ?: null
         ]);
 
@@ -41,9 +43,7 @@ class CustomerController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    
     public function show(Customer $customer)
     {
         return response()->json([
@@ -51,15 +51,14 @@ class CustomerController extends Controller
         ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(CustomerRequest $request, Customer $customer)
     {
+        $newPoints = $request->get('diemthuong', 0);
+
         $customer->update([
-            "name" => $request->get('name'),
-            "phone_number" => $request->get('phone_number'),
-            "user_id" => $request->get('user_id') || null
+            "diemthuong" => $customer->diemthuong + $newPoints,
+            "user_id" => $request->get('user_id', null)
         ]);
 
         return response()->json([
@@ -67,9 +66,7 @@ class CustomerController extends Controller
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(Customer $customer)
     {
         $customer->delete();

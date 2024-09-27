@@ -27,12 +27,22 @@ class AuthController extends Controller
             'password' => Hash::make($request->get('password')),
         ]);
 
-        $token = JWTAuth::fromUser($user);
+        $accessToken = JWTAuth::fromUser($user);
+        $refreshToken = JWTAuth::claims(['refresh' => true])->fromUser($user);
+
+        DB::table('refresh_tokens')->insert([
+            'user_id' => $user->id,
+            'token' => hash('sha256', $refreshToken),
+            'expires_at' => now()->addDays(7),
+        ]);
+
 
         return response()->json([
-            'data' => new UserResource($user),
-            'token' => $token,
-        ], 201);
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
+            'user' => $user,
+            'expires_in' => JWTAuth::factory()->getTTL() * 60 // 60 phút
+        ]);
     }
 
 
@@ -45,7 +55,8 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $user = JWTAuth::user();
+        // $user = JWTAuth::user();
+        $user = User::with('roles')->find(auth()->user()->id);
         $refreshToken = JWTAuth::claims(['refresh' => true])->fromUser(auth()->user());
 
         // Lưu refresh_token vào database
@@ -101,7 +112,6 @@ class AuthController extends Controller
             'access_token' => $newAccessToken,
             'expires_in' => JWTAuth::factory()->getTTL() * 60
         ]);
-
     }
 
 

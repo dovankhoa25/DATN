@@ -19,6 +19,7 @@ class Payment extends Model
     
     public $timestamp = false;
 
+
     public function scopeFilter($query, $filters){
         if (!empty($filters['name'])) {
             $query->where('name', 'like', '%' . $filters['name'] . '%');
@@ -27,5 +28,11 @@ class Payment extends Model
             $query->orderBy($filters['sort_by'], $filters['orderby']);
         }
         return $query;
+    }
+
+    public function bills()
+    {
+        return $this->hasMany(Bill::class, 'payment_id');
+
     }
 }

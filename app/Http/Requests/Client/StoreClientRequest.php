@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Client;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class TableRequest extends BaseApiRequest
+class StoreClientRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,17 +22,16 @@ class TableRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'table' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'name' => 'string|nullable',
+            'api_key' => 'string|nullable',
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
-            'table.required' => 'Trường table là bắt buộc.',
-            'table.string' => 'Trường table là chuỗi string.',
-            'description.string' => 'Trường description là chuỗi string.',
+            'name.string' => 'Tên  phải là chuỗi ký tự.',
+            'api_key.string' => 'Tên api phải là chuỗi ký tự.',
         ];
     }
 }

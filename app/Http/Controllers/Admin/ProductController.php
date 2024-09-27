@@ -3,40 +3,42 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ProductRequest;
+use App\Http\Requests\Product\FilterProductRequest;
+use App\Http\Requests\Product\ProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Image;
 use App\Models\Product;
 use App\Models\ProductDetail;
-use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
 
-    public function index(Request $request)
+    public function index(FilterProductRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $products = Product::with(['productDetails.images'])->paginate($perPage);
+        try {
 
-        return ProductResource::collection($products);
-    }
+            $perPage = $request['per_page'] ?? 10;
 
+            $products = Product::with(['productDetails.images', 'category'])
+                ->filter($request)
+                ->paginate($perPage);
 
-    public function create()
-    {
-        //
+            return ProductResource::collection($products);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Sản phẩm rỗng'], 404);
+        }
     }
 
 
     protected function storeImage($file, $directory)
     {
         if ($file) {
-            return $file->store($directory, 'public');
+            $filePath = $file->store($directory, 'public');
+            return Storage::url($filePath); // Trả về URL công khai
         }
 
         return null;
@@ -51,6 +53,7 @@ class ProductController extends Controller
             $product = Product::create([
                 'name' => $request->name,
                 'thumbnail' => $this->storeImage($request->file('thumbnail'), 'product/thumbal'),
+                'description' => $request->description,
                 'status' => true,
                 'category_id' => $request->category_id,
             ]);
@@ -90,13 +93,6 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit()
-    {
-        //
-    }
 
 
     public function update(ProductRequest $request, $id)
@@ -122,6 +118,7 @@ class ProductController extends Controller
             $product->update([
                 'name' => $request->name,
                 'thumbnail' => $thumbnailPath,
+                'description' => $request->description,
                 'status' => $request->status,
                 'category_id' => $request->category_id,
             ]);
@@ -143,41 +140,75 @@ class ProductController extends Controller
                     );
 
                     $currentImages = $productDetail->images->pluck('id')->toArray();
-                    $frontendImageIds = array_filter(array_column($detail['images'], 'id'));
+
+                    // $frontendImageIds = array_filter(array_column($detail['images'], 'id'));
+
+                    $frontendImageIds = $detail['image_old'] ?? [];
+
+
                     $imagesToDelete = array_diff($currentImages, $frontendImageIds);
+                    $imagesToRemove = Image::whereIn('id', $imagesToDelete)->get();
 
-                    Image::whereIn('id', $imagesToDelete)->delete();
+                    foreach ($imagesToRemove as $image) {
+                        if (Storage::exists($image->name)) {
+                            Storage::delete($image->name);
+                        }
+                        $image->delete();
+                    }
+                    // Image::whereIn('id', $imagesToDelete)->delete();
 
-                    foreach ($detail['images'] as $img) {
-                        if (isset($img['id'])) {
-                            Image::where('id', $img['id'])->update([
-                                'name' => $img['file'] ? $this->storeImage($img['file'], 'product/images') : null,
-                                'status' => $img['status'] ?? true,
-                            ]);
-                        } else {
-                            Image::create([
-                                'name' => $this->storeImage($img['file'], 'product/images'),
-                                'product_detail_id' => $productDetail->id,
-                            ]);
+
+                    if (isset($detail['images']) && is_array($detail['images']) && count($detail['images']) > 0) {
+                        foreach ($detail['images'] as $img) {
+                            if (isset($img['id'])) {
+                                Image::where('id', $img['id'])->update([
+                                    'name' => $img['file'] ? $this->storeImage($img['file'], 'product/images') : null,
+                                    'status' => $img['status'] ?? true,
+                                ]);
+                            } else {
+                                Image::create([
+                                    'name' => $this->storeImage($img['file'], 'product/images'),
+                                    'product_detail_id' => $productDetail->id,
+                                ]);
+                            }
                         }
                     }
+                    
                 }
             }
             DB::commit();
             return new ProductResource($product->load('productDetails.images'));
-
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
-
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
+
     public function destroy(Product $Product)
     {
-        
+        $Product = Product::findOrFail($Product);
+        $Product->delete();
+        return response()->json(null, 204);
+    }
+
+
+    
+    public function updateStatus(Request $request, string $id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $product->status = !$product->status;
+            $product->save();
+
+            if ($product->status) {
+                return response()->json(['message' => 'hiện'], 200);
+            } else {
+                return response()->json(['message' => 'ẩn'], 200);
+            }
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'sản phẩm không tồn tại'], 404);
+        }
     }
 }

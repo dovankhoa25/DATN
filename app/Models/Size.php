@@ -29,4 +29,10 @@ class Size extends Model
         }
         return $query;
     }
+
+    public function productDetails()
+    {
+        return $this->hasMany(ProductDetail::class, 'size_id');
+    }
+
 }

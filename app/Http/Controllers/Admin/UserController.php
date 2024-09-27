@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\FilterUserRequest;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Models\Role;
@@ -13,36 +14,26 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+
+    public function index(FilterUserRequest $request)
     {
-
         try {
-            $validated = $request->validate([
-                'per_page' => 'integer|min:1|max:100'
-            ]);
-            $perPage = $validated['per_page'] ?? 10;
-            $users = User::with('roles')->paginate($perPage);
-
+            // $filters = $request->all();
+            // dd($filters);
+            
+            $perPage = $request['per_page'] ?? 10;
+            $users = User::with('roles')->filter($request)->paginate($perPage);
             return new UserCollection($users);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'User rỗng'], 404);
+            return response()->json(['error' => 'Không tìm thấy người dùng'], 404);
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        
-    }
 
-    /**
-     * Display the specified resource.
-     */
+
+    public function store(Request $request) {}
+
+
     public function show($id)
     {
 
@@ -56,9 +47,7 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(Request $request, string $id)
     {
 

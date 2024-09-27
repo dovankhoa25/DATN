@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('user_addresses_id')->nullable()->constrained('user_addresses');
 
             $table->dateTime('order_date');
-            $table->decimal('total_amount', 15, 2);
+            $table->decimal('total_amount', 15, 2)->default(0.00);
             $table->string('branch_address')->nullable();
             $table->foreignId('payment_id')->constrained('payments');
             $table->foreignId('voucher_id')->nullable()->constrained('vouchers');
@@ -40,7 +40,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('bills', function (Blueprint $table) {
-            $table->dropColumn(['ma_bill', 'user_id', 'order_date', 'total_money', 'branch_address', 'payment_id', 'voucher_id', 'note', 'order_type', 'status', 'table_number', 'customer_name', 'customer_phone']);
+            Schema::dropIfExists('bills');
+            // $table->dropColumn(['ma_bill', 'user_id', 'order_date', 'total_money', 'branch_address', 'payment_id', 'voucher_id', 'note', 'order_type', 'status', 'table_number', 'customer_name', 'customer_phone']);
         });
     }
 };
