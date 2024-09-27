@@ -35,7 +35,7 @@ class CategoryController extends Controller
             $image = $request->file('image');
             $imageName = date('YmdHi') . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('upload/categories'), $imageName);
-            $imgUrl = "upload/categories/" . $imageName;
+            $imgUrl = "/upload/categories/" . $imageName;
         }
 
         $Category = Category::create([
@@ -79,7 +79,7 @@ class CategoryController extends Controller
                 $image = $request->file('image');
                 $imageName = date('YmdHi') . '.' . $image->getClientOriginalExtension();
                 $image->move(public_path('upload/categories'), $imageName);
-                $imgUrl = "upload/categories/" . $imageName;
+                $imgUrl = "/upload/categories/" . $imageName;
             }
 
             $category->update([

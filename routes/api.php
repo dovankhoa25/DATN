@@ -26,6 +26,7 @@ use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
 use App\Http\Controllers\Client\OnlineCartController;
+use App\Http\Controllers\Client\OrderCartController;
 use App\Http\Controllers\Client\ProductClientController;
 use App\Http\Controllers\Client\TableController;
 use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
@@ -147,6 +148,15 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
         Route::delete('/{id}', [ClientTimeOrderTableController::class, 'destroy']);
     });
 
+    Route::prefix('order_cart')->middleware('auth')->group(function () {
+        Route::get('/', [OrderCartController::class, 'index']);
+        Route::get('/{ma_bill}', [OrderCartController::class, 'show']);
+        Route::post('/', [OrderCartController::class, 'store']);
+        Route::put('/{id}', [OrderCartController::class, 'update']);
+        // Route::delete('/{id}', [OrderCartController::class, 'destroy']);
+    });
+
+
     Route::get('products', [ProductClientController::class, 'getProduct']); // fe lấy cái này theo product k lấy detail 
     Route::get('products_details', [ProductClientController::class, 'getProductAllWithDetail']); // fe lấy cái này all cả detail 
     Route::get('product/{id}', [ProductClientController::class, 'getProductWithDetailOrID']); // api get theo id product nhé fe
@@ -156,5 +166,9 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     Route::get('list_tables', [TableController::class, 'getAllTables']);
     Route::post('open_table', [TableController::class, 'openTable'])->middleware('auth', 'checkRole:qtv,admin');
 
+
     Route::get('list_payments', [ClientPaymentController::class, 'listPaymentTrue']);
+
+
+
 });

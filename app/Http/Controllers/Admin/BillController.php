@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Bill\BillRequest;
 use App\Http\Requests\Bill\FilterBillRequest;
-use App\Http\Requests\BillRequest;
+
 use App\Http\Resources\BillResource;
 use App\Models\Bill;
 use Illuminate\Http\Request;

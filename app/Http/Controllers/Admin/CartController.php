@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Cart\CartRequest;
 use App\Http\Requests\Cart\FilterCartRequest;
-use App\Http\Requests\CartRequest;
+
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use Illuminate\Http\Request;
