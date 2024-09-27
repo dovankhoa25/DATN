@@ -39,11 +39,8 @@ class Cart extends Model
             )
             ->join('product_details as pro_detail', 'cart.product_detail_id', '=', 'pro_detail.id')
             ->join('products as pro', 'pro_detail.product_id', '=', 'pro.id')
-            ->join('sizes as size', 'pro_detail.size_id', '=', 'size.id')
-            ->orderBy('cart.id')
-            // ->where('cart.id', 1)
-            ->paginate(7);
-    
+            ->join('sizes as size', 'pro_detail.size_id', '=', 'size.id');
+
         return $query;
     }
 
@@ -65,11 +62,19 @@ class Cart extends Model
             ->join('product_details as pro_detail', 'cart.product_detail_id', '=', 'pro_detail.id')
             ->join('products as pro', 'pro_detail.product_id', '=', 'pro.id')
             ->join('sizes as size', 'pro_detail.size_id', '=', 'size.id')
-            ->orderBy('cart.id')
-            ->where('cart.ma_bill', $ma_bill)
-            ->paginate(5);
-    
-        return $query;
+
+            ->where('cart.ma_bill', $ma_bill);
+
+        return $query->get();
     }
-    
+
+    // public function scopeFilter($query, $filters){
+    //     if (!empty($filters['name'])) {
+    //         $query->where('name', 'like', '%' . $filters['name'] . '%');
+    //     }
+    //     if (!empty($filters['sort_by']) && !empty($filters['orderby'])) {
+    //         $query->orderBy($filters['sort_by'], $filters['orderby']);
+    //     }
+    //     return $query;
+    // }
 }

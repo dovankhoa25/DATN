@@ -95,6 +95,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
 
     Route::apiResource('products', ProductController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::put('product/{id}/status', [ProductController::class, 'updateStatus'] )->middleware('auth', 'checkRole:qtv,admin');
+    // Route::post('products/{id}', [ProductController::class, 'update']);
 
     // Bills
     Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
@@ -149,6 +151,7 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     Route::get('products_details', [ProductClientController::class, 'getProductAllWithDetail']); // fe lấy cái này all cả detail 
     Route::get('product/{id}', [ProductClientController::class, 'getProductWithDetailOrID']); // api get theo id product nhé fe
     Route::get('product_cate/{id}', [ProductClientController::class, 'getProductCate']); // api get product theo id cate nhé fe
+
 
     Route::get('list_tables', [TableController::class, 'getAllTables']);
     Route::post('open_table', [TableController::class, 'openTable'])->middleware('auth', 'checkRole:qtv,admin');

@@ -41,12 +41,6 @@ class TimeOrderTableController extends Controller
             ->where('status', 2)
             ->pluck('id');
     
-        // $tablesWithoutOrder = $tablesWithStatus2->diff($orderedTables);
-    
-        // DB::table('tables')
-        //     ->whereIn('id', $tablesWithoutOrder)
-        //     ->update(['status' => 1]);
-    
         $tableItem = DB::table('tables')->paginate($perPage);
     
         if ($tableItem->total() > 0) {

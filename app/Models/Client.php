@@ -29,6 +29,10 @@ class Client extends Model
             $query->orderBy($filters['sort_by'], $filters['orderby']);
         }
 
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        
         return $query;
     }
 

@@ -1,17 +1,25 @@
 <?php
 
-namespace App\Http\Requests\Product;
+namespace App\Http\Requests\Size;
 
-
+use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FilterProductRequest extends FormRequest
+class FilterSizeRequest extends BaseApiRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [
@@ -19,10 +27,6 @@ class FilterProductRequest extends FormRequest
             'sort_by' => 'string|nullable',
             'orderby' => 'in:asc,desc|nullable',
             'name' => 'string|nullable',
-            'status' => 'boolean|nullable',
-            'description' => 'string|nullable',
-            'start_date' => 'date|nullable',
-            'end_date' => 'date|nullable',
         ];
     }
 
@@ -34,10 +38,7 @@ class FilterProductRequest extends FormRequest
             'per_page.max' => 'Số lượng bản ghi tối đa không được vượt quá 100.',
             'sort_by.string' => 'Sắp xếp theo cột phải là chuỗi ký tự.',
             'orderby.in' => 'Kiểu sắp xếp chỉ có thể là asc hoặc desc.',
-            'name.string' => 'Tên sản phẩm phải là chuỗi ký tự.',
-            'description.string' => 'Mô tả sản phẩm phải là chuỗi ký tự.',
-            'start_date.date' => 'Ngày bắt đầu phải là định dạng ngày hợp lệ.',
-            'end_date.date' => 'Ngày kết thúc phải là định dạng ngày hợp lệ.',
+            'name.string' => 'Tên size phải là chuỗi ký tự.',
         ];
     }
 }

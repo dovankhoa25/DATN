@@ -40,7 +40,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('bills', function (Blueprint $table) {
-            $table->dropColumn(['ma_bill', 'user_id', 'order_date', 'total_money', 'branch_address', 'payment_id', 'voucher_id', 'note', 'order_type', 'status', 'table_number', 'customer_name', 'customer_phone']);
+            Schema::dropIfExists('bills');
+            // $table->dropColumn(['ma_bill', 'user_id', 'order_date', 'total_money', 'branch_address', 'payment_id', 'voucher_id', 'note', 'order_type', 'status', 'table_number', 'customer_name', 'customer_phone']);
         });
     }
 };
