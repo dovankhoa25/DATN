@@ -30,6 +30,9 @@ use App\Http\Controllers\Client\OrderCartController;
 use App\Http\Controllers\Client\ProductClientController;
 use App\Http\Controllers\Client\TableController;
 use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
+
+use App\Http\Controllers\Client\UpdateProfileController;
+
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
 
 use Illuminate\Http\Request;
@@ -156,6 +159,12 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
         // Route::delete('/{id}', [OrderCartController::class, 'destroy']);
     });
 
+    Route::prefix('profile')->middleware('auth')->group(function () {
+        Route::get('/', [UpdateProfileController::class, 'index']);
+        Route::put('/{id}', [UpdateProfileController::class, 'update']);
+    });
+
+
 
     Route::get('products', [ProductClientController::class, 'getProduct']); // fe lấy cái này theo product k lấy detail 
     Route::get('products_details', [ProductClientController::class, 'getProductAllWithDetail']); // fe lấy cái này all cả detail 
@@ -168,6 +177,7 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
 
 
     Route::get('list_payments', [ClientPaymentController::class, 'listPaymentTrue']);
+
 
 
 

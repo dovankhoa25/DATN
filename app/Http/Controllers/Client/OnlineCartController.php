@@ -19,42 +19,41 @@ class OnlineCartController extends Controller
      */
     public function index()
     {
-        // try {
-        //     $user = JWTAuth::parseToken()->authenticate();
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
 
-        //     if (!$user) {
-        //         return response()->json(['message' => 'Người dùng không tồn tại'], 404);
-        //     }
+            if (!$user) {
+                return response()->json(['message' => 'Người dùng không tồn tại'], 404);
+            }
 
-        //     $objOnlCart = new OnlineCart();
-        //     $data = $objOnlCart->onlCartByUserId($user->id);
+            $objOnlCart = new OnlineCart();
+            $data = $objOnlCart->onlCartByUserId($user->id)->get();
 
-        //     if ($data->total() > 0) {
-        //         return response()->json([
-        //             'data' => $data,
-        //             'message' => 'success'
-        //         ], 200);
-        //     } else {
-        //         return response()->json(['message' => 'Giỏ hàng trống'], 404);
-        //     }
-
-        // } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-        //     return response()->json(['message' => 'Không thể lấy thông tin người dùng từ token'], 500);
-        // }
+            if ($data) {
+                return response()->json([
+                    'data' => $data,
+                    'message' => 'success'
+                ], 200);
+            } else {
+                return response()->json(['message' => 'Giỏ hàng trống'], 404);
+            }
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return response()->json(['message' => 'Không thể lấy thông tin người dùng từ token'], 500);
+        }
     }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(OnlCartRequest $request)
-    { 
+    {
         $productDetail = DB::table('product_details')
             ->select('quantity', 'price', 'sale')
             ->where('id', $request->get('product_detail_id'))
             ->first();
 
         $price = $productDetail->sale ?? $productDetail->price;
-        
+
         $user = JWTAuth::parseToken()->authenticate();
         if (!$user) {
             return response()->json(['message' => 'Người dùng không tồn tại'], 404);
@@ -96,14 +95,14 @@ class OnlineCartController extends Controller
 
         $cartItems = $objOnlCart->onlCartByUserId($idUser)->get();
 
-        $itemsToRemove = []; 
+        $itemsToRemove = [];
         foreach ($cartItems as $item) {
             $productDetail = DB::table('product_details')
                 ->where('id', $item->product_detail_id)
                 ->first();
 
             if ($productDetail && $productDetail->quantity < $item->quantity) {
-                $itemsToRemove[] = $item->id; 
+                $itemsToRemove[] = $item->id;
             }
         }
 

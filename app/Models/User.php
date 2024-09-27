@@ -55,6 +55,16 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+    public function customer()
+    {
+        return $this->hasOne(Customer::class, 'user_id');
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(UserAddress::class, 'user_id');
+    }
+
     public function scopeFilter($query, $filters)
     {
         if (!empty($filters['name'])) {
@@ -64,6 +74,7 @@ class User extends Authenticatable implements JWTSubject
         if (!empty($filters['email'])) {
             $query->where('email', 'like', '%' . $filters['email'] . '%');
         }
+
 
         if (!empty($filters['sort_by']) && !empty($filters['orderby'])) {
             $query->orderBy($filters['sort_by'], $filters['orderby']);
