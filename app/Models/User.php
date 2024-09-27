@@ -9,7 +9,11 @@ use App\Models\Role;
 class User extends Authenticatable implements JWTSubject
 {
 
+
    
+
+
+
     protected $fillable = [
         'email',
         'password',
@@ -60,8 +64,23 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(UserAddress::class, 'user_id');
     }
+
+    public function scopeFilter($query, $filters)
+    {
+        if (!empty($filters['name'])) {
+            $query->where('name', 'like', '%' . $filters['name'] . '%');
+        }
+
+        if (!empty($filters['email'])) {
+            $query->where('email', 'like', '%' . $filters['email'] . '%');
+        }
+
+
+        if (!empty($filters['sort_by']) && !empty($filters['orderby'])) {
+            $query->orderBy($filters['sort_by'], $filters['orderby']);
+        }
+
+        return $query;
+    }
     
-
-
 }
-// 

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\TimeOrderTableRequest;
+use App\Http\Requests\TimeOrderTable\TimeOrderTableRequest;
 use App\Http\Resources\TimeOrderTableResource;
 use App\Models\TimeOrderTable;
 use Illuminate\Http\Request;

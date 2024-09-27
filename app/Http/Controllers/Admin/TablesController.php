@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\TableRequest;
+use App\Http\Requests\Table\FillterTableRequest;
+use App\Http\Requests\Table\TableRequest;
 use App\Http\Resources\TableResource;
 use App\Models\Table;
 use Illuminate\Http\Request;
@@ -15,15 +16,16 @@ class TablesController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(FillterTableRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $data = Table::paginate($perPage);
-        $tables = TableResource::collection($data);
-        return $tables;
+        try {
+            $perPage = $request->get('per_page', 10);
+
+            $tables = Table::filter($request)->paginate($perPage);
+            return TableResource::collection($tables);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy Table'], 404);
+        }
     }
 
     /**
@@ -42,7 +44,7 @@ class TablesController extends Controller
         try {
             $table = Table::create([
                 'table' => $request->get('table'),
-                'description' => $request->get('description'),
+                'description' => $request->get('description') ?? Null,
             ]);
             return response()->json([
                 'data' => new TableResource($table),
@@ -80,7 +82,7 @@ class TablesController extends Controller
 
             $table->update([
                 'table' => $request->get('table'),
-                'description' => $request->get('description'),
+                'description' => $request->get('description') ?? Null,
             ]);
             return response()->json([
                 'data' => new TableResource($table),

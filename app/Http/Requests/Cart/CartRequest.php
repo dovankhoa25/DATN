@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Cart;
 
+use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CartRequest extends BaseApiRequest

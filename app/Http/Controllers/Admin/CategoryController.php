@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CategoryRequest;
-use App\Http\Resources\CategoryResource;
+use App\Http\Requests\Category\CategoryRequest;
+use App\Http\Requests\Category\FillterCategoryRequest;
+use App\Http\Resources\Category\CategoryAdminResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -12,24 +13,20 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class CategoryController extends Controller
 {
 
-    public function index(Request $request)
+    public function index(FillterCategoryRequest $request)
     {
-        $validated = $request->validate([
-            'per_page' => 'integer|min:1|max:100'
-        ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $categories = Category::with('subcategories')->whereNull('parent_id')->paginate($perPage);
+        try {
+            $perPage = $request->get('per_page', 10);
 
-        if ($categories->isEmpty()) {
-            return response()->json(['error' => 'Không có Category nào!'], 404);
+            $categories = Category::with('subcategories')
+                ->filter($request)
+                ->whereNull('parent_id')
+                ->paginate($perPage);
+            return CategoryAdminResource::collection($categories);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy Category'], 404);
         }
-        $categories = CategoryResource::collection($categories);
-
-        return $categories;
     }
-
-
-
 
     public function store(CategoryRequest $request)
     {
@@ -38,7 +35,7 @@ class CategoryController extends Controller
             $image = $request->file('image');
             $imageName = date('YmdHi') . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('upload/categories'), $imageName);
-            $imgUrl = "upload/categories/" . $imageName;
+            $imgUrl = "/upload/categories/" . $imageName;
         }
 
         $Category = Category::create([
@@ -49,7 +46,7 @@ class CategoryController extends Controller
         ]);
 
         return response()->json([
-            'data' => new CategoryResource($Category),
+            'data' => new CategoryAdminResource($Category),
             'message' => 'success'
         ], 201);
     }
@@ -59,7 +56,7 @@ class CategoryController extends Controller
         try {
             $category = Category::with('subcategories')->findOrFail($id);
             return response()->json([
-                'data' => new CategoryResource($category),
+                'data' => new CategoryAdminResource($category),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'category không tồn tại'], 404);
@@ -82,16 +79,16 @@ class CategoryController extends Controller
                 $image = $request->file('image');
                 $imageName = date('YmdHi') . '.' . $image->getClientOriginalExtension();
                 $image->move(public_path('upload/categories'), $imageName);
-                $imgUrl = "upload/categories/" . $imageName;
+                $imgUrl = "/upload/categories/" . $imageName;
             }
-            
+
             $category->update([
                 'name' => $request->input('name'),
-                'image' => $imgUrl,
+                'image' => $imgUrl ? $imgUrl : $category->image,
                 'parent_id' => $request->input('parent_id') ?? Null
             ]);
             return response()->json([
-                'data' => new CategoryResource($category),
+                'data' => new CategoryAdminResource($category),
                 'message' => 'success',
             ], 201);
         } catch (ModelNotFoundException $e) {
@@ -136,6 +133,19 @@ class CategoryController extends Controller
         }
     }
 
+    // list categories
+    public function listCategories(FillterCategoryRequest $request)
+    {
+
+        try {
+            $perPage = $request->get('per_page', 10);
+
+            $categories = Category::filter($request)->paginate($perPage);
+            return CategoryAdminResource::collection($categories);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy Category'], 404);
+        }
+    }
 
     // // Lấy category gốc bên client
     // public function getCategoriesRoot()
