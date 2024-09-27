@@ -22,7 +22,14 @@ class TimeOrderTable extends Model
         }
 
         if (!empty($filters['time_oder'])) {
-            $query->where('time_oder', $filters['time_oder']);
+            $timeSlots = [
+                'sáng' => '07:00:00',
+                'trưa' => '12:00:00',
+                'tối' => '19:00:00',
+            ];
+            if (array_key_exists($filters['time_oder'], $timeSlots)) {
+                $query->where('time_oder', $timeSlots[$filters['time_oder']]);
+            }
         }
 
         if (isset($filters['status'])) {

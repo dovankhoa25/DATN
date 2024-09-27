@@ -24,7 +24,7 @@ class TablesController extends Controller
             $tables = Table::filter($request)->paginate($perPage);
             return TableResource::collection($tables);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Không tìm thấy Category'], 404);
+            return response()->json(['error' => 'Không tìm thấy Table'], 404);
         }
     }
 

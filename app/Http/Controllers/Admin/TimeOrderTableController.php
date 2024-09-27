@@ -16,32 +16,19 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TimeOrderTableController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index(FillterTimeOrderTableRequest $request)
     {
         try {
             $perPage = $request->get('per_page', 10);
-
             $timeOrderTable = TimeOrderTable::filter($request)->paginate($perPage);
             return TimeOrderTableResource::collection($timeOrderTable);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Không tìm thấy Time order table'], 404);
+        } catch (Exception  $e) {
+            return response()->json(['error' => 'Có lỗi xảy ra, vui lòng thử lại sau'], 404);
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(TimeOrderTableRequest $request)
     {
         try {
@@ -50,12 +37,17 @@ class TimeOrderTableController extends Controller
             $findTable = Table::find($idTable);
 
             if ($findTable->status) {
+                $timeSlots = [
+                    'sáng' => '07:00:00',
+                    'trưa' => '12:00:00',
+                    'tối'  => '19:00:00',
+                ];
                 $timeOrderTable = TimeOrderTable::create([
                     'table_id' => $request->get('table_id'),
                     'user_id' => $user->id,
                     'phone_number' => $request->get('phone_number'),
                     'date_oder' => $request->get('date_oder'),
-                    'time_oder' => $request->get('time_oder'),
+                    'time_oder' => $timeSlots[$request->get('time_oder')],
                     'status' => 'pending',
                     'description' => $request->get('description'),
                 ]);
@@ -77,9 +69,6 @@ class TimeOrderTableController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         try {
@@ -92,17 +81,6 @@ class TimeOrderTableController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         try {
@@ -120,19 +98,16 @@ class TimeOrderTableController extends Controller
                 'data' => new TimeOrderTableResource($timeOrderTable)
             ]);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'update status thất bại'], 404);
+            return response()->json(['error' => 'Không tìm thấy TimeOrderTable để update'], 404);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         try {
             $timeOrderTable = TimeOrderTable::findOrFail($id);
 
-            $timeOrderTable->delete(); // Xóa mềm
+            $timeOrderTable->delete();
             return response()->json([
                 'message' => 'xoá timeOrderTable thành công'
             ], 200);

@@ -26,8 +26,8 @@ class TimeOrderTableRequest extends BaseApiRequest
             'table_id' => 'required|exists:tables,id',
             'user_id' => 'exists:users,id',
             'phone_number' => ['required', 'regex:/^[0-9]{10,15}$/'],
-            'date_oder' => 'required|date',
-            'time_oder' => 'required|date_format:H:i:s',
+            'date_oder' => 'required|date|after_or_equal:today',
+            'time_oder' => 'required|in:sáng,trưa,tối',
             'description' => 'nullable|string',
             'status' => 'in:pending,completed,failed',
         ];
@@ -47,9 +47,10 @@ class TimeOrderTableRequest extends BaseApiRequest
 
             'date_oder.required' => 'date_oder là bắt buộc',
             'date_oder.date' => 'date_oder phải đúng định dạng',
+            'date_oder.after_or_equal' => 'date_oder phải là hôm nay hoặc ngày trong tương lai',
 
             'time_oder.required' => 'time_oder là bắt buộc',
-            'time_oder.date_format' => 'time_oder phải đúng định dạng',
+            'time_oder.in' => 'time_oder phải là sáng hoặc trưa hoặc tối',
 
             'description.string' => 'description phải là chuỗi string',
         ];
