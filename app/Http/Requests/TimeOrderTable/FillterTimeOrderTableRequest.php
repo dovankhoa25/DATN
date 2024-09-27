@@ -24,11 +24,11 @@ class FillterTimeOrderTableRequest extends BaseApiRequest
     {
         return [
             'per_page' => 'integer|min:1|max:100',
-            'phone_number' => 'integer|nullable',
+            'phone_number' => ['nullable', 'regex:/^[0-9]{10,15}$/'],
             'date_oder' => 'date|nullable',
             'sort_by' => 'string|nullable',
             'orderby' => 'in:asc,desc|nullable',
-            'time_oder' => 'date_format:H:i|nullable',
+            'time_oder' => 'in:sáng,trưa,tối|nullable',
             'status' => 'in:pending,completed,failed|nullable',
         ];
     }
@@ -40,9 +40,10 @@ class FillterTimeOrderTableRequest extends BaseApiRequest
             'per_page.min' => 'Số lượng bản ghi tối thiểu phải là 1.',
             'per_page.max' => 'Số lượng bản ghi tối đa không được vượt quá 100.',
             'orderby.in' => 'Giá trị của orderby chỉ có thể là asc hoặc desc.',
-            'time_oder.date_format' => 'Giá trị của time_order phải theo định dạng giờ:phút (H:i).',
+            'time_oder.in' => 'time_oder phải là sáng hoặc trưa hoặc tối',
             'sort_by.string' => 'Giá trị của sort_by phải là chuỗi ký tự hợp lệ.',
-            'status.in' => 'Trạng thái phải là pending hoặc completed hoặc failed.'
+            'status.in' => 'Trạng thái phải là pending hoặc completed hoặc failed.',
+            'date_oder.date' => 'Date order phải đúng định dạng'
         ];
     }
 }

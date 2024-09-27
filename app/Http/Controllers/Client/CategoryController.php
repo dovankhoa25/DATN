@@ -11,9 +11,11 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class CategoryController extends Controller
 {
     // all categories -> subcategories
-    public function index()
+    public function index(Request $request)
     {
         try {
+            $perPage = $request['per_page'] ?? 10;
+
             $categories = Category::with([
                 'subcategories' => function ($query) {
                     $query->where('status', true);
@@ -21,7 +23,7 @@ class CategoryController extends Controller
             ])
                 ->where('status', true)
                 ->whereNull('parent_id')
-                ->get();
+                ->paginate($perPage);
 
             return CategoryClientResource::collection($categories);
         } catch (ModelNotFoundException $e) {

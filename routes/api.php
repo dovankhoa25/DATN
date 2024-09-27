@@ -29,6 +29,8 @@ use App\Http\Controllers\Client\OnlineCartController;
 use App\Http\Controllers\Client\ProductClientController;
 use App\Http\Controllers\Client\TableController;
 use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
+use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -148,6 +150,8 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     Route::get('product/{id}', [ProductClientController::class, 'getProductWithDetailOrID']); // api get theo id product nhé fe
     Route::get('product_cate/{id}', [ProductClientController::class, 'getProductCate']); // api get product theo id cate nhé fe
 
-    Route::get('tables', [TableController::class, 'getAllTables']);
-    // Route::post('open/table', [TableController::class, 'openTable'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::get('list_tables', [TableController::class, 'getAllTables']);
+    Route::post('open_table', [TableController::class, 'openTable'])->middleware('auth', 'checkRole:qtv,admin');
+
+    Route::get('list_payments', [ClientPaymentController::class, 'listPaymentTrue']);
 });
