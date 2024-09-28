@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Bill\BillOpenTableRequest;
+use App\Http\Requests\Bill\BillRequest;
 use App\Http\Requests\TimeOrderTable\TimeOrderTableRequest;
 use App\Http\Resources\TableResource;
+use App\Models\Bill;
 use App\Models\Table;
 use App\Models\TimeOrderTable;
 use Carbon\Carbon;
@@ -26,125 +29,130 @@ class TableController extends Controller
         ]);
     }
 
-    // nhận id table, user -> insert time order
-    // return id time_order , stk, tiền,
+    // nhận id table, user -> tạo bill
+    // return mã bill, table id
+    public function openTable(BillOpenTableRequest $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userRoles = $user->roles()->pluck('name')->toArray();
+
+        if (!in_array('qtv', $userRoles) && !in_array('admin', $userRoles)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền mở bàn',
+            ], 403);
+        }
+
+        $table = Table::find($request->table_id);
+        if (!$table) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bàn không tồn tại',
+            ], 404);
+        }
+
+        if (!$table->status) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bàn đang bị khóa',
+            ], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            $maBill = 'BILL-' . strtoupper(uniqid());
+            while (Bill::where('ma_bill', $maBill)->exists()) {
+                $maBill = 'BILL-' . strtoupper(uniqid());
+            }
+
+            $bill = Bill::create([
+                'ma_bill' => $maBill,
+                'user_id' => $user->id,
+                'customer_id' => $request->customer_id ?? null,
+                'order_date' => Carbon::now(),
+                'total_amount' => $request->total_amount ?? 0.00,
+                'branch_address' => $request->branch_address ?? 'Fpoly',
+                'payment_id' => $request->payment_id,
+                'voucher_id' => $request->voucher_id ?? null,
+                'note' => $request->note ?? null,
+                'order_type' => 'in_restaurant',
+                'user_addresses_id' => $request->user_addresses_id ?? null,
+                'status' => 'pending',
+                'table_number' => $table->id,
+            ]);
+
+            $table->update(['status' => false]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Bàn đã được mở thành công',
+                'table_id' => $table->id,
+                'ma_bill' => $bill->ma_bill,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra, vui lòng thử lại sau',
+            ], 500);
+        }
+    }
+
+
+
+
     // public function openTable(TimeOrderTableRequest $request)
     // {
     //     $user = JWTAuth::parseToken()->authenticate();
 
     //     $tableId = $request->table_id;
     //     $dateOrder = $request->date_oder;
-    //     $timeOrder = $request->time_oder;
+    //     $timeOrderInput = $request->time_oder;
 
-    //     // Thời gian bắt đầu và kết thúc đặt bàn
-    //     $startTime = Carbon::parse("$dateOrder $timeOrder");
-    //     $endTime = $startTime->copy()->addMinutes(59);
+    //     $timeSlots = [
+    //         'sáng' => '07:00:00',
+    //         'trưa' => '12:00:00',
+    //         'tối'  => '19:00:00',
+    //     ];
+    //     $selectedTime = $timeSlots[$timeOrderInput];
 
-    //     // Kiểm tra xem bàn đã được đặt trong khoảng thời gian này chưa
-    //     $existingBooking = TimeOrderTable::where('table_id', $tableId)
-    //         ->whereDate('date_oder', $dateOrder)
-    //         ->where(function ($query) use ($startTime, $endTime) {
-    //             $query->whereBetween('time_oder', [$startTime, $endTime])
-    //                 ->orWhereBetween(DB::raw('ADDTIME(time_oder, "00:59:00")'), [$startTime, $endTime]);
-    //         })
+    //     // Kiểm tra xem bàn đã được đặt vào thời điểm này chưa
+    //     $existingOrder = TimeOrderTable::where('table_id', $tableId)
+    //         ->where('date_oder', $dateOrder)
+    //         ->where('time_oder', $selectedTime)
     //         ->first();
 
-    //     if ($existingBooking) {
-
-    //         // Tìm bàn khác còn trống vào khoảng thời gian này
-    //         $availableTables = DB::table('tables')
-    //             ->whereNotIn('id', function ($query) use ($dateOrder, $startTime, $endTime) {
-    //                 $query->select('table_id')
-    //                     ->from('time_order_table')
-    //                     ->whereDate('date_oder', $dateOrder)
-    //                     ->where(function ($q) use ($startTime, $endTime) {
-    //                         $q->whereBetween('time_oder', [$startTime, $endTime])
-    //                             ->orWhereBetween(DB::raw("DATE_ADD(time_oder, INTERVAL 59 MINUTE)"), [$startTime, $endTime]);
-    //                     });
-    //             })
-    //             ->get();
-
+    //     if ($existingOrder) {
     //         return response()->json([
-    //             'message' => "Đặt bàn thất bại. Bàn này đã được đặt vào thời gian này",
-    //             'table_available' => $availableTables,
+    //             'message' => "Đặt bàn thất bại. Bàn này đã được đặt vào buổi $timeOrderInput",
     //         ], 409);
     //     }
 
     //     DB::beginTransaction();
     //     try {
     //         $timeOrder = TimeOrderTable::create([
-    //             'table_id' => $request->table_id,
+    //             'table_id' => $tableId,
     //             'user_id' => $user->id,
     //             'phone_number' => $request->phone_number,
-    //             'date_oder' => $request->date_oder,
-    //             'time_oder' => $request->time_oder,
-    //             'description' => $request->description ?? Null,
+    //             'date_oder' => $dateOrder,
+    //             'time_oder' => $selectedTime,
+    //             'description' => $request->description ?? null,
     //             'status' => 'pending',
     //         ]);
 
     //         DB::commit();
+
     //         return response()->json([
     //             'success' => true,
-    //             'message' => 'Đặt bàn thành công.',
-    //             'booking_id' => $timeOrder->id,
+    //             'message' => 'Đặt bàn thành công',
+    //             'time_oder_id' => $timeOrder->id,
     //             'stk' => '0123456789',
-    //         ]);
+    //         ], 200);
     //     } catch (\Exception $e) {
     //         DB::rollBack();
     //         return response()->json(['success' => false, 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'], 500);
     //     }
     // }
-
-    public function openTable(TimeOrderTableRequest $request)
-    {
-        $user = JWTAuth::parseToken()->authenticate();
-
-        $tableId = $request->table_id;
-        $dateOrder = $request->date_oder;
-        $timeOrderInput = $request->time_oder;
-
-        $timeSlots = [
-            'sáng' => '07:00:00',
-            'trưa' => '12:00:00',
-            'tối'  => '19:00:00',
-        ];
-        $selectedTime = $timeSlots[$timeOrderInput];
-
-        // Kiểm tra xem bàn đã được đặt vào thời điểm này chưa
-        $existingOrder = TimeOrderTable::where('table_id', $tableId)
-            ->where('date_oder', $dateOrder)
-            ->where('time_oder', $selectedTime)
-            ->first();
-
-        if ($existingOrder) {
-            return response()->json([
-                'message' => "Đặt bàn thất bại. Bàn này đã được đặt vào buổi $timeOrderInput",
-            ], 409);
-        }
-
-        DB::beginTransaction();
-        try {
-            $timeOrder = TimeOrderTable::create([
-                'table_id' => $tableId,
-                'user_id' => $user->id,
-                'phone_number' => $request->phone_number,
-                'date_oder' => $dateOrder,
-                'time_oder' => $selectedTime,
-                'description' => $request->description ?? null,
-                'status' => 'pending',
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Đặt bàn thành công',
-                'time_oder_id' => $timeOrder->id,
-                'stk' => '0123456789',
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'], 500);
-        }
-    }
 }

@@ -30,7 +30,8 @@ class BillRequest extends BaseApiRequest
             'payment_id' => 'required|exists:payments,id',
             'voucher_id' => 'nullable|exists:vouchers,id',
             'note' => 'nullable|string',
-            'status' => 'in:pending,completed',
+            'order_type' => 'in:in_restaurant,online',
+            'status' => 'in:pending,confirmed,preparing,shipping,completed,cancelled,failed',
         ];
     }
 
@@ -53,6 +54,8 @@ class BillRequest extends BaseApiRequest
 
             'voucher_id.required' => 'id voucher phải là bắt buộc',
             'voucher_id.exists' => 'id voucher phải tồn tại trong bảng vouchers',
+
+            'order_type' => 'order_type phải là in_restaurant hoặc online'
         ];
     }
 }
