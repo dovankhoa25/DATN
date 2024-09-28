@@ -36,7 +36,7 @@ class TableController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $userRoles = $user->roles()->pluck('name')->toArray();
 
-        if (!in_array('qtv', $userRoles) && !in_array('admin', $userRoles)) {
+        if (!in_array('qtv', $userRoles) && !in_array('admin', $userRoles) && !in_array('ctv', $userRoles)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Bạn không có quyền mở bàn',
@@ -68,15 +68,15 @@ class TableController extends Controller
             $bill = Bill::create([
                 'ma_bill' => $maBill,
                 'user_id' => $user->id,
-                'customer_id' => $request->customer_id ?? null,
+                'customer_id' => null,
                 'order_date' => Carbon::now(),
-                'total_amount' => $request->total_amount ?? 0.00,
+                'total_amount' => 0.00,
                 'branch_address' => $request->branch_address ?? 'Fpoly',
                 'payment_id' => $request->payment_id,
-                'voucher_id' => $request->voucher_id ?? null,
-                'note' => $request->note ?? null,
+                'voucher_id' => null,
+                'note' => null,
                 'order_type' => 'in_restaurant',
-                'user_addresses_id' => $request->user_addresses_id ?? null,
+                'user_addresses_id' => null,
                 'status' => 'pending',
                 'table_number' => $table->id,
             ]);
