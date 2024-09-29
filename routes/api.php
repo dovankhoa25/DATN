@@ -109,6 +109,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     // tables
     Route::apiResource('tables', TablesController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::put('table/{id}/status', [TablesController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
+
 
     // timeOrderTable
     Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:qtv,admin');

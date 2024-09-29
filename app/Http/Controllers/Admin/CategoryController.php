@@ -42,7 +42,7 @@ class CategoryController extends Controller
             'name' => $request->get('name'),
             'image' => $imgUrl,
             'status' => true,
-            'parent_id' => $request->get('parent_id') ?? Null
+            'parent_id' => $request->get('parent_id') ?? null
         ]);
 
         return response()->json([
@@ -85,7 +85,7 @@ class CategoryController extends Controller
             $category->update([
                 'name' => $request->input('name'),
                 'image' => $imgUrl ? $imgUrl : $category->image,
-                'parent_id' => $request->input('parent_id') ?? Null
+                'parent_id' => $request->input('parent_id', $category->parent_id)
             ]);
             return response()->json([
                 'data' => new CategoryAdminResource($category),
