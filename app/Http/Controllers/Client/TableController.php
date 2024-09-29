@@ -22,7 +22,7 @@ class TableController extends Controller
     {
         $perPage = $request['per_page'] ?? 10;
 
-        $tables = Table::select('id', 'table', 'description', 'status')->paginate($perPage);
+        $tables = Table::where('status', true)->select('id', 'table', 'description', 'status')->paginate($perPage);
 
         return response()->json([
             'data' => $tables
@@ -44,18 +44,19 @@ class TableController extends Controller
         }
 
         $table = Table::find($request->table_id);
-        if (!$table) {
+        if (!$table || !$table->status) {
             return response()->json([
                 'success' => false,
-                'message' => 'Bàn không tồn tại',
+                'message' => 'Bàn không tồn tại hoặc bị hỏng',
             ], 404);
         }
 
-        if (!$table->status) {
+        // chỉ khi reservation_status = close -> được mở bàn
+        if ($table->reservation_status != 'close') {
             return response()->json([
                 'success' => false,
-                'message' => 'Bàn đang bị khóa',
-            ], 404);
+                'message' => 'Bàn đang được sử dụng hoặc không sẵn sàng',
+            ], 400);
         }
 
         DB::beginTransaction();
@@ -81,7 +82,9 @@ class TableController extends Controller
                 'table_number' => $table->id,
             ]);
 
-            $table->update(['status' => false]);
+            $table->update([
+                'reservation_status' => 'open'
+            ]);
 
             DB::commit();
 
