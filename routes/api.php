@@ -99,7 +99,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
 
     Route::apiResource('products', ProductController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::put('product/{id}/status', [ProductController::class, 'updateStatus'] )->middleware('auth', 'checkRole:qtv,admin');
+    Route::put('product/{id}/status', [ProductController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
     // Route::post('products/{id}', [ProductController::class, 'update']);
 
     // Bills
@@ -111,6 +111,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     // tables
     Route::apiResource('tables', TablesController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::put('table/{id}/status', [TablesController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
+
 
     // timeOrderTable
     Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:qtv,admin');
@@ -179,8 +181,4 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
 
 
     Route::get('list_payments', [ClientPaymentController::class, 'listPaymentTrue']);
-
-
-
-
 });
