@@ -37,8 +37,7 @@ class OrderCart extends Model
             )
             ->join('product_details as pro_detail', 'od_cart.product_detail_id', '=', 'pro_detail.id')
             ->join('products as pro', 'pro_detail.product_id', '=', 'pro.id')
-            ->join('sizes as size', 'pro_detail.size_id', '=', 'size.id')
-            ->orderBy('od_cart.id');
+            ->join('sizes as size', 'pro_detail.size_id', '=', 'size.id');
 
         return $query;
     }

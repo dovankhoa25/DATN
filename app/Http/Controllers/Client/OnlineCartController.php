@@ -128,7 +128,7 @@ class OnlineCartController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(OnlCartRequest $request, int $id)
+    public function update(Request $request, int $id)
     {
         $cartItem = DB::table('online_cart')->where('id', $id)->first();
 
@@ -138,7 +138,7 @@ class OnlineCartController extends Controller
 
         $productDetail = DB::table('product_details')
             ->select('quantity', 'price', 'sale')
-            ->where('id', $request->get('product_detail_id'))
+            ->where('id', $cartItem->product_detail_id)
             ->first();
 
         $price = $productDetail->sale ?? $productDetail->price;
@@ -148,12 +148,16 @@ class OnlineCartController extends Controller
                 'message' => 'error'
             ], 400);
         }
+        $validated = $request->validate([
+            'quantity' => 'integer|min:1|max:100'
+        ]);
+        $quantity = $validated['quantity'];
 
         // Cập nhật giỏ hàng
         DB::table('online_cart')
             ->where('id', $id)
             ->update([
-                'quantity' => $request->get('quantity'),
+                'quantity' => $quantity,
                 'price' => $price * $request->get('quantity'),
                 'updated_at' => now()
             ]);

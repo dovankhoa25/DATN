@@ -62,34 +62,45 @@ class TimeOrderTableController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Người dùng không tồn tại'], 404);
         }
-
+    
         $tableId = $request->get('table_id');
         $dateOrder = $request->get('date_oder');
-        $timeOrder = $request->get('time_oder');
+        $timeOrderKey = $request->get('time_oder'); 
+        
+        $hourOrder = [
+            'sáng' => '07:00:00',
+            'trưa' => '12:00:00',
+            'tối'  => '19:00:00',
+        ];
+    
+        if (!isset($hourOrder[$timeOrderKey])) {
+            return response()->json(['message' => 'Khung giờ không hợp lệ'], 422);
+        }
 
+        $newTime = \Carbon\Carbon::createFromFormat('H:i:s', $hourOrder[$timeOrderKey]);
+    
         $existingOrder = TimeOrderTable::where('table_id', $tableId)
             ->where('date_oder', $dateOrder)
             ->get();
-
+    
         foreach ($existingOrder as $order) {
             $existingTime = \Carbon\Carbon::createFromFormat('H:i:s', $order->time_oder);
-            $newTime = \Carbon\Carbon::createFromFormat('H:i:s', $timeOrder);
-
+    
             if ($existingTime->diffInMinutes($newTime) < 60) {
                 return response()->json(['message' => 'Bàn đã được đặt trong khung giờ này'], 422);
             }
         }
-
+    
         $res = TimeOrderTable::create([
             'table_id' => $tableId,
             'user_id' => $user->id,
             'phone_number' => $request->get('phone_number'),
             'date_oder' => $dateOrder,
-            'time_oder' => $timeOrder,
+            'time_oder' => $hourOrder[$timeOrderKey], // Lưu khung giờ chính xác
             'description' => $request->get('description'),
             'status' => 'pending',
         ]);
-
+    
         $orderTableCollection = new TimeOrderTableResource($res);
         if ($res) {
             return response()->json([
@@ -99,7 +110,7 @@ class TimeOrderTableController extends Controller
         } else {
             return response()->json(['error' => 'Thêm thất bại'], 500);
         }
-    }
+    }    
 
 
     /**
@@ -132,32 +143,43 @@ class TimeOrderTableController extends Controller
     {
         $orderItem = DB::table('time_order_table')->where('id', $id)->first();
         if (!$orderItem) {
-            return response()->json(['message' => 'Không tìm thấy order cần sửa']);
+            return response()->json(['message' => 'Không tìm thấy order cần sửa'], 404);
         }
-
+    
         $user = JWTAuth::parseToken()->authenticate();
         if (!$user) {
             return response()->json(['message' => 'Người dùng không tồn tại'], 404);
         }
-
+    
         $tableId = $request->get('table_id');
         $dateOrder = $request->get('date_oder');
-        $timeOrder = $request->get('time_oder');
-
+        $timeOrderKey = $request->get('time_oder');
+    
+        $hourOrder = [
+            'sáng' => '07:00:00',
+            'trưa' => '12:00:00',
+            'tối'  => '19:00:00',
+        ];
+    
+        if (!isset($hourOrder[$timeOrderKey])) {
+            return response()->json(['message' => 'Khung giờ không hợp lệ'], 422);
+        }
+    
+        $newTime = \Carbon\Carbon::createFromFormat('H:i:s', $hourOrder[$timeOrderKey]);
+    
         $existingOrder = TimeOrderTable::where('table_id', $tableId)
             ->where('date_oder', $dateOrder)
-            ->where('id', '!=', $id)
+            ->where('id', '!=', $id) 
             ->get();
-
+    
         foreach ($existingOrder as $order) {
             $existingTime = \Carbon\Carbon::createFromFormat('H:i:s', $order->time_oder);
-            $newTime = \Carbon\Carbon::createFromFormat('H:i:s', $timeOrder);
-
+    
             if ($existingTime->diffInMinutes($newTime) < 60) {
                 return response()->json(['message' => 'Thời gian đặt bàn phải cách nhau ít nhất 1 giờ'], 422);
             }
         }
-
+    
         // Cập nhật bản ghi
         DB::table('time_order_table')
             ->where('id', $id)
@@ -166,19 +188,20 @@ class TimeOrderTableController extends Controller
                 'user_id' => $user->id,
                 'phone_number' => $request->get('phone_number'),
                 'date_oder' => $dateOrder,
-                'time_oder' => $timeOrder,
+                'time_oder' => $hourOrder[$timeOrderKey], 
                 'description' => $request->get('description'),
                 'status' => 'pending',
             ]);
-
+    
         $updateOrderItem = DB::table('time_order_table')->where('id', $id)->first();
         $orderTableCollection = new TimeOrderTableResource($updateOrderItem);
-
+    
         return response()->json([
             'data' => $orderTableCollection,
             'message' => 'success'
         ], 200);
     }
+    
 
 
     /**

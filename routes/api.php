@@ -34,7 +34,7 @@ use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTable
 use App\Http\Controllers\Client\UpdateProfileController;
 
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
-
+use App\Http\Controllers\Client\UpdateProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -181,4 +181,17 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
 
 
     Route::get('list_payments', [ClientPaymentController::class, 'listPaymentTrue']);
+
+    Route::prefix('order_cart')->middleware('auth')->group(function () {
+        Route::get('/', [OrderCartController::class, 'index']);
+        Route::get('/{ma_bill}', [OrderCartController::class, 'show']);
+        Route::post('/', [OrderCartController::class, 'store']);
+        Route::put('/{id}', [OrderCartController::class, 'update']);
+        // Route::delete('/{id}', [OrderCartController::class, 'destroy']);
+    });
+
+    Route::prefix('profile')->middleware('auth')->group(function () {
+        Route::get('/', [UpdateProfileController::class, 'index']);
+        Route::put('/{id}', [UpdateProfileController::class, 'update']);
+    });
 });

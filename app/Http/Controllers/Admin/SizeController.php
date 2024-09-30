@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Size\FilterSizeRequest;
-use App\Http\Requests\SizeRequest;
+use App\Http\Requests\Size\SizeRequest;
 use App\Http\Resources\SizeResource;
 use App\Models\Size;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -27,6 +27,7 @@ class SizeController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(SizeRequest $request)
+
     {
         $sizedata = $request->all();
         $sizedata['status'] = true;

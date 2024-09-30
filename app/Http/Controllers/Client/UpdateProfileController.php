@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\Profile\ProfileRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -25,6 +25,9 @@ class UpdateProfileController extends Controller
         $profileItem = User::with(['customer', 'addresses'])->where('id', $user->id)->first();
     
         if ($profileItem) {
+            $profileItem->makeHidden(['email_verified_at','created_at', 'updated_at']);
+            $profileItem->customer->makeHidden(['created_at', 'updated_at']);
+            $profileItem->addresses->makeHidden(['created_at', 'updated_at']);
             return response()->json([
                 'data' => $profileItem,
                 'message' => 'success'
@@ -54,7 +57,7 @@ class UpdateProfileController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProfileRequest $request, int $id)
+    public function update(ProfileRequest $request, int $id)
     {
         $user = JWTAuth::parseToken()->authenticate();
 
@@ -78,12 +81,12 @@ class UpdateProfileController extends Controller
         $checkPass = $profileItem->password;
         $userName = $request->get('name') ?? $profileItem->name;
 
-        if (Hash::check($request->get('new_password'), $checkPass)) {
-            return response()->json(['message' => 'Mật khẩu mới không được trùng với mật khẩu cũ'], 404);
-        }
-
         if (!Hash::check($request->get('old_password'), $checkPass)) {
             return response()->json(['message' => 'Sai mật khẩu cũ'], 404);
+        }
+
+        if (Hash::check($request->get('new_password'), $checkPass)) {
+            return response()->json(['message' => 'Mật khẩu mới không được trùng với mật khẩu cũ'], 404);
         }
 
         $newPassword = $request->get('new_password');
@@ -107,7 +110,6 @@ class UpdateProfileController extends Controller
             return response()->json(['message' => 'Cập nhật profile thất bại'], 404);
         }
     }
-
 
     /**
      * Remove the specified resource from storage.
