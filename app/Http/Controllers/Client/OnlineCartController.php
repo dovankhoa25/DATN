@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OnlCartRequest;
+use App\Http\Requests\OnlCart\OnlCartRequest;
 use App\Http\Resources\OnlCartResource;
 use App\Models\OnlineCart;
 use Illuminate\Http\Request;

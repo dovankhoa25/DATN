@@ -78,6 +78,13 @@ class TimeOrderTableController extends Controller
         }
 
         $newTime = \Carbon\Carbon::createFromFormat('H:i:s', $hourOrder[$timeOrderKey]);
+
+        if ($dateOrder == \Carbon\Carbon::today('Asia/Ho_Chi_Minh')->toDateString()) {
+            $currentTime = \Carbon\Carbon::now('Asia/Ho_Chi_Minh')->toTimeString();
+            if ($hourOrder[$timeOrderKey] <= $currentTime) {
+                return response()->json(['message' => 'Khung giờ đã qua, vui lòng chọn khung giờ khác'], 422);
+            }
+        }
     
         $existingOrder = TimeOrderTable::where('table_id', $tableId)
             ->where('date_oder', $dateOrder)
@@ -96,7 +103,7 @@ class TimeOrderTableController extends Controller
             'user_id' => $user->id,
             'phone_number' => $request->get('phone_number'),
             'date_oder' => $dateOrder,
-            'time_oder' => $hourOrder[$timeOrderKey], // Lưu khung giờ chính xác
+            'time_oder' => $hourOrder[$timeOrderKey], 
             'description' => $request->get('description'),
             'status' => 'pending',
         ]);
