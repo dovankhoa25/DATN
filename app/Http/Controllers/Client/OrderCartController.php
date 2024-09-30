@@ -7,12 +7,11 @@ use App\Http\Requests\OrderCartRequest;
 use App\Models\OrderCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Events\NewOrderPlaced;
 
 class OrderCartController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+   
     public function index(Request $request)
     {
         $bill = DB::table('bills')
@@ -49,9 +48,7 @@ class OrderCartController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+   
     public function store(OrderCartRequest $request)
     {
         $bill = DB::table('bills')
@@ -97,9 +94,7 @@ class OrderCartController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+    
     public function show(Request $request, string $ma_bill)
     {
         $bill = DB::table('bills')
@@ -136,9 +131,7 @@ class OrderCartController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+   
     public function update(Request $request, int $id)
     {
         $cartItem = DB::table('oder_cart')->where('id', $id)->first();

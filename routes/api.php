@@ -104,6 +104,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     // Bills
     Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::get('/bill_table/{table_number}', [BillController::class, 'getBillByTableNumber']);
+
     //Bill detail
     Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth', 'checkRole:qtv,admin');
 
@@ -168,8 +170,8 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
 
     Route::get('products', [ProductClientController::class, 'getProduct']); // fe lấy cái này theo product k lấy detail 
     Route::get('products_details', [ProductClientController::class, 'getProductAllWithDetail']); // fe lấy cái này all cả detail 
-    Route::get('product/{id}', [ProductClientController::class, 'getProductWithDetailOrID']); // api get theo id product nhé fe
-    Route::get('product_cate/{id}', [ProductClientController::class, 'getProductCate']); // api get product theo id cate nhé fe
+    Route::get('product/{id}', [ProductClientController::class, 'getProductWithDetailByID']); // api get theo id product nhé fe
+    Route::get('product_cate/{id}', [ProductClientController::class, 'getProductByCate']); // api get product theo id cate nhé fe
 
 
     Route::get('list_tables', [TableController::class, 'getAllTables']);
