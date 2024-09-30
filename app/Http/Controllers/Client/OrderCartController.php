@@ -7,12 +7,10 @@ use App\Http\Requests\OrderCart\OrderCartRequest;
 use App\Models\OrderCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Events\NewOrderPlaced;
 
 class OrderCartController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $bill = DB::table('bills')
@@ -25,6 +23,7 @@ class OrderCartController extends Controller
         }
 
         if ($bill->status !== 'pending') {
+
             return response()->json([
                 'error' => 'Mã bill này đã hoàn thành xử lí, không thể hiển thị',
                 'message' => 'error'
@@ -91,6 +90,7 @@ class OrderCartController extends Controller
             $data = $res->makeHidden(['created_at', 'updated_at']);
             return response()->json([
                 'data' => $data,
+
                 'message' => 'success'
             ], 201);
         } else {

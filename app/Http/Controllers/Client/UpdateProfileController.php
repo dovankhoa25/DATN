@@ -28,7 +28,6 @@ class UpdateProfileController extends Controller
             $profileItem->makeHidden(['email_verified_at','created_at', 'updated_at']);
             $profileItem->customer->makeHidden(['created_at', 'updated_at']);
             $profileItem->addresses->makeHidden(['created_at', 'updated_at']);
-    
             return response()->json([
                 'data' => $profileItem,
                 'message' => 'success'
@@ -104,6 +103,7 @@ class UpdateProfileController extends Controller
 
         if ($userUpdate) {
             return response()->json([
+                'data' => $userUpdate,
                 'message' => 'success'
             ], 200);
         } else {
