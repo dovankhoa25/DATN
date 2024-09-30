@@ -32,6 +32,7 @@ class Table extends Model
     protected $fillable = [
         'table',
         'description',
-        'status'
+        'status',
+        'reservation_status'
     ];
 }

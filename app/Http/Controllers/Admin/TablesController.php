@@ -13,9 +13,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TablesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index(FillterTableRequest $request)
     {
         try {
@@ -28,23 +26,15 @@ class TablesController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(TableRequest $request)
     {
         try {
             $table = Table::create([
                 'table' => $request->get('table'),
                 'description' => $request->get('description') ?? Null,
+                'status' => 1,
+                'reservation_status' => 'close'
             ]);
             return response()->json([
                 'data' => new TableResource($table),
@@ -55,9 +45,6 @@ class TablesController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
 
@@ -71,10 +58,6 @@ class TablesController extends Controller
         }
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(TableRequest $request, string $id)
     {
         try {
@@ -82,7 +65,7 @@ class TablesController extends Controller
 
             $table->update([
                 'table' => $request->get('table'),
-                'description' => $request->get('description') ?? Null,
+                'description' => $request->get('description', $table->description),
             ]);
             return response()->json([
                 'data' => new TableResource($table),
@@ -93,9 +76,6 @@ class TablesController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         try {
@@ -105,6 +85,23 @@ class TablesController extends Controller
             return response()->json([
                 'message' => 'xoá table thành công'
             ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'table không tồn tại'], 404);
+        }
+    }
+
+    public function updateStatus(Request $request, string $id)
+    {
+        try {
+            $table = Table::findOrFail($id);
+            $table->status = !$table->status;
+            $table->save();
+
+            if ($table->status) {
+                return response()->json(['message' => 'hiện'], 200);
+            } else {
+                return response()->json(['message' => 'ẩn'], 200);
+            }
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'table không tồn tại'], 404);
         }

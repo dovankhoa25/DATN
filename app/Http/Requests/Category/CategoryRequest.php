@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Category;
 
 use App\Http\Requests\BaseApiRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CategoryRequest extends BaseApiRequest
@@ -22,12 +23,7 @@ class CategoryRequest extends BaseApiRequest
                 'nullable',
                 'integer',
                 'exists:categories,id',
-                function ($attribute, $value, $fail) {
-                    $categoryId = request()->route('id');
-                    if ($categoryId && $value == $categoryId) {
-                        $fail('không được phép');
-                    }
-                },
+                Rule::notIn([$this->route('category')]),
             ],
 
         ];
@@ -47,6 +43,7 @@ class CategoryRequest extends BaseApiRequest
 
             'parent_id.required' => 'id parent phải bắt buộc',
             'parent_id.exists' => 'id parent phải tồn tại trong bảng categories',
+            'parent_id.not_in' => 'Không được phép chọn chính nó làm parent',
         ];
     }
 }

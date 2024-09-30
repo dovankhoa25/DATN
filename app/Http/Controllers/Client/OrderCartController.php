@@ -7,12 +7,10 @@ use App\Http\Requests\OrderCart\OrderCartRequest;
 use App\Models\OrderCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Events\NewOrderPlaced;
 
 class OrderCartController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $bill = DB::table('bills')

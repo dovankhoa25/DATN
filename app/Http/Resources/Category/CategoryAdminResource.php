@@ -19,7 +19,7 @@ class CategoryAdminResource extends JsonResource
             'name' => $this->name,
             'image' => $this->image,
             'status' => $this->status,
-            'parent_id' => $this->parent_id,
+            'parent_id' => (int)$this->parent_id,
             'name_parent' => $this->parent ? $this->parent->name : null,
             'subcategory' => CategoryAdminResource::collection($this->whenLoaded('subcategories')),
             'created_at' => $this->created_at,

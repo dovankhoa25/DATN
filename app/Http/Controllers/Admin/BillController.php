@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Bill\BillRequest;
 use App\Http\Requests\Bill\FilterBillRequest;
-use App\Http\Requests\BillRequest;
+
 use App\Http\Resources\BillResource;
 use App\Models\Bill;
 use Illuminate\Http\Request;
@@ -91,11 +92,11 @@ class BillController extends Controller
                 return response()->json(['error' => 'Chỉ có thể cập nhật trạng thái cho đơn hàng online'], 400);
             }
 
-            
+
             if (in_array($currentStatus, ['completed', 'failed'])) {
                 return response()->json(['error' => 'Không thể cập nhật khi trạng thái đã là completed hoặc failed'], 400);
             }
-            
+
             if ($validStatuses[$newStatus] < $validStatuses[$currentStatus]) {
                 return response()->json(['error' => 'Không thể cập nhật trạng ngược lại'], 400);
             }
@@ -128,4 +129,65 @@ class BillController extends Controller
 
         return $maBill;
     }
+
+    public function getBillByTableNumber(int $tableNumber)
+    {
+        // Lấy dữ liệu bill kèm theo các quan hệ billDetails, productDetail, product, size và images
+        $bills = Bill::with('billDetails.productDetail.product', 'billDetails.productDetail.size', 'billDetails.productDetail.images')
+            ->where('table_number', $tableNumber)
+            ->where('status', 'pending')
+            ->where('order_type', 'in_restaurant')
+            ->get();
+
+        // Định dạng lại dữ liệu trả ra
+        $formattedBills = $bills->map(function ($bill) {
+            $billDetails = $bill->billDetails->map(function ($detail) {
+                return [
+                    'quantity' => $detail->quantity,
+                    'product' => [
+                        'id' => $detail->productDetail->product->id,
+                        'name' => $detail->productDetail->product->name,
+                        'thumbnail' => $detail->productDetail->product->thumbnail,
+                        'description' => $detail->productDetail->product->description,
+                        // 'category_id' => $detail->productDetail->product->category_id,
+                        'product_detail' => [
+                            // 'id' => $detail->productDetail->id,
+                            'price' => $detail->productDetail->sale ?? $detail->productDetail->price,
+                            'size' => [
+                                'id' => $detail->productDetail->size->id,
+                                'name' => $detail->productDetail->size->name,
+                            ],
+                            'images' => $detail->productDetail->images->map(function ($image) {
+                                return [
+                                    'id' => $image->id,
+                                    'name' => $image->name,
+                                ];
+                            }),
+                        ],
+                        'status' => $detail->status,
+                    ],
+                ];
+            });
+
+            return [
+                'id' => $bill->id,
+                'ma_bill' => $bill->ma_bill,
+                'order_date' => $bill->order_date,
+                'total_amount' => $bill->total_amount,
+                'table_number' => $bill->table_number,
+                'status' => $bill->status,
+                'order_type' => $bill->order_type,
+                'bill_details' => $billDetails, // Chi tiết hóa đơn
+            ];
+        });
+
+        // Trả về JSON với dữ liệu đã định dạng
+        return response()->json([
+            'data' => $formattedBills,
+            'total_bills' => $bills->count(), // Số lượng hóa đơn
+        ], 200);
+    }
+
+
+
 }

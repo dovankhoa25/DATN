@@ -97,7 +97,7 @@ class UpdateProfileController extends Controller
 
         $checkPass = $profileItem->password;
         $userName = $request->get('name') ?? $profileItem->name;
-
+      
         if (!Hash::check($request->get('old_password'), $checkPass)) {
             return response()->json(['message' => 'Sai mật khẩu cũ'], 404);
         }

@@ -12,7 +12,7 @@ class PaymentController extends Controller
     {
         $perPage = $request['per_page'] ?? 10;
 
-        $payments = Payment::where('status', true)->select('id', 'name')->paginate($perPage);
+        $payments = Payment::where('status', true)->select('id', 'name')->get();
 
         return response()->json([
             'data' => $payments,
