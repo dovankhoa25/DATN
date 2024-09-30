@@ -30,11 +30,8 @@ use App\Http\Controllers\Client\OrderCartController;
 use App\Http\Controllers\Client\ProductClientController;
 use App\Http\Controllers\Client\TableController;
 use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
-
 use App\Http\Controllers\Client\UpdateProfileController;
-
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
-use App\Http\Controllers\Client\UpdateProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
