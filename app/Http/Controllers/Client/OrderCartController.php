@@ -23,7 +23,6 @@ class OrderCartController extends Controller
         }
 
         if ($bill->status !== 'pending') {
-
             return response()->json([
                 'error' => 'Mã bill này đã hoàn thành xử lí, không thể hiển thị',
                 'message' => 'error'
@@ -90,7 +89,6 @@ class OrderCartController extends Controller
             $data = $res->makeHidden(['created_at', 'updated_at']);
             return response()->json([
                 'data' => $data,
-
                 'message' => 'success'
             ], 201);
         } else {

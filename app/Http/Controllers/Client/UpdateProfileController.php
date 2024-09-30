@@ -25,18 +25,35 @@ class UpdateProfileController extends Controller
         $profileItem = User::with(['customer', 'addresses'])->where('id', $user->id)->first();
     
         if ($profileItem) {
-            $profileItem->makeHidden(['email_verified_at','created_at', 'updated_at']);
-            $profileItem->customer->makeHidden(['created_at', 'updated_at']);
-            $profileItem->addresses->makeHidden(['created_at', 'updated_at']);
+            if (!$profileItem->customer) {
+                $profileItem->setRelation('customer', collect());
+            }
+
+            if ($profileItem->addresses->isEmpty()) {
+                $profileItem->setRelation('addresses', collect());
+            }
+    
+            $profileItem->makeHidden(['email_verified_at', 'created_at', 'updated_at']);
+            $customer = $profileItem->customer instanceof \Illuminate\Database\Eloquent\Model 
+                ? $profileItem->customer->makeHidden(['created_at', 'updated_at'])->toArray()
+                : [];
+    
+            $addresses = $profileItem->addresses->map(function ($address) {
+                return collect($address)->except(['created_at', 'updated_at'])->toArray();
+            });
+    
+            $profileItemArray = $profileItem->toArray();
+            $profileItemArray['customer'] = $customer;
+            $profileItemArray['addresses'] = $addresses;
+    
             return response()->json([
-                'data' => $profileItem,
+                'data' => $profileItemArray,
                 'message' => 'success'
             ], 200);
         } else {
             return response()->json(['message' => 'Không tìm thấy thông tin người dùng'], 404);
         }
     }
-    
 
     /**
      * Store a newly created resource in storage.
@@ -80,7 +97,7 @@ class UpdateProfileController extends Controller
 
         $checkPass = $profileItem->password;
         $userName = $request->get('name') ?? $profileItem->name;
-
+      
         if (!Hash::check($request->get('old_password'), $checkPass)) {
             return response()->json(['message' => 'Sai mật khẩu cũ'], 404);
         }
@@ -103,7 +120,6 @@ class UpdateProfileController extends Controller
 
         if ($userUpdate) {
             return response()->json([
-                'data' => $userUpdate,
                 'message' => 'success'
             ], 200);
         } else {
