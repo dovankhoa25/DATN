@@ -27,6 +27,26 @@ class OnlineCartController extends Controller
             }
 
             $objOnlCart = new OnlineCart();
+
+            $cartItems = $objOnlCart->onlCartByUserId($user->id)->get();
+
+            $itemsToRemove = [];
+            foreach ($cartItems as $item) {
+                $productDetail = DB::table('product_details')
+                    ->where('id', $item->product_detail_id)
+                    ->first();
+
+                if ($productDetail && $productDetail->quantity < $item->quantity) {
+                    $itemsToRemove[] = $item->id;
+                }
+            }
+
+            if (!empty($itemsToRemove)) {
+                DB::table('online_cart')
+                    ->whereIn('id', $itemsToRemove)
+                    ->delete();
+            }
+
             $data = $objOnlCart->onlCartByUserId($user->id)->get();
 
             if ($data) {
@@ -51,9 +71,9 @@ class OnlineCartController extends Controller
             ->select('quantity', 'price', 'sale')
             ->where('id', $request->get('product_detail_id'))
             ->first();
-
+    
         $price = $productDetail->sale ?? $productDetail->price;
-
+    
         $user = JWTAuth::parseToken()->authenticate();
         if (!$user) {
             return response()->json(['message' => 'Người dùng không tồn tại'], 404);
@@ -64,23 +84,50 @@ class OnlineCartController extends Controller
                 'message' => 'error'
             ], 400);
         }
-
-        $res = OnlineCart::create([
-            'user_id' => $user->id,
-            'product_detail_id' => $request->get('product_detail_id'),
-            'quantity' => $request->get('quantity'),
-            'price' => $price * $request->get('quantity'),
-        ]);
-        $onlCartCollection = new OnlCartResource($res);
-        if ($res) {
+    
+        $existingCart = OnlineCart::where('user_id', $user->id)
+            ->where('product_detail_id', $request->get('product_detail_id'))
+            ->first();
+    
+        if ($existingCart) {
+            // Nếu sản phẩm đã tồn tại, cập nhật số lượng
+            $newQuantity = $existingCart->quantity + $request->get('quantity');
+            if ($newQuantity > $productDetail->quantity) {
+                return response()->json([
+                    'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
+                    'message' => 'error'
+                ], 400);
+            }
+    
+            $existingCart->update([
+                'quantity' => $newQuantity,
+                'price' => $price * $newQuantity,
+            ]);
+    
+            $onlCartCollection = new OnlCartResource($existingCart);
             return response()->json([
                 'data' => $onlCartCollection,
                 'message' => 'success'
-            ], 201);
+            ], 200);
         } else {
-            return response()->json(['error' => 'Thêm thất bại']);
+            $res = OnlineCart::create([
+                'user_id' => $user->id,
+                'product_detail_id' => $request->get('product_detail_id'),
+                'quantity' => $request->get('quantity'),
+                'price' => $price * $request->get('quantity'),
+            ]);
+    
+            $onlCartCollection = new OnlCartResource($res);
+            if ($res) {
+                return response()->json([
+                    'data' => $onlCartCollection,
+                    'message' => 'success'
+                ], 201);
+            } else {
+                return response()->json(['error' => 'Thêm thất bại'], 500);
+            }
         }
-    }
+    }    
 
     /**
      * Display the specified resource.
