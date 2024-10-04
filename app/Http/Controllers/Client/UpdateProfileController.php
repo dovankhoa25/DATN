@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Profile\AddressRequest;
 use App\Http\Requests\Profile\ProfileRequest;
 use App\Models\User;
+use App\Models\UserAddress;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\DB;
@@ -58,23 +60,90 @@ class UpdateProfileController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function storeAddress(AddressRequest $request)
     {
-        //
+        $user = JWTAuth::parseToken()->authenticate();
+        if (!$user) {
+            return response()->json(['message' => 'Người dùng không tồn tại'], 404);
+        }
+
+        if ($request->get('is_default') == 1) {
+            UserAddress::where('user_id', $user->id)
+                ->where('is_default', 1)
+                ->update(['is_default' => 0]);
+        }
+
+        $res = UserAddress::create([
+            'user_id' => $user->id,
+            'address' => $request->get('address'),
+            'city' => $request->get('city'),
+            'state' => $request->get('state'),
+            'postal_code' => $request->get('postal_code'),
+            'country' => $request->get('country'),
+            'is_default' => $request->get('is_default')
+        ]);
+
+        if ($res) {
+            return response()->json([
+                'data' => $res->makeHidden(['created_at', 'updated_at']),
+                'message' => 'success'
+            ], 201);
+        } else {
+            return response()->json(['error' => 'Thêm thất bại'], 500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function updateAddress(AddressRequest $request, int $idAddress)
     {
-        //
+        $user = JWTAuth::parseToken()->authenticate();
+        if (!$user) {
+            return response()->json(['message' => 'Người dùng không tồn tại'], 404);
+        }
+
+        $checkAddress = DB::table('user_addresses')
+            ->where('id', $idAddress)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if(!$checkAddress){
+            return response()->json(['error' => 'Bạn không thể sửa địa chỉ này'], 500);
+        }
+
+        if ($request->get('is_default') == 1) {
+            UserAddress::where('user_id', $user->id)
+                ->where('is_default', 1)
+                ->update(['is_default' => 0]);
+        }
+
+        DB::table('user_addresses')
+        ->where('id', $idAddress)
+        ->update([
+            'user_id' => $user->id,
+            'address' => $request->get('address'),
+            'city' => $request->get('city'),
+            'state' => $request->get('state'),
+            'postal_code' => $request->get('postal_code'),
+            'country' => $request->get('country'),
+            'is_default' => $request->get('is_default')
+        ]);
+        $addressAupdate = DB::table('user_addresses')->where('id', $idAddress)->first();
+        if ($addressAupdate) {
+            return response()->json([
+                'data' => $addressAupdate,
+                'message' => 'success'
+            ], 200);
+        } else {
+            return response()->json(['error' => 'Sửa thất bại'], 500);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProfileRequest $request, int $id)
+    public function update(ProfileRequest $request, int $idUser)
     {
         $user = JWTAuth::parseToken()->authenticate();
 
@@ -82,7 +151,7 @@ class UpdateProfileController extends Controller
             return response()->json(['message' => 'Người dùng không tồn tại'], 404);
         }
 
-        if ($id !== $user->id) {
+        if ($idUser !== $user->id) {
             return response()->json(['message' => 'Sai id'], 404);
         }
 
@@ -110,13 +179,13 @@ class UpdateProfileController extends Controller
         $hashedPassword = Hash::make($newPassword);
 
         DB::table('users')
-            ->where('id', $id)
+            ->where('id', $idUser)
             ->update([
                 'name' => $userName,
                 'password' => $hashedPassword,
             ]);
 
-        $userUpdate = DB::table('users')->where('id', $id)->first();
+        $userUpdate = DB::table('users')->where('id', $idUser)->first();
 
         if ($userUpdate) {
             return response()->json([

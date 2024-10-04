@@ -189,6 +189,8 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
 
     Route::prefix('profile')->middleware('auth')->group(function () {
         Route::get('/', [UpdateProfileController::class, 'index']);
-        Route::put('/{id}', [UpdateProfileController::class, 'update']);
+        Route::post('/store_address', [UpdateProfileController::class, 'storeAddress']);
+        Route::put('/{idUser}', [UpdateProfileController::class, 'update']);
+        Route::put('/update_address/{idAddress}', [UpdateProfileController::class, 'updateAddress']);
     });
 });

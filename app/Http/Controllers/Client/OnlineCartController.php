@@ -90,7 +90,6 @@ class OnlineCartController extends Controller
             ->first();
     
         if ($existingCart) {
-            // Nếu sản phẩm đã tồn tại, cập nhật số lượng
             $newQuantity = $existingCart->quantity + $request->get('quantity');
             if ($newQuantity > $productDetail->quantity) {
                 return response()->json([
