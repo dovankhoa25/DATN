@@ -22,10 +22,6 @@ class OnlineCartController extends Controller
         try {
             $user = JWTAuth::parseToken()->authenticate();
 
-            if (!$user) {
-                return response()->json(['message' => 'Người dùng không tồn tại'], 404);
-            }
-
             $objOnlCart = new OnlineCart();
 
             $cartItems = $objOnlCart->onlCartByUserId($user->id)->get();
@@ -71,38 +67,43 @@ class OnlineCartController extends Controller
             ->select('quantity', 'price', 'sale')
             ->where('id', $request->get('product_detail_id'))
             ->first();
-    
+
         $price = $productDetail->sale ?? $productDetail->price;
-    
+
         $user = JWTAuth::parseToken()->authenticate();
         if (!$user) {
             return response()->json(['message' => 'Người dùng không tồn tại'], 404);
         }
-        if ($request->quantity > $productDetail->quantity) {
+
+
+        $quantityProduct = $productDetail->quantity;
+        if ($request->quantity > $quantityProduct) {
             return response()->json([
                 'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
-                'message' => 'error'
+                'message' => 'error',
+                'data' => $quantityProduct,
             ], 400);
         }
-    
+
         $existingCart = OnlineCart::where('user_id', $user->id)
             ->where('product_detail_id', $request->get('product_detail_id'))
             ->first();
-    
+
         if ($existingCart) {
             $newQuantity = $existingCart->quantity + $request->get('quantity');
             if ($newQuantity > $productDetail->quantity) {
                 return response()->json([
                     'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
-                    'message' => 'error'
+                    'message' => 'error',
+                    'data' => $quantityProduct,
                 ], 400);
             }
-    
+
             $existingCart->update([
                 'quantity' => $newQuantity,
                 'price' => $price * $newQuantity,
             ]);
-    
+
             $onlCartCollection = new OnlCartResource($existingCart);
             return response()->json([
                 'data' => $onlCartCollection,
@@ -115,7 +116,7 @@ class OnlineCartController extends Controller
                 'quantity' => $request->get('quantity'),
                 'price' => $price * $request->get('quantity'),
             ]);
-    
+
             $onlCartCollection = new OnlCartResource($res);
             if ($res) {
                 return response()->json([
@@ -126,7 +127,7 @@ class OnlineCartController extends Controller
                 return response()->json(['error' => 'Thêm thất bại'], 500);
             }
         }
-    }    
+    }
 
     /**
      * Display the specified resource.
@@ -176,7 +177,12 @@ class OnlineCartController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $cartItem = DB::table('online_cart')->where('id', $id)->first();
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $cartItem = DB::table('online_cart')
+            ->where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
 
         if (!$cartItem) {
             return response()->json(['message' => 'Không tìm thấy thông tin giỏ hàng cần sửa'], 404);
@@ -188,12 +194,18 @@ class OnlineCartController extends Controller
             ->first();
 
         $price = $productDetail->sale ?? $productDetail->price;
+
         if ($request->quantity > $productDetail->quantity) {
             return response()->json([
                 'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
-                'message' => 'error'
+                'message' => 'error',
+                'data' => [
+                    'soluong' => $productDetail->quantity,
+                    'soluongkhachguilen' => $request->quantity,
+                ],
             ], 400);
         }
+        
         $validated = $request->validate([
             'quantity' => 'integer|min:1|max:100'
         ]);

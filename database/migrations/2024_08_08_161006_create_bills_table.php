@@ -27,7 +27,18 @@ return new class extends Migration
 
             $table->text('note')->nullable(); 
             $table->enum('order_type', ['in_restaurant', 'online'])->default('online');
-            $table->enum('status', ['pending', 'confirmed', 'preparing', 'shipping', 'completed', 'cancelled', 'failed'])->default('pending');
+            $table->enum('status', [
+                'pending',
+                'confirmed',
+                'preparing',
+                'shipping',
+                'completed',
+                'cancelled',
+                'failed',
+                'cancellation_requested',
+                'cancellation_approved',
+                'cancellation_rejected'
+            ])->default('pending');
 
             $table->string('table_number')->nullable(); // Số bàn (nếu ăn tại quán)
             $table->timestamps();

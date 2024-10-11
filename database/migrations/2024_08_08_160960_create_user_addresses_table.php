@@ -11,11 +11,13 @@ return new class extends Migration
         Schema::create('user_addresses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('fullname');
+            $table->number('phone');
+            $table->string('city');
+            $table->string('commune');
             $table->string('address');
-            $table->string('city')->nullable();
-            $table->string('state')->nullable();
             $table->string('postal_code')->nullable();
-            $table->string('country')->nullable();
+            $table->string('country')->default('Việt Nam');
             $table->boolean('is_default')->default(false);
             $table->timestamps();
         });

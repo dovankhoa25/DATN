@@ -17,6 +17,7 @@ class CategoryClientResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'image' => $this->image,
             // 'name_parent' => $this->parent ? $this->parent->name : null,
             'subcategory' => CategoryClientResource::collection($this->whenLoaded('subcategories')),
         ];

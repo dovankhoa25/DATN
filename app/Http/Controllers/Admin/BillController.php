@@ -62,11 +62,6 @@ class BillController extends Controller
     }
 
 
-    public function edit(string $id)
-    {
-        //
-    }
-
     public function update(Request $request, string $id)
     {
         try {
@@ -112,12 +107,6 @@ class BillController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'không tìm thấy bills'], 404);
         }
-    }
-
-
-    public function destroy(string $id)
-    {
-        //
     }
 
     private function randomMaBill()

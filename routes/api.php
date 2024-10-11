@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\client\BillUser;
 use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
@@ -133,6 +134,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
 Route::prefix('client')->middleware('check.api.key')->group(function () {
 
+
+    // oder qua web 
     Route::apiResource('online_cart', OnlineCartController::class)->middleware('auth');
 
     Route::apiResource('category', ClientCategoryController::class);
@@ -143,6 +146,7 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     // vouchers của customer
     Route::get('/vouchers_customer', [ClientVoucherController::class, 'vouchersCustomer']);
 
+    // table
 
     Route::prefix('order_table')->middleware('auth')->group(function () {
         Route::get('/', [ClientTimeOrderTableController::class, 'index']);
@@ -152,6 +156,7 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
         Route::delete('/{id}', [ClientTimeOrderTableController::class, 'destroy']);
     });
 
+    // cart oder trực tiếp
     Route::prefix('order_cart')->middleware('auth')->group(function () {
         Route::get('/', [OrderCartController::class, 'index']);
         Route::get('/{ma_bill}', [OrderCartController::class, 'show']);
@@ -160,13 +165,15 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
         // Route::delete('/{id}', [OrderCartController::class, 'destroy']);
     });
 
+
+
     Route::prefix('profile')->middleware('auth')->group(function () {
         Route::get('/', [UpdateProfileController::class, 'index']);
         Route::put('/{id}', [UpdateProfileController::class, 'update']);
     });
 
 
-
+    // product 
     Route::get('products', [ProductClientController::class, 'getProduct']); // fe lấy cái này theo product k lấy detail 
     Route::get('products_details', [ProductClientController::class, 'getProductAllWithDetail']); // fe lấy cái này all cả detail 
     Route::get('product/{id}', [ProductClientController::class, 'getProductWithDetailByID']); // api get theo id product nhé fe
@@ -179,13 +186,6 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
 
     Route::get('list_payments', [ClientPaymentController::class, 'listPaymentTrue']);
 
-    Route::prefix('order_cart')->middleware('auth')->group(function () {
-        Route::get('/', [OrderCartController::class, 'index']);
-        Route::get('/{ma_bill}', [OrderCartController::class, 'show']);
-        Route::post('/', [OrderCartController::class, 'store']);
-        Route::put('/{id}', [OrderCartController::class, 'update']);
-        // Route::delete('/{id}', [OrderCartController::class, 'destroy']);
-    });
 
     Route::prefix('profile')->middleware('auth')->group(function () {
         Route::get('/', [UpdateProfileController::class, 'index']);
@@ -193,4 +193,14 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
         Route::put('/{idUser}', [UpdateProfileController::class, 'update']);
         Route::put('/update_address/{idAddress}', [UpdateProfileController::class, 'updateAddress']);
     });
+
+
+    Route::get('bill_user', [BillUser::class, 'billUser'])->middleware('auth');
+    Route::post('bill_store', [BillUser::class, 'store'])->middleware('auth');
+    Route::put('bills/{id}/cancel', [BillController::class, 'requestCancelBill'])->middleware('auth');
+
+
+
+
+
 });
