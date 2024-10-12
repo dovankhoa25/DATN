@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->decimal('value', 8, 2);
             $table->string('image')->nullable();
-            $table->date('expiration_date')->nullable();
+            $table->date('star_date');
+            $table->date('end_date');
             $table->boolean('status')->default(true);
             $table->foreignId('customer_id')->nullable()->constrained('customers');
             $table->softDeletes();

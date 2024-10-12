@@ -33,6 +33,10 @@ class Product extends Model
     }
 
 
+    public static function getProductWithDetails($id)
+    {
+        return self::with(['productDetails.images', 'category', 'productDetails.size'])->findOrFail($id);
+    }
 
 
 

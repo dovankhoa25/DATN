@@ -45,7 +45,8 @@ class ProductController extends Controller
 
         $products = $productIds->map(function ($id) {
             return Cache::remember('product:' . $id, 600, function () use ($id) {
-                return Product::with(['productDetails.images', 'category'])->find($id);
+                // return Product::with(['productDetails.images', 'category'])->find($id);
+                return Product::getProductWithDetails($id);
             });
         });
 
@@ -97,11 +98,11 @@ class ProductController extends Controller
             }
 
             DB::commit();
-            $product->load('productDetails.images', 'category');
-
+            // $product->load('productDetails.images', 'category');
+            $product = Product::getProductWithDetails($product->id);
             Cache::put('product:' . $product->id, $product, 600);
 
-            return new ProductResource($product->load('productDetails.images'));
+            return new ProductResource($product);
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
@@ -235,7 +236,8 @@ class ProductController extends Controller
 
             DB::commit();
 
-            Cache::put('product:' . $product->id, $product->load('productDetails.images'), 600);
+            // Cache::put('product:' . $product->id, $product->load('productDetails.images'), 600);
+            Cache::put('product:' . $product->id, Product::getProductWithDetails($product->id), 600);
 
             return new ProductResource($product->load('productDetails.images'));
         } catch (\Throwable $e) {
@@ -328,8 +330,9 @@ class ProductController extends Controller
             $product->status = !$product->status;
             $product->save();
 
-            Cache::put('product:' . $product->id, $product->load('productDetails.images'), 600);
+            // Cache::put('product:' . $product->id, $product->load('productDetails.images'), 600);
 
+            Cache::put('product:' . $product->id, Product::getProductWithDetails($product->id), 600);
             if ($product->status) {
                 return response()->json(['message' => 'hiện'], 200);
             } else {
