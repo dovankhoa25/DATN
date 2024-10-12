@@ -76,7 +76,7 @@ class BillUser extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
 
-        $selectedItems = $request->get('productdetail_items');
+        $selectedItems = $request->get('cart_items');
         $usePoints = $request->get('use_points', false);
         $voucherId = $request->get('voucher_id');
         if (empty($selectedItems)) {
@@ -86,19 +86,31 @@ class BillUser extends Controller
         $totalAmount = 0;
 
 
-        foreach ($selectedItems as $item) {
-            $productDetail = ProductDetail::find($item['product_detail_id']);
 
-            if (!$productDetail || $productDetail->quantity < $item['quantity']) {
+        foreach ($selectedItems as $cartId) {
+            $cartItem = OnlineCart::where('id', $cartId)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if (!$cartItem) {
+                return response()->json([
+                    'error' => 'Giỏ hàng không tồn tại hoặc đã bị xóa.',
+                ], 400);
+            }
+
+            $productDetail = ProductDetail::find($cartItem->product_detail_id);
+
+            if (!$productDetail || $productDetail->quantity < $cartItem->quantity) {
                 return response()->json([
                     'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm hoặc sản phẩm không tồn tại.',
-                    'product_detail_id' => $item['product_detail_id']
+                    'product_detail_id' => $cartItem->product_detail_id
                 ], 400);
             }
 
             $price = $productDetail->sale ?? $productDetail->price;
-            $totalAmount += $price * $item['quantity'];
+            $totalAmount += $price * $cartItem->quantity;
         }
+
 
 
         if ($voucherId) {
@@ -173,14 +185,9 @@ class BillUser extends Controller
 
 
 
-    private function handleRefund($bill)
-    {
-        // Xử lý hoàn tiền cho người dùng
-        // Nếu người dùng đã thanh toán bằng tiền mặt, chuyển khoản hoặc điểm thưởng
-        // Bạn cần triển khai logic hoàn tiền tương ứng
-    }
+    private function handleRefund($bill) {}
 
-    
+
     private function notifyUser($bill)
     {
         $user = User::find($bill->user_id);
@@ -197,6 +204,24 @@ class BillUser extends Controller
             return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
         }
 
+        if ($bill->status == 'pending') {
+            $bill->status = 'cancelled';
+            $bill->save();
+
+            $billDetails = BillDetail::where('bill_id', $bill->id)->get();
+
+            foreach ($billDetails as $detail) {
+                $productDetail = ProductDetail::find($detail->product_detail_id);
+                if ($productDetail) {
+                    $productDetail->quantity += $detail->quantity;
+                    $productDetail->save();
+                }
+            }
+
+            return response()->json(['message' => 'Đơn hàng đã được hủy'], 200);
+        }
+
+
         if (in_array($bill->status, ['completed', 'cancelled', 'failed', 'shipping'])) {
             return response()->json(['message' => 'Đơn hàng không thể hủy ở trạng thái hiện tại'], 400);
         }
@@ -207,6 +232,7 @@ class BillUser extends Controller
 
         $bill->status = 'cancellation_requested';
         $bill->save();
+        // $this->notifyUser($bill);
 
         return response()->json(['message' => 'Yêu cầu hủy đơn hàng đã được gửi'], 200);
     }

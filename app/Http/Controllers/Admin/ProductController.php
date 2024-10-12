@@ -13,24 +13,43 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
 
+    // public function index(FilterProductRequest $request)
+    // {
+    //     try {
+
+    //         $perPage = $request['per_page'] ?? 10;
+
+    //         $products = Product::with(['productDetails.images', 'category'])
+    //             ->filter($request)
+    //             ->paginate($perPage);
+
+    //         return ProductResource::collection($products);
+    //     } catch (ModelNotFoundException $e) {
+    //         return response()->json(['error' => 'Sản phẩm rỗng'], 404);
+    //     }
+    // }
+
     public function index(FilterProductRequest $request)
     {
-        try {
+        $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
 
-            $perPage = $request['per_page'] ?? 10;
+        $productIds = Product::filter($request->all())
+            ->paginate($perPage)
+            ->pluck('id');
 
-            $products = Product::with(['productDetails.images', 'category'])
-                ->filter($request)
-                ->paginate($perPage);
+        $products = $productIds->map(function ($id) {
+            return Cache::remember('product:' . $id, 600, function () use ($id) {
+                return Product::with(['productDetails.images', 'category'])->find($id);
+            });
+        });
 
-            return ProductResource::collection($products);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Sản phẩm rỗng'], 404);
-        }
+        return ProductResource::collection($products);
     }
 
 
@@ -78,6 +97,10 @@ class ProductController extends Controller
             }
 
             DB::commit();
+            $product->load('productDetails.images', 'category');
+
+            Cache::put('product:' . $product->id, $product, 600);
+
             return new ProductResource($product->load('productDetails.images'));
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -95,6 +118,100 @@ class ProductController extends Controller
 
 
 
+    // public function update(ProductRequest $request, $id)
+    // {
+    //     DB::beginTransaction();
+
+    //     try {
+    //         $product = Product::with('productDetails.images')->findOrFail($id);
+
+
+    //         if ($request->hasFile('thumbnail')) {
+    //             if ($product->thumbnail) {
+    //                 Storage::delete($product->thumbnail);
+    //             }
+
+    //             $thumbnailPath = $this->storeImage($request->file('thumbnail'), 'product/thumbal');
+    //         } else {
+    //             $thumbnailPath = $product->thumbnail;
+    //         }
+
+
+
+    //         $product->update([
+    //             'name' => $request->name,
+    //             'thumbnail' => $thumbnailPath,
+    //             'description' => $request->description,
+    //             'status' => $request->status,
+    //             'category_id' => $request->category_id,
+    //         ]);
+
+
+    //         if ($request->has('product_details')) {
+    //             foreach ($request->product_details as $detail) {
+    //                 $productDetail = ProductDetail::updateOrCreate(
+    //                     ['id' => $detail['id'] ?? null],
+
+    //                     [
+    //                         'size_id' => $detail['size_id'],
+    //                         'price' => $detail['price'],
+    //                         'quantity' => $detail['quantity'],
+    //                         'sale' => $detail['sale'],
+    //                         'status' => $detail['status'] ?? 1,
+    //                         'product_id' => $product->id,
+    //                     ]
+    //                 );
+
+    //                 $currentImages = $productDetail->images->pluck('id')->toArray();
+
+    //                 // $frontendImageIds = array_filter(array_column($detail['images'], 'id'));
+
+    //                 $frontendImageIds = $detail['image_old'] ?? [];
+
+
+    //                 $imagesToDelete = array_diff($currentImages, $frontendImageIds);
+    //                 $imagesToRemove = Image::whereIn('id', $imagesToDelete)->get();
+
+    //                 foreach ($imagesToRemove as $image) {
+    //                     if (Storage::exists($image->name)) {
+    //                         Storage::delete($image->name);
+    //                     }
+    //                     $image->delete();
+    //                 }
+    //                 // Image::whereIn('id', $imagesToDelete)->delete();
+
+
+    //                 if (isset($detail['images']) && is_array($detail['images']) && count($detail['images']) > 0) {
+    //                     foreach ($detail['images'] as $img) {
+    //                         if (isset($img['id'])) {
+    //                             Image::where('id', $img['id'])->update([
+    //                                 'name' => $img['file'] ? $this->storeImage($img['file'], 'product/images') : null,
+    //                                 'status' => $img['status'] ?? true,
+    //                             ]);
+    //                         } else {
+    //                             Image::create([
+    //                                 'name' => $this->storeImage($img['file'], 'product/images'),
+    //                                 'product_detail_id' => $productDetail->id,
+    //                             ]);
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         DB::commit();
+    //         Cache::put('product:' . $product->id, $product->load('productDetails.images'), 600);
+
+
+    //         return new ProductResource($product->load('productDetails.images'));
+    //     } catch (\Throwable $e) {
+    //         DB::rollBack();
+    //         return response()->json(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+    //     }
+    // }
+
+
+
+
     public function update(ProductRequest $request, $id)
     {
         DB::beginTransaction();
@@ -102,18 +219,7 @@ class ProductController extends Controller
         try {
             $product = Product::with('productDetails.images')->findOrFail($id);
 
-
-            if ($request->hasFile('thumbnail')) {
-                if ($product->thumbnail) {
-                    Storage::delete($product->thumbnail);
-                }
-
-                $thumbnailPath = $this->storeImage($request->file('thumbnail'), 'product/thumbal');
-            } else {
-                $thumbnailPath = $product->thumbnail;
-            }
-
-
+            $thumbnailPath = $this->handleThumbnail($request, $product);
 
             $product->update([
                 'name' => $request->name,
@@ -123,66 +229,85 @@ class ProductController extends Controller
                 'category_id' => $request->category_id,
             ]);
 
-
             if ($request->has('product_details')) {
-                foreach ($request->product_details as $detail) {
-                    $productDetail = ProductDetail::updateOrCreate(
-                        ['id' => $detail['id'] ?? null],
-
-                        [
-                            'size_id' => $detail['size_id'],
-                            'price' => $detail['price'],
-                            'quantity' => $detail['quantity'],
-                            'sale' => $detail['sale'],
-                            'status' => $detail['status'] ?? 1,
-                            'product_id' => $product->id,
-                        ]
-                    );
-
-                    $currentImages = $productDetail->images->pluck('id')->toArray();
-
-                    // $frontendImageIds = array_filter(array_column($detail['images'], 'id'));
-
-                    $frontendImageIds = $detail['image_old'] ?? [];
-
-
-                    $imagesToDelete = array_diff($currentImages, $frontendImageIds);
-                    $imagesToRemove = Image::whereIn('id', $imagesToDelete)->get();
-
-                    foreach ($imagesToRemove as $image) {
-                        if (Storage::exists($image->name)) {
-                            Storage::delete($image->name);
-                        }
-                        $image->delete();
-                    }
-                    // Image::whereIn('id', $imagesToDelete)->delete();
-
-
-                    if (isset($detail['images']) && is_array($detail['images']) && count($detail['images']) > 0) {
-                        foreach ($detail['images'] as $img) {
-                            if (isset($img['id'])) {
-                                Image::where('id', $img['id'])->update([
-                                    'name' => $img['file'] ? $this->storeImage($img['file'], 'product/images') : null,
-                                    'status' => $img['status'] ?? true,
-                                ]);
-                            } else {
-                                Image::create([
-                                    'name' => $this->storeImage($img['file'], 'product/images'),
-                                    'product_detail_id' => $productDetail->id,
-                                ]);
-                            }
-                        }
-                    }
-                    
-                }
+                $this->syncProductDetails($request->product_details, $product);
             }
+
             DB::commit();
+
+            Cache::put('product:' . $product->id, $product->load('productDetails.images'), 600);
+
             return new ProductResource($product->load('productDetails.images'));
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
+
+    private function handleThumbnail($request, $product)
+    {
+        if ($request->hasFile('thumbnail')) {
+            if ($product->thumbnail) {
+                Storage::delete($product->thumbnail);
+            }
+
+            return $this->storeImage($request->file('thumbnail'), 'product/thumbal');
+        }
+
+        return $product->thumbnail;
+    }
+
+    private function syncProductDetails($details, $product)
+    {
+        foreach ($details as $detail) {
+            $productDetail = ProductDetail::updateOrCreate(
+                ['id' => $detail['id'] ?? null],
+                [
+                    'size_id' => $detail['size_id'],
+                    'price' => $detail['price'],
+                    'quantity' => $detail['quantity'],
+                    'sale' => $detail['sale'],
+                    'status' => $detail['status'] ?? 1,
+                    'product_id' => $product->id,
+                ]
+            );
+
+            $this->syncProductImages($detail, $productDetail);
+        }
+    }
+
+    private function syncProductImages($detail, $productDetail)
+    {
+        $currentImages = $productDetail->images->pluck('id')->toArray();
+        $frontendImageIds = $detail['image_old'] ?? [];
+
+        $imagesToDelete = array_diff($currentImages, $frontendImageIds);
+        $imagesToRemove = Image::whereIn('id', $imagesToDelete)->get();
+
+        foreach ($imagesToRemove as $image) {
+            if (Storage::exists($image->name)) {
+                Storage::delete($image->name);
+            }
+            $image->delete();
+        }
+
+        if (isset($detail['images']) && is_array($detail['images'])) {
+            foreach ($detail['images'] as $img) {
+                if (isset($img['id'])) {
+                    Image::where('id', $img['id'])->update([
+                        'name' => $img['file'] ? $this->storeImage($img['file'], 'product/images') : null,
+                        'status' => $img['status'] ?? true,
+                    ]);
+                } else {
+                    Image::create([
+                        'name' => $this->storeImage($img['file'], 'product/images'),
+                        'product_detail_id' => $productDetail->id,
+                    ]);
+                }
+            }
+        }
+    }
+
 
 
 
@@ -194,13 +319,16 @@ class ProductController extends Controller
     }
 
 
-    
+
+
     public function updateStatus(Request $request, string $id)
     {
         try {
             $product = Product::findOrFail($id);
             $product->status = !$product->status;
             $product->save();
+
+            Cache::put('product:' . $product->id, $product->load('productDetails.images'), 600);
 
             if ($product->status) {
                 return response()->json(['message' => 'hiện'], 200);

@@ -9,19 +9,45 @@ use App\Http\Resources\Category\CategoryAdminResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
 
+    // public function index(FillterCategoryRequest $request)
+    // {
+    //     try {
+    //         $perPage = $request->get('per_page', 10);
+
+    //         $categories = Category::with('subcategories')
+    //             ->filter($request)
+    //             ->whereNull('parent_id')
+    //             ->paginate($perPage);
+    //         return CategoryAdminResource::collection($categories);
+    //     } catch (ModelNotFoundException $e) {
+    //         return response()->json(['error' => 'Không tìm thấy Category'], 404);
+    //     }
+    // }
+
     public function index(FillterCategoryRequest $request)
     {
-        try {
-            $perPage = $request->get('per_page', 10);
+        $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
 
+        $cacheKey = 'categories_page_' . $page . '_per_page_' . $perPage;
+        $cachedCategories = Cache::get($cacheKey);
+
+        if ($cachedCategories) {
+            return CategoryAdminResource::collection($cachedCategories);
+        }
+
+        try {
             $categories = Category::with('subcategories')
                 ->filter($request)
                 ->whereNull('parent_id')
                 ->paginate($perPage);
+
+            Cache::put($cacheKey, $categories->items(), 600);
             return CategoryAdminResource::collection($categories);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Không tìm thấy Category'], 404);

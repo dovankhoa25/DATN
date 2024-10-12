@@ -98,7 +98,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
 
     Route::apiResource('products', ProductController::class)->middleware('auth', 'checkRole:qtv,admin');
     Route::put('product/{id}/status', [ProductController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
-    // Route::post('products/{id}', [ProductController::class, 'update']);
+    Route::post('products/{id}', [ProductController::class, 'update']);
 
     // Bills
     Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
@@ -194,7 +194,7 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
         Route::put('/update_address/{idAddress}', [UpdateProfileController::class, 'updateAddress']);
     });
 
-
+    //bill client
     Route::get('bill_user', [BillUser::class, 'billUser'])->middleware('auth');
     Route::post('bill_store', [BillUser::class, 'store'])->middleware('auth');
     Route::put('bills/{id}/cancel', [BillController::class, 'requestCancelBill'])->middleware('auth');
