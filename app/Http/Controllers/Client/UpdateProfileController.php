@@ -109,7 +109,7 @@ class UpdateProfileController extends Controller
             ->first();
 
         if(!$checkAddress){
-            return response()->json(['error' => 'Bạn không thể sửa địa chỉ này'], 500);
+            return response()->json(['error' => 'Bạn không thể sửa địa chỉ này'], 400);
         }
 
         if ($request->get('is_default') == 1) {
@@ -199,8 +199,25 @@ class UpdateProfileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroyAddress(int $idAddress)
     {
-        //
+        $user = JWTAuth::parseToken()->authenticate();
+        $address = UserAddress::findOrFail($idAddress);
+
+        if($user->id != $address->user_id){
+            return response()->json(['error' => 'Bạn không thể xóa địa chỉ này'],400);
+        }
+
+        if($address->is_default == 1){
+            return response()->json(['error' => 'Không thể xóa địa chỉ mặc định'],400);
+        }
+
+        $res = $address->delete();
+
+        if ($res) {
+            return response()->json(['message' => 'success'], 204);
+        } else {
+            return response()->json(['error' => 'Xóa thất bại']);
+        }
     }
 }
