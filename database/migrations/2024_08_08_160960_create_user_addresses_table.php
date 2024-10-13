@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('fullname');
-            $table->number('phone');
+            $table->bigInteger('phone');
             $table->string('city');
             $table->string('commune');
             $table->string('address');
@@ -23,9 +23,9 @@ return new class extends Migration
         });
     }
 
+
     public function down()
     {
         Schema::dropIfExists('user_addresses');
     }
-    
 };

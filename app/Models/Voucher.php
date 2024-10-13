@@ -41,8 +41,10 @@ class Voucher extends Model
         'name',
         'value',
         'image',
+        'star_date',
+        'end_date',
         'status',
         'customer_id',
-        'expiration_date',
+        'quantity',
     ];
 }

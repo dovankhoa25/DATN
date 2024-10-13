@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class BillDetail extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'bill_id',
+        'product_detail_id',
+        'quantity',
+        'price',
+    ];
+    
     // Định nghĩa quan hệ với Bill
     public function bill()
     {

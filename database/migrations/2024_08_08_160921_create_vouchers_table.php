@@ -20,10 +20,12 @@ return new class extends Migration
             $table->date('end_date');
             $table->boolean('status')->default(true);
             $table->foreignId('customer_id')->nullable()->constrained('customers');
+            $table->unsignedInteger('quantity')->default(0);
             $table->softDeletes();
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

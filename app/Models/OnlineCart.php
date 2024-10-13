@@ -49,4 +49,11 @@ class OnlineCart extends Model
 
         return $query;
     }
+
+
+    public function productDetail()
+    {
+        return $this->belongsTo(ProductDetail::class, 'product_detail_id', 'id');
+    }
+    
 }

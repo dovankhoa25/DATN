@@ -25,8 +25,10 @@ return new class extends Migration
             $table->foreignId('payment_id')->constrained('payments');
             $table->foreignId('voucher_id')->nullable()->constrained('vouchers');
 
-            $table->text('note')->nullable(); 
+            $table->text('note')->nullable();
             $table->enum('order_type', ['in_restaurant', 'online'])->default('online');
+            $table->string('table_number')->nullable();
+
             $table->enum('status', [
                 'pending',
                 'confirmed',
@@ -40,7 +42,8 @@ return new class extends Migration
                 'cancellation_rejected'
             ])->default('pending');
 
-            $table->string('table_number')->nullable(); // Số bàn (nếu ăn tại quán)
+            $table->enum('payment_status', ['pending', 'paid', 'successful', 'failed', 'refunded'])->default('pending');
+            $table->timestamp('qr_expiration')->nullable();
             $table->timestamps();
         });
     }

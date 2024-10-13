@@ -14,3 +14,12 @@
 4. Bổ sung bảng : user_addres 
     - lưu lại địa chỉ người dùng
     - list ra khi đặt hàng để người dùng chọn thuận tiện trong list addres
+
+5. cập nhật migrate 13/10
+    - voucher thêm star date + end date ( đã bổ sung model)
+    -  thêm price bảng billdeatil nếu sản phẩm đổi giá theo time : $table->decimal('price', 10, 2);
+    - cập nhật bill + qr code time ( đã thêm model) : 
+        $table->enum('payment_status', ['pending', 'paid', 'successful',       'failed', 'refunded'])->default('pending');
+        $table->timestamp('qr_expiration')->nullable();
+    - sẽ cập nhât lại cart bỏ trường price sau 
+    - 

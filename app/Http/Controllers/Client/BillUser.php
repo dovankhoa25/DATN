@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\client;
 
+use App\Events\BillCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\Client\StoreBillRequest;
 use App\Http\Resources\BillResource;
@@ -9,10 +10,14 @@ use App\Models\Bill;
 use App\Models\BillDetail;
 use App\Models\Customer;
 use App\Models\OnlineCart;
+use App\Models\Payment;
 use App\Models\ProductDetail;
 use App\Models\User;
 use App\Models\Voucher;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 
@@ -72,6 +77,96 @@ class BillUser extends Controller
 
 
 
+    // public function store(StoreBillRequest $request)
+    // {
+    //     $user = JWTAuth::parseToken()->authenticate();
+
+    //     $selectedItems = $request->get('cart_items');
+    //     $usePoints = $request->get('use_points', false);
+    //     $voucherId = $request->get('voucher_id');
+
+    //     if (empty($selectedItems)) {
+    //         return response()->json(['message' => 'Không có sản phẩm nào được chọn'], 400);
+    //     }
+
+    //     $cartItems = OnlineCart::where('user_id', $user->id)
+    //         ->whereIn('id', $selectedItems)
+    //         ->with('productDetail')
+    //         ->get();
+
+    //     if ($cartItems->isEmpty()) {
+    //         return response()->json(['error' => 'Giỏ hàng không tồn tại hoặc đã bị xóa.'], 400);
+    //     }
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         $totalAmount = $this->calculateTotalAmount($cartItems);
+
+    //         $totalAmount = $this->applyVoucher($voucherId, $totalAmount);
+
+    //         $customer = Customer::where('user_id', $user->id)->first();
+    //         if ($usePoints && $customer) {
+    //             [$totalAmount, $diemtru] = $this->applyPoints($customer, $totalAmount);
+    //         }
+
+    //         $bill = Bill::create([
+    //             'ma_bill' => $this->randomMaBill(),
+    //             'user_id' => $user->id,
+    //             'customer_id' => null,
+    //             'user_addresses_id' => $request->get('user_addresses_id'),
+    //             'order_date' => now(),
+    //             'total_amount' => $totalAmount,
+    //             'branch_address' => $request->get('branch_address'),
+    //             'payment_id' => $request->get('payment_id'),
+    //             'voucher_id' => $voucherId,
+    //             'note' => $request->get('note'),
+    //             'order_type' => $request->get('order_type', 'online'),
+    //             'status' => 'pending',
+    //             'table_number' => $request->get('table_number'),
+    //         ]);
+
+    //         $billDetails = [];
+    //         $productDetailsToUpdate = [];
+
+    //         foreach ($cartItems as $cartItem) {
+    //             $billDetails[] = [
+    //                 'bill_id' => $bill->id,
+    //                 'product_detail_id' => $cartItem->product_detail_id,
+    //                 'quantity' => $cartItem->quantity,
+    //                 'price' => $cartItem->productDetail->price,
+    //             ];
+
+    //             if (isset($productDetailsToUpdate[$cartItem->product_detail_id])) {
+    //                 $productDetailsToUpdate[$cartItem->product_detail_id] += $cartItem->quantity;
+    //             } else {
+    //                 $productDetailsToUpdate[$cartItem->product_detail_id] = $cartItem->quantity;
+    //             }
+    //         }
+    //         BillDetail::insert($billDetails);
+    //         foreach ($productDetailsToUpdate as $productDetailId => $quantity) {
+    //             ProductDetail::where('id', $productDetailId)->decrement('quantity', $quantity);
+    //         }
+
+
+    //         OnlineCart::where('user_id', $user->id)
+    //             ->whereIn('product_detail_id', $cartItems->pluck('product_detail_id'))
+    //             ->delete();
+
+    //         DB::commit();
+
+    //         event(new BillCreated($bill));
+
+    //         return response()->json([
+    //             'message' => 'Đặt hàng thành công',
+    //             'bill' => new BillResource($bill)
+    //         ], 201);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         return response()->json(['error' => $e->getMessage()], 400);
+    //     }
+    // }
+
     public function store(StoreBillRequest $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -79,109 +174,160 @@ class BillUser extends Controller
         $selectedItems = $request->get('cart_items');
         $usePoints = $request->get('use_points', false);
         $voucherId = $request->get('voucher_id');
+        $paymentId = $request->get('payment_id');
+
         if (empty($selectedItems)) {
             return response()->json(['message' => 'Không có sản phẩm nào được chọn'], 400);
         }
 
-        $totalAmount = 0;
+        $cartItems = OnlineCart::where('user_id', $user->id)
+            ->whereIn('id', $selectedItems)
+            ->with('productDetail')
+            ->get();
 
+        if ($cartItems->isEmpty()) {
+            return response()->json(['error' => 'Giỏ hàng không tồn tại hoặc đã bị xóa.'], 400);
+        }
 
+        try {
+            DB::beginTransaction();
 
-        foreach ($selectedItems as $cartId) {
-            $cartItem = OnlineCart::where('id', $cartId)
-                ->where('user_id', $user->id)
-                ->first();
+            $totalAmount = $this->calculateTotalAmount($cartItems);
+            $totalAmount = $this->applyVoucher($voucherId, $totalAmount);
 
-            if (!$cartItem) {
-                return response()->json([
-                    'error' => 'Giỏ hàng không tồn tại hoặc đã bị xóa.',
-                ], 400);
+            $customer = Customer::where('user_id', $user->id)->first();
+            if ($usePoints && $customer) {
+                [$totalAmount, $diemtru] = $this->applyPoints($customer, $totalAmount);
             }
 
-            $productDetail = ProductDetail::find($cartItem->product_detail_id);
+            $payment = Cache::get("payment:{$paymentId}");
+
+            if (!$payment) {
+                $payment = Payment::find($paymentId);
+
+                if (!$payment) {
+                    return response()->json(['error' => 'Phương thức thanh toán không hợp lệ.'], 400);
+                }
+
+                Cache::put("payment:{$paymentId}", $payment, 60 * 600);
+            }
+
+            $paymentStatus = ($payment->name === 'ATM') ? 'pending' : null;
+            $qrExpiration = ($payment->name === 'ATM') ? now()->addMinutes(10) : null;
+
+            $bill = Bill::create([
+                'ma_bill' => $this->randomMaBill(),
+                'user_id' => $user->id,
+                'customer_id' => null,
+                'user_addresses_id' => $request->get('user_addresses_id'),
+                'order_date' => now(),
+                'total_amount' => $totalAmount,
+                'branch_address' => $request->get('branch_address'),
+                'payment_id' => $paymentId,
+                'voucher_id' => $voucherId,
+                'note' => $request->get('note'),
+                'order_type' => $request->get('order_type', 'online'),
+                'status' => 'pending',
+                'payment_status' => $paymentStatus,
+                'qr_expiration' => $qrExpiration,
+                'table_number' => $request->get('table_number'),
+            ]);
+
+            $billDetails = [];
+            $productDetailsToUpdate = [];
+
+            foreach ($cartItems as $cartItem) {
+                $billDetails[] = [
+                    'bill_id' => $bill->id,
+                    'product_detail_id' => $cartItem->product_detail_id,
+                    'quantity' => $cartItem->quantity,
+                    'price' => $cartItem->productDetail->price,
+                ];
+
+                if (isset($productDetailsToUpdate[$cartItem->product_detail_id])) {
+                    $productDetailsToUpdate[$cartItem->product_detail_id] += $cartItem->quantity;
+                } else {
+                    $productDetailsToUpdate[$cartItem->product_detail_id] = $cartItem->quantity;
+                }
+            }
+
+            BillDetail::insert($billDetails);
+            foreach ($productDetailsToUpdate as $productDetailId => $quantity) {
+                ProductDetail::where('id', $productDetailId)->decrement('quantity', $quantity);
+            }
+
+            OnlineCart::where('user_id', $user->id)
+                ->whereIn('product_detail_id', $cartItems->pluck('product_detail_id'))
+                ->delete();
+
+            DB::commit();
+
+            event(new BillCreated($bill));
+
+            return response()->json([
+                'message' => 'Đặt hàng thành công',
+                'bill' => new BillResource($bill)
+            ], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+
+
+    private function calculateTotalAmount($cartItems)
+    {
+        $totalAmount = 0;
+        foreach ($cartItems as $cartItem) {
+            $productDetail = $cartItem->productDetail;
 
             if (!$productDetail || $productDetail->quantity < $cartItem->quantity) {
-                return response()->json([
-                    'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm hoặc sản phẩm không tồn tại.',
-                    'product_detail_id' => $cartItem->product_detail_id
-                ], 400);
+
+                throw new Exception('Sản phẩm không tồn tại hoặc không đủ số lượng.');
             }
 
             $price = $productDetail->sale ?? $productDetail->price;
             $totalAmount += $price * $cartItem->quantity;
         }
 
-
-
-        if ($voucherId) {
-            $voucher = Voucher::find($voucherId);
-            if ($voucher) {
-                $totalAmount -= $voucher->discount_amount;
-                if ($totalAmount < 0) $totalAmount = 0;
-            }
-        }
-
-        $customer = Customer::where('user_id', $user->id)->first();
-        if ($usePoints && $customer) {
-            $diemthuong = $customer->diemthuong;
-
-            if ($diemthuong > 0) {
-                if ($diemthuong >= $totalAmount) {
-                    $diemtru = $totalAmount;
-                    $customer->diemthuong -= $diemtru;
-                    $totalAmount = 0;
-                } else {
-                    $diemtru = $diemthuong;
-                    $totalAmount -= $diemthuong;
-                    $customer->diemthuong = 0;
-                }
-
-                $customer->save();
-            }
-        }
-
-
-
-        $bill = Bill::create([
-            'ma_bill' => $this->randomMaBill(),
-            'user_id' => $user->id,
-            'customer_id' => null,
-            'user_addresses_id' => $request->get('user_addresses_id'),
-            'order_date' => now(),
-            'total_amount' => $totalAmount,
-            'branch_address' => $request->get('branch_address'),
-            'payment_id' => $request->get('payment_id'),
-            'voucher_id' => $voucherId,
-            'note' => $request->get('note'),
-            'order_type' => $request->get('order_type', 'online'),
-            'status' => 'pending',
-            'table_number' => $request->get('table_number'),
-        ]);
-
-
-        foreach ($selectedItems as $item) {
-            BillDetail::create([
-                'bill_id' => $bill->id,
-                'product_detail_id' => $item['product_detail_id'],
-                'quantity' => $item['quantity'],
-            ]);
-
-
-            $productDetail = ProductDetail::find($item['product_detail_id']);
-            $productDetail->quantity -= $item['quantity'];
-            $productDetail->save();
-        }
-
-
-        OnlineCart::where('user_id', $user->id)
-            ->whereIn('product_detail_id', array_column($selectedItems, 'product_detail_id'))
-            ->delete();
-
-        return response()->json([
-            'message' => 'Đặt hàng thành công',
-            'bill' => new BillResource($bill)
-        ], 201);
+        return $totalAmount;
     }
+
+
+
+
+    private function applyVoucher($voucherId, $totalAmount)
+    {
+        $voucher = Voucher::find($voucherId);
+
+        if ($voucher && is_numeric($voucher->discount_amount)) {
+            $totalAmount -= $voucher->discount_amount;
+            return max(0, $totalAmount);
+        }
+
+        return $totalAmount;
+    }
+
+
+    private function applyPoints(Customer $customer, $totalAmount)
+    {
+        $diemtru = 0;
+        if ($customer->diemthuong > 0) {
+            if ($customer->diemthuong >= $totalAmount) {
+                $diemtru = $totalAmount;
+                $customer->diemthuong -= $diemtru;
+                $totalAmount = 0;
+            } else {
+                $diemtru = $customer->diemthuong;
+                $totalAmount -= $customer->diemthuong;
+                $customer->diemthuong = 0;
+            }
+            $customer->save();
+        }
+        return [$totalAmount, $diemtru];
+    }
+
 
 
 

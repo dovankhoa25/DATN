@@ -21,10 +21,9 @@ class Bill extends Model
         'voucher_id',
         'note',
         'order_type',
-        'status',
         'table_number',
-        'note',
-        'status'
+        'status',
+        'payment_status',
     ];
 
     public function billDetails()
