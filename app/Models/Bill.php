@@ -24,8 +24,11 @@ class Bill extends Model
         'table_number',
         'status',
         'payment_status',
+        'qr_expiration',
+        'payment_status',
     ];
-
+    protected $dates = ['order_date'];
+    
     public function billDetails()
     {
         return $this->hasMany(BillDetail::class, 'bill_id', 'id');

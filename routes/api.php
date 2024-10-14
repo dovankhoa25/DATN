@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Auth\AuthController;
 
 
 use App\Http\Controllers\Admin\CartController;

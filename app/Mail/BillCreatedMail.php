@@ -20,9 +20,7 @@ class BillCreatedMail extends Mailable
         $this->bill = $bill;
     }
 
-    /**
-     * Get the message envelope.
-     */
+
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -30,21 +28,19 @@ class BillCreatedMail extends Mailable
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
+ 
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.bill_created',
         );
+
+        // return new Content(
+        //     text: 'emails.bill_created',
+        // );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
+
     public function attachments(): array
     {
         return [];

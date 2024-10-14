@@ -6,6 +6,7 @@ use App\Events\BillCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\Client\StoreBillRequest;
 use App\Http\Resources\BillResource;
+use App\Jobs\CheckBillExpiration;
 use App\Models\Bill;
 use App\Models\BillDetail;
 use App\Models\Customer;
@@ -18,6 +19,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 
@@ -200,20 +202,16 @@ class BillUser extends Controller
                 [$totalAmount, $diemtru] = $this->applyPoints($customer, $totalAmount);
             }
 
-            $payment = Cache::get("payment:{$paymentId}");
-
+            $payment = Cache::remember("payment:{$paymentId}", 60 * 600, function () use ($paymentId) {
+                return Payment::find($paymentId);
+            });
+            
             if (!$payment) {
-                $payment = Payment::find($paymentId);
-
-                if (!$payment) {
-                    return response()->json(['error' => 'Phương thức thanh toán không hợp lệ.'], 400);
-                }
-
-                Cache::put("payment:{$paymentId}", $payment, 60 * 600);
+                return response()->json(['error' => 'Phương thức thanh toán không hợp lệ.'], 400);
             }
 
-            $paymentStatus = ($payment->name === 'ATM') ? 'pending' : null;
-            $qrExpiration = ($payment->name === 'ATM') ? now()->addMinutes(10) : null;
+            $paymentStatus = ($payment->name == 'ATM') ? 'pending' : 'pending';
+            $qrExpiration = ($payment->name === 'ATM') ? now()->addMinutes(1) : null;
 
             $bill = Bill::create([
                 'ma_bill' => $this->randomMaBill(),
@@ -232,7 +230,7 @@ class BillUser extends Controller
                 'qr_expiration' => $qrExpiration,
                 'table_number' => $request->get('table_number'),
             ]);
-
+            
             $billDetails = [];
             $productDetailsToUpdate = [];
 
@@ -251,7 +249,7 @@ class BillUser extends Controller
                 }
             }
 
-            BillDetail::insert($billDetails);
+            BillDetail::insert($billDetails);   
             foreach ($productDetailsToUpdate as $productDetailId => $quantity) {
                 ProductDetail::where('id', $productDetailId)->decrement('quantity', $quantity);
             }
@@ -261,7 +259,7 @@ class BillUser extends Controller
                 ->delete();
 
             DB::commit();
-
+            dispatch(new CheckBillExpiration($bill->id))->delay(now()->addMinutes(1));
             event(new BillCreated($bill));
 
             return response()->json([
@@ -300,19 +298,26 @@ class BillUser extends Controller
     private function applyVoucher($voucherId, $totalAmount)
     {
         $voucher = Voucher::find($voucherId);
-
-        if ($voucher && is_numeric($voucher->discount_amount)) {
-            $totalAmount -= $voucher->discount_amount;
+    
+        if ($voucher && $voucher->status && 
+            $voucher->start_date <= now() && 
+            $voucher->end_date >= now() && 
+            $voucher->quantity > 0) {
+            
+            $totalAmount -= $voucher->value;
+            
+            $voucher->decrement('quantity');
+    
             return max(0, $totalAmount);
         }
-
+    
         return $totalAmount;
     }
-
+    
 
     private function applyPoints(Customer $customer, $totalAmount)
     {
-        $diemtru = 0;
+        $diemtru = 0;   
         if ($customer->diemthuong > 0) {
             if ($customer->diemthuong >= $totalAmount) {
                 $diemtru = $totalAmount;

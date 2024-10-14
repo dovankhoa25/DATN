@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Events\BillProcessed;
-use App\Listeners\HandleBillProcessed;
+use App\Events\BillCreated;
+use App\Listeners\HandleBillCreated;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -20,8 +20,8 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        BillProcessed::class => [
-            HandleBillProcessed::class,
+        BillCreated::class => [
+            HandleBillCreated::class,
         ],
     ];
 

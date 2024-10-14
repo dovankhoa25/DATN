@@ -3,8 +3,11 @@
 namespace App\Listeners;
 
 use App\Events\BillCreated;
+use App\Jobs\SendBillCreatedEmail;
+use App\Mail\BillCreatedMail;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Mail;
 
 class HandleBillCreated implements ShouldQueue
 {
@@ -19,12 +22,13 @@ class HandleBillCreated implements ShouldQueue
     public function handle(BillCreated $event)
     {
 
-        // Gửi email, cập nhật điểm thưởng, thông báo tới hệ thống, v.v.
         $bill = $event->bill;
 
-        // Ví dụ: Gửi email thông báo đơn hàng đã được tạo
-        // \Mail::to($bill->user->email)->send(new BillCreatedMail($bill));
+        // meo sác nhận 
+        SendBillCreatedEmail::dispatch($bill);
 
-        // Cập nhật điểm thưởng hoặc các tác vụ khác
+        // cập nhật điểm 
+
+
     }
 }
