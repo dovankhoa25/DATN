@@ -23,9 +23,11 @@ class AddressRequest extends BaseApiRequest
     public function rules()
     {
         return [
+            'fullname' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'regex:/^[0-9]{10,15}$/'],
+            'commune' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
-            'state' => ['required', 'string', 'max:255'],
             'postal_code' => ['required', 'string', 'max:255'],
             'country' => ['required', 'string', 'max:255'],
             'is_default' => ['nullable', 'boolean']
@@ -35,14 +37,20 @@ class AddressRequest extends BaseApiRequest
     public function messages()
     {
         return [
+            'fullname.required' => 'Địa chỉ là bắt buộc',
+            'fullname.max' => 'Địa chỉ nhiều nhất là 255 kí tự',
+
+            'phone.required' => 'Địa chỉ là bắt buộc',
+            'phone.regex' => 'Số điện thoại không đúng định dạng',
+
+            'commune.required' => 'Địa chỉ là bắt buộc',
+            'commune.max' => 'Địa chỉ nhiều nhất là 255 kí tự',
+
             'address.required' => 'Địa chỉ là bắt buộc',
             'address.max' => 'Địa chỉ nhiều nhất là 255 kí tự',
 
             'city.required' => 'Địa chỉ là bắt buộc',
             'city.max' => 'Địa chỉ nhiều nhất là 255 kí tự',
-
-            'state.required' => 'Địa chỉ là bắt buộc',
-            'state.max' => 'Địa chỉ nhiều nhất là 255 kí tự',
 
             'postal_code.required' => 'Địa chỉ là bắt buộc',
             'postal_code.max' => 'Địa chỉ nhiều nhất là 255 kí tự',

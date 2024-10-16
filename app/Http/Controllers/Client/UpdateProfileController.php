@@ -23,9 +23,9 @@ class UpdateProfileController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Người dùng không tồn tại'], 404);
         }
-    
+
         $profileItem = User::with(['customer', 'addresses'])->where('id', $user->id)->first();
-    
+
         if ($profileItem) {
             if (!$profileItem->customer) {
                 $profileItem->setRelation('customer', collect());
@@ -34,20 +34,20 @@ class UpdateProfileController extends Controller
             if ($profileItem->addresses->isEmpty()) {
                 $profileItem->setRelation('addresses', collect());
             }
-    
-            $profileItem->makeHidden(['email_verified_at', 'created_at', 'updated_at']);
-            $customer = $profileItem->customer instanceof \Illuminate\Database\Eloquent\Model 
-                ? $profileItem->customer->makeHidden(['created_at', 'updated_at'])->toArray()
+
+            $profileItem->makeHidden(['deleted_at', 'is_locked', 'email_verified_at', 'created_at', 'updated_at']);
+            $customer = $profileItem->customer instanceof \Illuminate\Database\Eloquent\Model
+                ? $profileItem->customer->makeHidden(['deleted_at', 'created_at', 'updated_at'])->toArray()
                 : [];
-    
+
             $addresses = $profileItem->addresses->map(function ($address) {
-                return collect($address)->except(['created_at', 'updated_at'])->toArray();
+                return collect($address)->except(['deleted_at', 'created_at', 'updated_at'])->toArray();
             });
-    
+
             $profileItemArray = $profileItem->toArray();
             $profileItemArray['customer'] = $customer;
             $profileItemArray['addresses'] = $addresses;
-    
+
             return response()->json([
                 'data' => $profileItemArray,
                 'message' => 'success'
@@ -75,9 +75,11 @@ class UpdateProfileController extends Controller
 
         $res = UserAddress::create([
             'user_id' => $user->id,
+            'fullname' => $request->get('fullname'),
+            'phone' => $request->get('phone'),
+            'commune' => $request->get('commune'),
             'address' => $request->get('address'),
             'city' => $request->get('city'),
-            'state' => $request->get('state'),
             'postal_code' => $request->get('postal_code'),
             'country' => $request->get('country'),
             'is_default' => $request->get('is_default')
@@ -108,7 +110,7 @@ class UpdateProfileController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        if(!$checkAddress){
+        if (!$checkAddress) {
             return response()->json(['error' => 'Bạn không thể sửa địa chỉ này'], 500);
         }
 
@@ -119,16 +121,18 @@ class UpdateProfileController extends Controller
         }
 
         DB::table('user_addresses')
-        ->where('id', $idAddress)
-        ->update([
-            'user_id' => $user->id,
-            'address' => $request->get('address'),
-            'city' => $request->get('city'),
-            'state' => $request->get('state'),
-            'postal_code' => $request->get('postal_code'),
-            'country' => $request->get('country'),
-            'is_default' => $request->get('is_default')
-        ]);
+            ->where('id', $idAddress)
+            ->update([
+                'user_id' => $user->id,
+                'fullname' => $request->get('fullname'),
+                'phone' => $request->get('phone'),
+                'commune' => $request->get('commune'),
+                'address' => $request->get('address'),
+                'city' => $request->get('city'),
+                'postal_code' => $request->get('postal_code'),
+                'country' => $request->get('country'),
+                'is_default' => $request->get('is_default')
+            ]);
         $addressAupdate = DB::table('user_addresses')->where('id', $idAddress)->first();
         if ($addressAupdate) {
             return response()->json([
@@ -166,7 +170,7 @@ class UpdateProfileController extends Controller
 
         $checkPass = $profileItem->password;
         $userName = $request->get('name') ?? $profileItem->name;
-      
+
         if (!Hash::check($request->get('old_password'), $checkPass)) {
             return response()->json(['message' => 'Sai mật khẩu cũ'], 404);
         }
@@ -199,8 +203,25 @@ class UpdateProfileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroyAddress(int $idAddress)
     {
-        //
+        $user = JWTAuth::parseToken()->authenticate();
+        $address = UserAddress::findOrFail($idAddress);
+
+        if ($user->id != $address->user_id) {
+            return response()->json(['error' => 'Bạn không thể xóa địa chỉ này'], 400);
+        }
+
+        if ($address->is_default == 1) {
+            return response()->json(['error' => 'Không thể xóa địa chỉ mặc định'], 400);
+        }
+
+        $res = $address->delete();
+
+        if ($res) {
+            return response()->json(['message' => 'success'], 204);
+        } else {
+            return response()->json(['error' => 'Xóa thất bại']);
+        }
     }
 }
