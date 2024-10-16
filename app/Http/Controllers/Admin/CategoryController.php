@@ -35,24 +35,18 @@ class CategoryController extends Controller
         $page = $request->get('page', 1);
 
         $cacheKey = 'categories_page_' . $page . '_per_page_' . $perPage;
-        $cachedCategories = Cache::get($cacheKey);
 
-        if ($cachedCategories) {
-            return CategoryAdminResource::collection($cachedCategories);
-        }
-
-        try {
-            $categories = Category::with('subcategories')
+        $categories = Cache::remember($cacheKey, 600, function () use ($request, $perPage) {
+            return Category::with('subcategories')
                 ->filter($request)
                 ->whereNull('parent_id')
                 ->paginate($perPage);
+        });
 
-            Cache::put($cacheKey, $categories->items(), 600);
-            return CategoryAdminResource::collection($categories);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Không tìm thấy Category'], 404);
-        }
+        return CategoryAdminResource::collection($categories);
     }
+
+
 
     public function store(CategoryRequest $request)
     {

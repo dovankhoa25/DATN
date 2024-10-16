@@ -52,7 +52,7 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$accessToken = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => 'user không tồn tại hoặc sai Mật Khẩu'], 401);
         }
 
         // $user = JWTAuth::user();
@@ -102,7 +102,7 @@ class AuthController extends Controller
             ->first();
 
         if (!$storedToken) {
-            return response()->json(['error' => 'token không hợp lệ hoặc đã hết hạn'], 401);
+            return response()->json(['error' => 'token không hợp lệ hoặc đã hết hạn'], 402);
         }
 
         $user = User::find($storedToken->user_id);

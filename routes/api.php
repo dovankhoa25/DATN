@@ -197,10 +197,5 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     //bill client
     Route::get('bill_user', [BillUser::class, 'billUser'])->middleware('auth');
     Route::post('bill_store', [BillUser::class, 'store'])->middleware('auth');
-    Route::put('bills/{id}/cancel', [BillController::class, 'requestCancelBill'])->middleware('auth');
-
-
-
-
-
+    Route::put('bills/{id}/cancel', [BillUser::class, 'requestCancelBill'])->middleware('auth');
 });
