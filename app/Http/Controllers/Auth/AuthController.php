@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Jobs\CreateOrUpdateCustomerJob;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +37,7 @@ class AuthController extends Controller
             'expires_at' => now()->addDays(7),
         ]);
 
-
+        CreateOrUpdateCustomerJob::dispatch($user);
         return response()->json([
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,

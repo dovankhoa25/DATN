@@ -5,6 +5,7 @@ namespace App\Http\Controllers\client;
 use App\Events\BillCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\Client\StoreBillRequest;
+use App\Http\Resources\BillDetailResource;
 use App\Http\Resources\BillResource;
 use App\Jobs\CheckBillExpiration;
 use App\Models\Bill;
@@ -16,6 +17,7 @@ use App\Models\ProductDetail;
 use App\Models\User;
 use App\Models\Voucher;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -205,7 +207,7 @@ class BillUser extends Controller
             $payment = Cache::remember("payment:{$paymentId}", 60 * 600, function () use ($paymentId) {
                 return Payment::find($paymentId);
             });
-            
+
             if (!$payment) {
                 return response()->json(['error' => 'Phương thức thanh toán không hợp lệ.'], 400);
             }
@@ -230,7 +232,7 @@ class BillUser extends Controller
                 'qr_expiration' => $qrExpiration,
                 'table_number' => $request->get('table_number'),
             ]);
-            
+
             $billDetails = [];
             $productDetailsToUpdate = [];
 
@@ -249,7 +251,7 @@ class BillUser extends Controller
                 }
             }
 
-            BillDetail::insert($billDetails);   
+            BillDetail::insert($billDetails);
             foreach ($productDetailsToUpdate as $productDetailId => $quantity) {
                 ProductDetail::where('id', $productDetailId)->decrement('quantity', $quantity);
             }
@@ -298,26 +300,28 @@ class BillUser extends Controller
     private function applyVoucher($voucherId, $totalAmount)
     {
         $voucher = Voucher::find($voucherId);
-    
-        if ($voucher && $voucher->status && 
-            $voucher->start_date <= now() && 
-            $voucher->end_date >= now() && 
-            $voucher->quantity > 0) {
-            
+
+        if (
+            $voucher && $voucher->status &&
+            $voucher->start_date <= now() &&
+            $voucher->end_date >= now() &&
+            $voucher->quantity > 0
+        ) {
+
             $totalAmount -= $voucher->value;
-            
+
             $voucher->decrement('quantity');
-    
+
             return max(0, $totalAmount);
         }
-    
+
         return $totalAmount;
     }
-    
+
 
     private function applyPoints(Customer $customer, $totalAmount)
     {
-        $diemtru = 0;   
+        $diemtru = 0;
         if ($customer->diemthuong > 0) {
             if ($customer->diemthuong >= $totalAmount) {
                 $diemtru = $totalAmount;
@@ -386,5 +390,34 @@ class BillUser extends Controller
         // $this->notifyUser($bill);
 
         return response()->json(['message' => 'Yêu cầu hủy đơn hàng đã được gửi'], 200);
+    }
+
+
+
+    public function showBillDetail(string $id)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+
+            $bill = Bill::where('id', $id)->where('user_id', $user->id)->first();
+
+            if (!$bill) {
+                return response()->json(['error' => 'Hóa đơn không tồn tại hoặc không thuộc về người dùng'], 403);
+            }
+
+            $billDetails = BillDetail::with(['productDetail.product'])
+                ->where('bill_id', $id)
+                ->get();
+
+            if ($billDetails->isEmpty()) {
+                return response()->json(['error' => 'Chi tiết hóa đơn không tồn tại'], 404);
+            }
+
+            return response()->json([
+                'data' => BillDetailResource::collection($billDetails),
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Chi tiết hóa đơn không tồn tại'], 404);
+        }
     }
 }
