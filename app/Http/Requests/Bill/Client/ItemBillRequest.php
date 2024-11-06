@@ -5,7 +5,7 @@ namespace App\Http\Requests\Bill\Client;
 use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class BillOderRequest extends BaseApiRequest
+class ItemBillRequest extends BaseApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,6 +24,7 @@ class BillOderRequest extends BaseApiRequest
     {
         return [
             'ma_bill' => 'required|string|exists:bills,ma_bill',
+            'id_order_cart' => 'array|required|exists:oder_cart,id',
         ];
     }
 
@@ -33,6 +34,10 @@ class BillOderRequest extends BaseApiRequest
             'ma_bill.required' => 'Mã hóa đơn là bắt buộc.',
             'ma_bill.string' => 'Mã hóa đơn phải là chuỗi ký tự.',
             'ma_bill.exists' => 'Mã hóa đơn không tồn tại trong hệ thống.',
+
+            'id_order_cart.array' => 'Giỏ hàng phải là một mảng.',
+            'id_order_cart.required' => 'Giỏ hàng là bắt buộc.',
+            'id_order_cart.exists' => 'Một hoặc nhiều sản phẩm trong giỏ hàng không tồn tại.',
         ];
     }
 }

@@ -22,7 +22,7 @@ use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
-use App\Http\Controllers\Client\BillOnlineController;
+use App\Http\Controllers\Client\BillOrderController;
 use App\Http\Controllers\client\BillUser;
 use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 
@@ -158,13 +158,10 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     });
 
     // cart oder trực tiếp
-    Route::prefix('order_cart')->middleware('auth')->group(function () {
-        Route::get('/', [OrderCartController::class, 'index']);
-        Route::get('/{ma_bill}', [OrderCartController::class, 'show']);
-        Route::post('/', [OrderCartController::class, 'store']);
-        Route::put('/{id}', [OrderCartController::class, 'update']);
-        // Route::delete('/{id}', [OrderCartController::class, 'destroy']);
-    });
+    Route::get('order_cart/{ma_bill}', [OrderCartController::class, 'show']);
+    Route::post('order_cart/', [OrderCartController::class, 'store']);
+    Route::put('order_cart/{id}', [OrderCartController::class, 'update']);
+    // Route::delete('/{id}', [OrderCartController::class, 'destroy']);
 
 
 
@@ -202,5 +199,9 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     Route::put('bills/{id}/cancel', [BillUser::class, 'requestCancelBill'])->middleware('auth');
     Route::get('billdetail/{id}', [BillUser::class, 'showBillDetail'])->middleware('auth');
 
-    Route::post('bill_online', [BillOnlineController::class, 'getBillOnline']);
+
+    // order + bill order
+    Route::post('oder_item', [BillOrderController::class, 'addItem']);
+
+    Route::post('bill_online', [BillOrderController::class, 'getBillOnline']);
 });

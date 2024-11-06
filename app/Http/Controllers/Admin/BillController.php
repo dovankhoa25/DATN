@@ -176,7 +176,4 @@ class BillController extends Controller
             'total_bills' => $bills->count(), // Số lượng hóa đơn
         ], 200);
     }
-
-
-
 }
