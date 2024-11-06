@@ -28,7 +28,7 @@ class Bill extends Model
         'payment_status',
     ];
     protected $dates = ['order_date'];
-    
+
     public function billDetails()
     {
         return $this->hasMany(BillDetail::class, 'bill_id', 'id');
@@ -53,6 +53,8 @@ class Bill extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+
 
     public function scopeFilter($query, $filters)
     {
@@ -82,5 +84,4 @@ class Bill extends Model
 
         return $query;
     }
-    
 }

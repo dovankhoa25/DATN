@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\OnlCart\OnlCartRequest;
 use App\Http\Resources\OnlCartResource;
 use App\Models\OnlineCart;
+use App\Models\ProductDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -54,7 +55,7 @@ class OnlineCartController extends Controller
                 return response()->json(['message' => 'Giỏ hàng trống'], 404);
             }
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-            return response()->json(['message' => 'Không thể lấy thông tin người dùng từ token'], 403);
+            return response()->json(['message' => 'Không thể lấy thông tin người dùng từ token'], 402);
         }
     }
 
@@ -110,17 +111,27 @@ class OnlineCartController extends Controller
                 'message' => 'success'
             ], 200);
         } else {
+            $productDetail = ProductDetail::find($request->get('product_detail_id'));
+
+            if (!$productDetail) {
+                return response()->json(['error' => 'Sản phẩm không tồn tại.'], 404);
+            }
+
             $res = OnlineCart::create([
                 'user_id' => $user->id,
-                'product_detail_id' => $request->get('product_detail_id'),
+                'product_detail_id' => $productDetail->id,
                 'quantity' => $request->get('quantity'),
-                'price' => $price * $request->get('quantity'),
+                'price' => $productDetail->sale ? $productDetail->sale : $productDetail->price  * $request->get('quantity'),
             ]);
 
-            $onlCartCollection = new OnlCartResource($res);
             if ($res) {
                 return response()->json([
-                    'data' => $onlCartCollection,
+                    'data' => [
+                        'product_name' => $productDetail->product->name,
+                        'price' => $productDetail->price,
+                        'quantity' => $res->quantity,
+                        'total_price' => $res->price,
+                    ],
                     'message' => 'success'
                 ], 201);
             } else {
@@ -205,7 +216,7 @@ class OnlineCartController extends Controller
                 ],
             ], 400);
         }
-        
+
         $validated = $request->validate([
             'quantity' => 'integer|min:1|max:100'
         ]);

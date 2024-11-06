@@ -33,7 +33,7 @@ class TablesController extends Controller
             $table = Table::create([
                 'table' => $request->get('table'),
                 'description' => $request->get('description') ?? Null,
-                'status' => 1,
+                'status' => 0,
                 'reservation_status' => 'close'
             ]);
             return response()->json([

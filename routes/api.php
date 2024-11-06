@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Client\BillOnlineController;
 use App\Http\Controllers\client\BillUser;
 use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 
@@ -199,4 +200,7 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     Route::get('bill_user', [BillUser::class, 'billUser'])->middleware('auth');
     Route::post('bill_store', [BillUser::class, 'store'])->middleware('auth');
     Route::put('bills/{id}/cancel', [BillUser::class, 'requestCancelBill'])->middleware('auth');
+    Route::get('billdetail/{id}', [BillUser::class, 'showBillDetail'])->middleware('auth');
+
+    Route::post('bill_online', [BillOnlineController::class, 'getBillOnline']);
 });

@@ -18,7 +18,7 @@ class BillResource extends JsonResource
             'id' => $this->id,
             'ma_bill' => $this->ma_bill,
             'khachhang' => $this->user_id ? new UserResource($this->user) : ($this->customer_id ?? null),
-            'addresses' => $this->UserAddress ? $this->UserAddress->address : null,
+            // 'addresses' => $this->user_addresses_id ? $this->user->addresses->address : null,
             'order_date' => $this->order_date,
             'total_amount' => $this->total_amount,
             'branch_address' => $this->branch_address,

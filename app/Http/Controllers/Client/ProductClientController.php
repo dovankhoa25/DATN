@@ -189,6 +189,7 @@ class ProductClientController extends Controller
                             'name' => $detail->size->name,
                         ],
                         'price' => $detail->price,
+                        'sale' => $detail->sale,
                         'quantity' => $detail->quantity,
                         'images' => collect($detail->images)->map(function ($image) {
                             return [
@@ -346,6 +347,7 @@ class ProductClientController extends Controller
                     return [
                         'id' => $detail->id,
                         'price' => $detail->price,
+                        'sale' => $detail->sale,
                         'quantity' => $detail->quantity,
                         'size' => [
                             'id' => $detail->size->id,

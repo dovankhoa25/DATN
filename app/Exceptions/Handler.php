@@ -29,18 +29,18 @@ class Handler extends ExceptionHandler
         if ($exception instanceof TokenExpiredException) {
             return response()->json([
                 'error' => 'Token đã hết hạn',
-            ], 401);
+            ], 402);
         }
-        
+
         if ($exception instanceof TokenInvalidException) {
-                Log::error('Invalid token', [
+            Log::error('Invalid token', [
                 'request' => $request->all(),
                 'exception' => $exception->getMessage(),
             ]);
 
             return response()->json([
                 'error' => 'token : không hợp lệ vui lòng cung cấp token hợp lệ.',
-            ], 401);
+            ], 402);
         }
 
         return parent::render($request, $exception);
@@ -48,8 +48,6 @@ class Handler extends ExceptionHandler
 
     public function register(): void
     {
-        $this->reportable(function (Throwable $e) {
-            
-        });
+        $this->reportable(function (Throwable $e) {});
     }
 }
