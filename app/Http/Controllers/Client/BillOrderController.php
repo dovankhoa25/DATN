@@ -61,6 +61,7 @@ class BillOrderController extends Controller
                 'product_detail_id' => $item->product_detail_id,
                 'quantity' => $item->quantity,
                 'price' => $item->price,
+                'status' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
