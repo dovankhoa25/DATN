@@ -104,6 +104,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     // Bills
     Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
     Route::get('/bill_table/{table_number}', [BillController::class, 'getBillByTableNumber']);
+    Route::post('/acive_item', [BillController::class, 'activeItem']);
 
     //Bill detail
     Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth', 'checkRole:qtv,admin');
@@ -161,7 +162,7 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     Route::get('order_cart/{ma_bill}', [OrderCartController::class, 'show']);
     Route::post('order_cart/', [OrderCartController::class, 'store']);
     Route::put('order_cart/{id}', [OrderCartController::class, 'update']);
-    // Route::delete('/{id}', [OrderCartController::class, 'destroy']);
+    Route::delete('order_cart/{id}', [OrderCartController::class, 'destroy']);
 
 
 

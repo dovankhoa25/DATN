@@ -30,7 +30,7 @@ class BillOpenTableRequest extends BaseApiRequest
             'order_date' => 'date|after_or_equal:today',
             'total_amount' => 'numeric|min:0',
             'branch_address' => 'nullable|string|max:255',
-            'payment_id' => 'required|exists:payments,id',
+            'payment_id' => 'nullable|exists:payments,id',
             'voucher_id' => 'nullable|exists:vouchers,id',
             'note' => 'nullable|string',
             'order_type' => 'in:in_restaurant,online',

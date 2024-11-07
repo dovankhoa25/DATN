@@ -125,9 +125,11 @@ class OrderCartController extends Controller
             ], 400);
         }
 
+
         $validated = $request->validate([
-            'quantity' => 'integer|min:1|max:100'
+            'quantity' => 'required|integer|min:1|max:100'
         ]);
+
         $quantity = $validated['quantity'];
 
         $productDetail = DB::table('product_details')
@@ -165,13 +167,13 @@ class OrderCartController extends Controller
      */
     public function destroy(int $id)
     {
-        // $cart = OrderCart::findOrFail($id);
+        $cart = OrderCart::findOrFail($id);
 
-        // $res = $cart->delete();
-        // if ($res) {
-        //     return response()->json(['message' => 'success'], 204);
-        // } else {
-        //     return response()->json(['error' => 'Xóa thất bại']);
-        // }
+        $res = $cart->delete();
+        if ($res) {
+            return response()->json(['message' => 'success'], 204);
+        } else {
+            return response()->json(['error' => 'Xóa thất bại']);
+        }
     }
 }
