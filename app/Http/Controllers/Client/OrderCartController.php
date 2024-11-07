@@ -25,8 +25,7 @@ class OrderCartController extends Controller
 
         if ($bill->status !== 'pending') {
             return response()->json([
-                'error' => 'Mã bill này đã hoàn thành xử lí, không thể thêm',
-                'message' => 'error'
+                'message' => 'Mã bill này đã hoàn thành xử lí, không thể thêm',
             ], 400);
         }
 
@@ -39,8 +38,7 @@ class OrderCartController extends Controller
 
         if ($request->quantity > $productDetail->quantity) {
             return response()->json([
-                'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
-                'message' => 'error'
+                'message' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
             ], 400);
         }
 
@@ -75,8 +73,7 @@ class OrderCartController extends Controller
 
         if ($bill->status !== 'pending') {
             return response()->json([
-                'error' => 'Mã bill này đã xử lí xong, không thể xem :)',
-                'message' => 'error'
+                'message' => 'Mã bill này đã xử lí xong, không thể xem :)',
             ], 400);
         }
 
@@ -101,9 +98,9 @@ class OrderCartController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $id)
+    public function update(OrderCartRequest $request)
     {
-        $cartItem = DB::table('oder_cart')->where('id', $id)->first();
+        $cartItem = DB::table('oder_cart')->where('id', $request->id_cart_order)->first();
 
         if (!$cartItem) {
             return response()->json(['message' => 'Không tìm thấy thông tin giỏ hàng cần sửa'], 404);
@@ -125,33 +122,25 @@ class OrderCartController extends Controller
             ], 400);
         }
 
-
-        $validated = $request->validate([
-            'quantity' => 'required|integer|min:1|max:100'
-        ]);
-
-        $quantity = $validated['quantity'];
-
         $productDetail = DB::table('product_details')
             ->select('quantity')
             ->where('id', $cartItem->product_detail_id)
             ->first();
 
-        if ($quantity > $productDetail->quantity) {
+        if ($request->quantity > $productDetail->quantity) {
             return response()->json([
-                'error' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
-                'message' => 'error'
+                'message' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.số lượng hiện có của sản phẩm là ' . $productDetail->quantity,
             ], 400);
         }
 
         $res = DB::table('oder_cart')
-            ->where('id', $id)
+            ->where('id', $request->id_cart_order)
             ->update([
-                'quantity' => $quantity
+                'quantity' => $request->quantity
             ]);
 
         if ($res !== false) {
-            $updatedCartItem = DB::table('oder_cart')->where('id', $id)->first();
+            $updatedCartItem = DB::table('oder_cart')->where('id', $request->id_cart_order)->first();
             $data = collect($updatedCartItem)->except(['created_at', 'updated_at'])->toArray();
             return response()->json([
                 'data' => $data,

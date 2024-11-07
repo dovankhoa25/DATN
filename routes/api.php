@@ -161,7 +161,7 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     // cart oder trực tiếp
     Route::get('order_cart/{ma_bill}', [OrderCartController::class, 'show']);
     Route::post('order_cart/', [OrderCartController::class, 'store']);
-    Route::put('order_cart/{id}', [OrderCartController::class, 'update']);
+    Route::put('order_cart', [OrderCartController::class, 'update']);
     Route::delete('order_cart/{id}', [OrderCartController::class, 'destroy']);
 
 

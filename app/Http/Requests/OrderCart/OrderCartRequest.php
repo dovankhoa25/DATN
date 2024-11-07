@@ -22,27 +22,33 @@ class OrderCartRequest extends BaseApiRequest
      */
     public function rules(): array
     {
-        return [
-            'ma_bill' => ['required', 'string', 'max:255', 'exists:bills,ma_bill'],
-            'product_detail_id' => ['required', 'exists:product_details,id'],
-            'quantity' => ['required', 'integer', 'min:1'],
-        ];
+        if ($this->isMethod('post')) {
+            return [
+                'ma_bill' => ['required', 'string', 'max:255', 'exists:bills,ma_bill'],
+                'product_detail_id' => ['required', 'exists:product_details,id'],
+                'quantity' => ['required', 'integer', 'min:1'],
+            ];
+        }
+
+        if ($this->isMethod('put')) {
+            return [
+                'quantity' => ['required', 'integer', 'min:1', 'max:50'],
+                'id_cart_order' => ['required', 'numeric', 'exists:oder_cart,id'],
+            ];
+        }
     }
 
     public function messages()
     {
         return [
-            'ma_bill.required' => "Mã bill là bắt buộc",
-            'ma_bill.string' => "Mã bill là chuỗi kí tự",
-            'ma_bill.max' => "Mã bill có độ dài tối đa là 255",
-            'ma_bill.exists' => "Mã bill không tồn tại",
-
-            'product_detail_id.required' => "Sản phẩm là bắt buộc",
-            'product_detail_id.exists' => "Sản phẩm phải tồn tại và chưa bị xóa trong dữ liệu",
+            'id_cart_order.required' => "id cart là bắt buộc",
+            'id_cart_order.numeric' => "id là số",
+            'id_cart_order.exists' => "không tồn tại món ăn",
 
             'quantity.required' => "Số lượng là bắt buộc",
             'quantity.integer' => "Số lượng là một số nguyên",
-            'quantity.min' => "Số lượng không nhỏ hơn 1",
+            'quantity.min' => "Số lượng không lớn hơn 1",
+            'quantity.max' => "Số lượng không nhỏ hơn 50",
         ];
     }
 }
