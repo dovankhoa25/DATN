@@ -36,27 +36,45 @@ class OrderCartController extends Controller
 
         $price = $productDetail->sale ?? $productDetail->price;
 
-        if ($request->quantity > $productDetail->quantity) {
-            return response()->json([
-                'message' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm.',
-            ], 400);
-        }
 
-        $res = OrderCart::create([
-            'ma_bill' => $request->get('ma_bill'),
-            'product_detail_id' => $request->get('product_detail_id'),
-            'quantity' => $request->get('quantity'),
-            'price' => $price,
-        ]);
+        $existingCartItem = OrderCart::where('ma_bill', $request->get('ma_bill'))
+            ->where('product_detail_id', $request->get('product_detail_id'))
+            ->first();
 
-        if ($res) {
-            $data = $res->makeHidden(['created_at', 'updated_at']);
+        if ($existingCartItem) {
+            $newQuantity = $existingCartItem->quantity + $request->get('quantity');
+
+            if ($newQuantity > $productDetail->quantity) {
+                return response()->json([
+                    'message' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm. Số lượng sản phẩm hiện tại : ' . $productDetail->quantity,
+                ], 400);
+            }
+
+            $existingCartItem->update(['quantity' => $newQuantity]);
+
+            $data = $existingCartItem->makeHidden(['created_at', 'updated_at']);
             return response()->json([
                 'data' => $data,
-                'message' => 'success'
-            ], 201);
+                'message' => 'Số lượng sản phẩm đã được cập nhật thành công',
+            ], 200);
         } else {
-            return response()->json(['error' => 'Thêm thất bại']);
+
+            $res = OrderCart::create([
+                'ma_bill' => $request->get('ma_bill'),
+                'product_detail_id' => $request->get('product_detail_id'),
+                'quantity' => $request->get('quantity'),
+                'price' => $price,
+            ]);
+
+            if ($res) {
+                $data = $res->makeHidden(['created_at', 'updated_at']);
+                return response()->json([
+                    'data' => $data,
+                    'message' => 'Thêm sản phẩm vào giỏ hàng thành công',
+                ], 201);
+            } else {
+                return response()->json(['error' => 'Thêm thất bại'], 400);
+            }
         }
     }
 
