@@ -47,6 +47,7 @@ class OrderCartController extends Controller
             if ($newQuantity > $productDetail->quantity) {
                 return response()->json([
                     'message' => 'Số lượng đặt vượt quá số lượng hiện có của sản phẩm. Số lượng sản phẩm hiện tại : ' . $productDetail->quantity,
+                    'quantity' =>  $productDetail->quantity,
                 ], 400);
             }
 

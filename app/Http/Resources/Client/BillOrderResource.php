@@ -43,17 +43,18 @@ class BillOrderResource extends JsonResource
                         'thumbnail' => $firstDetail->productDetail->product->thumbnail,
                         'description' => $firstDetail->productDetail->product->description,
                         'status' => $firstDetail->productDetail->product->status,
+                        'product_details' => $details->map(function ($detail) {
+                            return [
+                                'id' => $detail->productDetail->id,
+                                'size_id' => $detail->productDetail->size_id,
+                                'price' => $detail->productDetail->price,
+                                'quantity' => $detail->productDetail->quantity,
+                                'sale' => $detail->productDetail->sale,
+                                'status' => $detail->status,
+                            ];
+                        }),
                     ],
-                    'product_details' => $details->map(function ($detail) {
-                        return [
-                            'id' => $detail->productDetail->id,
-                            'size_id' => $detail->productDetail->size_id,
-                            'price' => $detail->productDetail->price,
-                            'quantity' => $detail->productDetail->quantity,
-                            'sale' => $detail->productDetail->sale,
-                            'status' => $detail->productDetail->status,
-                        ];
-                    }),
+
                     'quantity' => $details->sum('quantity'),
                     'total_price' => $details->sum(fn($detail) => $detail->price * $detail->quantity),
                 ];
