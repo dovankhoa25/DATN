@@ -12,6 +12,7 @@ use App\Models\BillDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class BillController extends Controller
 {
@@ -172,10 +173,10 @@ class BillController extends Controller
             ];
         });
 
-        // Trả về JSON với dữ liệu đã định dạng
+
         return response()->json([
             'data' => $formattedBills,
-            'total_bills' => $bills->count(), // Số lượng hóa đơn
+            'total_bills' => $bills->count(),
         ], 200);
     }
 
@@ -198,11 +199,30 @@ class BillController extends Controller
             ], 400);
         }
 
-        $detail_bill->status = 1;
-        $detail_bill->save();
+        if ($detail_bill->status == 0) {
+            try {
+                DB::beginTransaction();
+
+                $detail_bill->status = 1;
+                $detail_bill->save();
+
+                $bill = $detail_bill->bill;
+                $bill->total_amount += $detail_bill->price;
+                $bill->save();
+
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Món ăn đã được xử lí rồi.',
+            ], 400);
+        }
 
         return response()->json([
-            'message' => 'Món ăn đã đang làm',
+            'message' => 'Món ăn đã đang làm và chờ mang ra',
             'data' =>  $detail_bill,
         ], 200);
     }

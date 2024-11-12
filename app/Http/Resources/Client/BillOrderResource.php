@@ -46,11 +46,12 @@ class BillOrderResource extends JsonResource
                         'product_details' => $details->map(function ($detail) {
                             return [
                                 'id' => $detail->productDetail->id,
-                                'size_id' => $detail->productDetail->size_id,
+                                'size_name' => $detail->productDetail->size->name,
                                 'price' => $detail->productDetail->price,
-                                'quantity' => $detail->productDetail->quantity,
+                                'quantity' => $detail->quantity,
                                 'sale' => $detail->productDetail->sale,
                                 'status' => $detail->status,
+                                'time_order' => $detail->created_at,
                             ];
                         }),
                     ],

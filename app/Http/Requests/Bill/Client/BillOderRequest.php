@@ -22,9 +22,24 @@ class BillOderRequest extends BaseApiRequest
      */
     public function rules(): array
     {
-        return [
-            'ma_bill' => 'required|string|exists:bills,ma_bill',
-        ];
+
+
+        if ($this->isMethod('post')) {
+            return [
+                'ma_bill' => 'required|string|exists:bills,ma_bill',
+            ];
+        }
+
+        if ($this->isMethod('put')) {
+            return [
+                'ma_bill' => 'required|string|exists:bills,ma_bill',
+                'phone' => 'nullable|integer|exists:customers,phone_number',
+                'payment_id' => 'required|exists:payments,id',
+                'voucher' => 'nullable|exists:vouchers,name',
+                'note' => 'nullable|string|max:255',
+
+            ];
+        }
     }
 
     public function messages(): array

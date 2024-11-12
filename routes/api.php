@@ -104,7 +104,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     // Bills
     Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
     Route::get('/bill_table/{table_number}', [BillController::class, 'getBillByTableNumber']);
-    Route::post('/acive_item', [BillController::class, 'activeItem']);
+    Route::put('/acive_item', [BillController::class, 'activeItem']);
 
     //Bill detail
     Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth', 'checkRole:qtv,admin');
@@ -205,4 +205,5 @@ Route::prefix('client')->middleware('check.api.key')->group(function () {
     Route::post('oder_item', [BillOrderController::class, 'addItem']);
 
     Route::post('bill_online', [BillOrderController::class, 'getBillOnline']);
+    Route::put('pay_bill', [BillOrderController::class, 'saveBill']);
 });
