@@ -207,7 +207,7 @@ class BillController extends Controller
                 $detail_bill->save();
 
                 $bill = $detail_bill->bill;
-                $bill->total_amount += $detail_bill->price;
+                $bill->total_amount += $detail_bill->price * $detail_bill->quantity;
                 $bill->save();
 
                 DB::commit();

@@ -54,8 +54,8 @@ class OnlineCartController extends Controller
             } else {
                 return response()->json(['message' => 'Giỏ hàng trống'], 404);
             }
-        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-            return response()->json(['message' => 'Không thể lấy thông tin người dùng từ token'], 402);
+        } catch (JWTException $e) {
+            return response()->json(['message' => $e], 403);
         }
     }
 

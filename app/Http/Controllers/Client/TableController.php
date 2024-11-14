@@ -15,9 +15,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Str;
 
 class TableController extends Controller
 {
+
+
+
+    private function randomMaBill()
+    {
+        return 'BILL_' . (string) Str::uuid();
+    }
+
+
     public function getAllTables(Request $request)
     {
         $perPage = $request['per_page'] ?? 10;
@@ -34,14 +44,14 @@ class TableController extends Controller
     public function openTable(BillOpenTableRequest $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $userRoles = $user->roles()->pluck('name')->toArray();
+        // $userRoles = $user->roles()->pluck('name')->toArray();
 
-        if (!in_array('qtv', $userRoles) && !in_array('admin', $userRoles) && !in_array('ctv', $userRoles)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Bạn không có quyền mở bàn',
-            ], 403);
-        }
+        // if (!in_array('qtv', $userRoles) && !in_array('admin', $userRoles) && !in_array('ctv', $userRoles)) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Bạn không có quyền mở bàn',
+        //     ], 403);
+        // }
 
         $table = Table::find($request->table_id);
         if (!$table || !$table->status) {
@@ -61,25 +71,23 @@ class TableController extends Controller
 
         DB::beginTransaction();
         try {
-            $maBill = 'BILL-' . strtoupper(uniqid());
-            while (Bill::where('ma_bill', $maBill)->exists()) {
-                $maBill = 'BILL-' . strtoupper(uniqid());
-            }
 
             $bill = Bill::create([
-                'ma_bill' => $maBill,
+                'ma_bill' => $this->randomMaBill(),
                 'user_id' => $user->id,
                 'customer_id' => null,
                 'order_date' => Carbon::now(),
+                'user_addresses_id' => null,
                 'total_amount' => 0.00,
                 'branch_address' => $request->branch_address ?? 'Fpoly',
                 'payment_id' => $request->payment_id,
                 'voucher_id' => null,
                 'note' => null,
                 'order_type' => 'in_restaurant',
-                'user_addresses_id' => null,
-                'status' => 'pending',
                 'table_number' => $table->id,
+                'status' => 'pending',
+                'qr_expiration' => null,
+                'payment_status' => 'pending',
             ]);
 
             $table->update([
