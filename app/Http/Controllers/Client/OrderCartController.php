@@ -104,14 +104,10 @@ class OrderCartController extends Controller
 
         $data = $objCart->listCart()->where('ma_bill', $ma_bill)->paginate($perPage);
 
-        if ($data->total() > 0) {
-            return response()->json([
-                'data' => $data,
-                'message' => 'success'
-            ], 200);
-        } else {
-            return response()->json(['message' => 'Mã bill không tồn tại'], 404);
-        }
+        return response()->json([
+            'data' => $data,
+            'message' => 'success'
+        ], 200);
     }
 
     /**
