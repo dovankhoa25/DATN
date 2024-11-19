@@ -181,49 +181,63 @@ class BillController extends Controller
     }
 
 
-    public function activeItem(ItemBillActiveRequest $request)
+    public function activeItems(ItemBillActiveRequest $request)
     {
-        $detail_bill = BillDetail::where('id', $request->id_billdetail)
-            ->first();
+        $ids = $request->get('id_billdetails');
 
-
-        if (!$detail_bill) {
+        if (empty($ids) || !is_array($ids)) {
             return response()->json([
-                'message' => 'Không có món ăn nào như vậy trong đây'
+                'message' => 'Danh sách món ăn không hợp lệ.',
             ], 400);
         }
 
-        if ($detail_bill->bill->status !== 'pending') {
+        $details = BillDetail::whereIn('id', $ids)->get();
+
+        if ($details->isEmpty()) {
             return response()->json([
-                'message' => 'Mã bill này đã hoàn thành xử lí',
+                'message' => 'Không tìm thấy món ăn nào trong danh sách.',
+            ], 404);
+        }
+
+        $bill = $details->first()->bill;
+
+        if ($bill->status !== 'pending') {
+            return response()->json([
+                'message' => 'Hóa đơn này đã hoàn thành xử lí.',
             ], 400);
         }
 
-        if ($detail_bill->status == 0) {
-            try {
-                DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-                $detail_bill->status = 1;
-                $detail_bill->save();
+            $totalAmount = 0;
 
-                $bill = $detail_bill->bill;
-                $bill->total_amount += $detail_bill->price * $detail_bill->quantity;
-                $bill->save();
+            foreach ($details as $detail) {
+                if ($detail->status === 0) {
+                    $detail->status = 1;
+                    $detail->save();
 
-                DB::commit();
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return response()->json(['error' => $e->getMessage()], 500);
+                    $totalAmount += $detail->price * $detail->quantity;
+                }
             }
-        } else {
-            return response()->json([
-                'message' => 'Món ăn đã được xử lí rồi.',
-            ], 400);
-        }
 
-        return response()->json([
-            'message' => 'Món ăn đã đang làm và chờ mang ra',
-            'data' =>  $detail_bill,
-        ], 200);
+            $bill->total_amount += $totalAmount;
+            $bill->save();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Tất cả món ăn đã được cập nhật trạng thái.',
+                'data' => [
+                    'details' => $details,
+                    'bill' => $bill,
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

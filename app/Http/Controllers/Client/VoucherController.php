@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Voucher;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -119,5 +120,22 @@ class VoucherController extends Controller
                 'message' => 'Không lấy được voucher',
             ], 500);
         }
+    }
+
+
+    public function voucherYagi()
+    {
+        $vouchers = Voucher::whereNull('customer_id')->get();
+
+        if ($vouchers->isEmpty()) {
+            return response()->json([
+                'message' => 'Customer này không có voucher nào.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $vouchers,
+        ], 200);
     }
 }

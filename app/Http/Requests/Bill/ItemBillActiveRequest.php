@@ -23,7 +23,7 @@ class ItemBillActiveRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'id_billdetail' => 'required|exists:bill_details,id',
+            'id_billdetails' => 'required|exists:bill_details,id',
         ];
     }
 }
