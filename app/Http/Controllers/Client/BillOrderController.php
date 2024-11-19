@@ -12,6 +12,7 @@ use App\Models\BillDetail;
 use App\Models\Customer;
 use App\Models\OrderCart;
 use App\Models\Payment;
+use App\Models\Table;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -140,11 +141,11 @@ class BillOrderController extends Controller
             if (!$payment) {
                 return response()->json(['error' => 'Phương thức thanh toán không hợp lệ.'], 400);
             }
+            $tableId = $bill->table_number;
 
 
             $paymentStatus = ($payment->name == 'ATM') ? 'pending' : 'successful';
             $qrExpiration = ($payment->name === 'ATM') ? now()->addMinutes(10) : null;
-
             $bill->customer_id = $customerId;
             $bill->payment_id = $paymentId;
             $bill->voucher_id = $voucherId;
@@ -154,6 +155,12 @@ class BillOrderController extends Controller
             $bill->status = 'completed';
             $bill->qr_expiration = $qrExpiration;
             $bill->save();
+
+            $table = Table::where('id', $tableId)->first();
+            $table->reservation_status = 'close';
+            $table->save();
+
+
             DB::commit();
 
 
