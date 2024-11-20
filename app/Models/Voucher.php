@@ -22,26 +22,29 @@ class Voucher extends Model
             $query->where('name', 'like', '%' . $filters['name'] . '%');
         }
 
-        if (!empty($filters['value'])) {
-            $query->where('value', $filters['value']);
+        if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
+            $query->whereBetween('start_date', [$filters['start_date'], $filters['end_date']]);
+        } elseif (!empty($filters['end_date'])) {
+            $query->where('start_date', '<=', $filters['end_date']);
+        } elseif (!empty($filters['start_date'])) {
+            $query->where('start_date', '>=', $filters['start_date']);
+        } else {
+            $query->where('start_date', '>=', now()->format('Y-m-d'));
         }
 
-        if (!empty($filters['expiration_date'])) {
-            $query->whereDate('expiration_date', $filters['expiration_date']);
-        }
-
-        if (!empty($filters['user_id'])) {
-            $query->where('user_id', $filters['user_id']);
+        if (!empty($filters['customer_id'])) {
+            $query->where('customer_id', $filters['customer_id']);
         }
 
         return $query;
     }
 
+
     protected $fillable = [
         'name',
         'value',
         'image',
-        'star_date',
+        'start_date',
         'end_date',
         'status',
         'customer_id',

@@ -15,20 +15,22 @@ class FilterVoucherRequest extends FormRequest
     {
         return [
             'name' => 'nullable|string|max:255',
-            'value' => 'nullable|numeric|min:0',
-            'expiration_date' => 'nullable|date|after_or_equal:today',
-            'user_id' => 'nullable|exists:users,id', 
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'customer_id' => 'nullable|exists:customers,id',
         ];
     }
+
 
     public function messages(): array
     {
         return [
             'name.string' => 'Tên voucher phải là một chuỗi ký tự hợp lệ.',
-            'value.numeric' => 'Giá trị voucher phải là số.',
-            'expiration_date.date' => 'Ngày hết hạn phải là một ngày hợp lệ.',
-            'expiration_date.after_or_equal' => 'Ngày hết hạn phải không được trước ngày hôm nay.',
-            'user_id.exists' => 'ID người dùng không tồn tại.',
+            'name.max' => 'Tên voucher không được vượt quá 255 ký tự.',
+            'start_date.date' => 'Ngày bắt đầu phải là một ngày hợp lệ.',
+            'end_date.date' => 'Ngày kết thúc phải là một ngày hợp lệ.',
+            'end_date.after_or_equal' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+            'customer_id.exists' => 'ID khách hàng không tồn tại.',
         ];
     }
 }

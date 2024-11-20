@@ -19,9 +19,11 @@ class VoucherResource extends JsonResource
             'name' => $this->name,
             'value' => $this->value,
             "image" => $this->image,
-            "expiration_date"=> $this->expiration_date,
-            'status' => $this->status,
-            "customer_id" => $this->customer_id
+            "start_date" => $this->start_date,
+            'end_date' => $this->end_date,
+            "status" => $this->status,
+            "customer_id" => $this->customer_id,
+            "quantity" => $this->quantity
         ];
     }
 }

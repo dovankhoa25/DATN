@@ -17,65 +17,37 @@ class VoucherController extends Controller
     {
         try {
             $perPage = $request->get('per_page', 10);
-            $vouchers = Voucher::filter($request->all())->paginate($perPage);
-            return VoucherResource::collection($vouchers);
+
+            $filters = $request->all();
+            // \Log::info('Filters applied: ', $filters);
+
+            $vouchers = Voucher::filter($filters);
+            // \Log::info('Query result: ', $vouchers->toSql());
+
+            $paginated = $vouchers->paginate($perPage);
+
+            return VoucherResource::collection($paginated);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Không tìm thấy voucher'], 404);
         }
     }
 
-  
-    // public function store(Request $request)
-    // {
-    //     $validatedData = $request->validate([
-    //         'point' => 'required',
-    //         'phone_number' => ['required'],
-    //     ]);
-    //     $user = JWTAuth::parseToken()->authenticate();
-    //     $existingCustomer = Customer::where('phone_number', $validatedData['phone_number'])->first();
-    //     if ($existingCustomer && !$existingCustomer->user_id) {
-    //         $existingCustomer::update(["user_id" => $user->id]);
-    //     }
-    //     if ($existingCustomer->user_id !== $user->id) {
-    //         return response()->json([
-    //             "error" => "Số điện thoại không phải là của tài khoản này."
-    //         ], 400);
-    //     }
-    //     if ($request->point > $existingCustomer->diemthuong) {
-    //         return response()->json([
-    //             "error" => "Số điểm không đủ."
-    //         ], 400);
-    //     }
-    //     $voucher = Voucher::create([
-    //         'name' => $request->point,
-    //         "customer_id" => $existingCustomer->id
-    //     ]);
 
-    //     return response()->json([
-    //         "data" => new VoucherResource($voucher)
-    //     ], 201);
-    // }
 
 
     public function store(VoucherRequest $request)
     {
-        // $data = $request->validate([
-        //     'name' => 'required|string|max:255',
-        //     'value' => 'required|numeric|min:0',
-        //     'image' => 'nullable|string',
-        //     'status' => 'nullable|boolean',
-        //     'customer_id' => 'nullable|exists:customers,id',
-        //     'expiration_date' => 'nullable|date|after_or_equal:today',
-        // ]);
-        $data = $request->validated();
+        $data = $request->only(['name', 'value', 'image', 'start_date', 'end_date', 'status', 'customer_id', 'quantity']);
+
         $voucher = Voucher::create($data);
-        
+
         return response()->json([
             'message' => 'Thêm Mới Thành Công!',
             'data' => $voucher
-        ],201);
-
+        ], 201);
     }
+
+
 
 
 
@@ -85,5 +57,30 @@ class VoucherController extends Controller
         return response()->json([
             'data' => new VoucherResource($voucher)
         ], 201);
+    }
+
+    public function update(VoucherRequest $request, $id)
+    {
+        try {
+            $voucher = Voucher::findOrFail($id);
+
+            $data = $request->only(['name', 'value', 'image', 'start_date', 'end_date', 'status', 'customer_id', 'quantity']);
+
+            $voucher->update($data);
+
+            return response()->json([
+                'message' => 'Cập Nhật Thành Công!',
+                'data' => $voucher
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Không tìm thấy voucher để cập nhật!'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Đã xảy ra lỗi trong quá trình cập nhật.',
+                'details' => $e->getMessage()
+            ], 500);
+        }
     }
 }

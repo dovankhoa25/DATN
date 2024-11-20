@@ -20,29 +20,61 @@ class VoucherRequest extends BaseApiRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|max:255',
-            'value' => 'required|numeric|min:0',
-            'image' => 'nullable|string',
-            'status' => 'nullable|boolean',
-            'customer_id' => 'nullable|exists:customers,id',
-            'expiration_date' => 'nullable|date|after_or_equal:today',
-        ];
+
+
+        if ($this->isMethod('post')) {
+            return [
+                'name' => 'required|string|max:255',
+                'value' => 'required|numeric|min:0',
+                'image' => 'nullable|string',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date',
+                'status' => 'nullable|boolean',
+                'customer_id' => 'nullable|exists:customers,id',
+                'quantity' => 'required|numeric|min:0',
+            ];
+        }
+
+        if ($this->isMethod('put')) {
+            return [
+                'name' => 'required|string|max:255',
+                'value' => 'required|numeric|min:0',
+                'image' => 'nullable|string',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date',
+                'status' => 'nullable|boolean',
+                'customer_id' => 'nullable|exists:customers,id',
+                'quantity' => 'required|numeric|min:0',
+            ];
+        }
     }
 
     public function messages()
     {
         return [
             'name.required' => 'Tên voucher là bắt buộc.',
+            'name.string' => 'Tên voucher phải là một chuỗi văn bản.',
+            'name.max' => 'Tên voucher không được vượt quá 255 ký tự.',
+
             'value.required' => 'Giá trị voucher là bắt buộc.',
-            'value.numeric' => 'Giá trị voucher phải là số.',
+            'value.numeric' => 'Giá trị voucher phải là một số.',
             'value.min' => 'Giá trị voucher phải lớn hơn hoặc bằng 0.',
-            'status.boolean' => 'Trạng thái voucher phải là true hoặc false.',
-            'customer_id.exists' => 'Khách hàng không tồn tại.',
-            'expiration_date.date' => 'Ngày hết hạn không hợp lệ.',
-            'expiration_date.after_or_equal' => 'Ngày hết hạn phải là ngày hôm nay hoặc trong tương lai.',
+
+            'image.string' => 'Hình ảnh phải là một chuỗi văn bản.',
+
+            'start_date.required' => 'Ngày bắt đầu là bắt buộc.',
+            'start_date.date' => 'Ngày bắt đầu phải là một ngày hợp lệ.',
+
+            'end_date.required' => 'Ngày kết thúc là bắt buộc.',
+            'end_date.date' => 'Ngày kết thúc phải là một ngày hợp lệ.',
+
+            'status.boolean' => 'Trạng thái phải là giá trị boolean.',
+
+            'customer_id.exists' => 'Khách hàng này không tồn tại.',
+
+            'quantity.required' => 'Số lượng voucher là bắt buộc.',
+            'quantity.numeric' => 'Số lượng phải là một số.',
+            'quantity.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
         ];
     }
-
-    
 }
