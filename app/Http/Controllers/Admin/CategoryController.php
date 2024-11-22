@@ -65,6 +65,11 @@ class CategoryController extends Controller
             'parent_id' => $request->get('parent_id') ?? null
         ]);
 
+        $cacheKeys = Cache::getKeys('categories_page_*');
+        foreach ($cacheKeys as $key) {
+            Cache::forget($key);
+        }
+
         return response()->json([
             'data' => new CategoryAdminResource($Category),
             'message' => 'success'
