@@ -41,7 +41,7 @@ class Bill extends Model
 
     public function voucher()
     {
-        return $this->belongsTo(voucher::class, 'voucher_id');
+        return $this->belongsTo(Voucher::class, 'voucher_id');
     }
 
     public function UserAddress()

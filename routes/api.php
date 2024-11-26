@@ -23,7 +23,7 @@ use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Client\BillOrderController;
-use App\Http\Controllers\client\BillUser;
+use App\Http\Controllers\Client\BillUser;
 use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
 
 use App\Http\Controllers\Client\CategoryController as ClientCategoryController;
