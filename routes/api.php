@@ -133,8 +133,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(funct
     Route::put('api_key_status/{id}', [ClientKeyController::class, 'statusKey'])->middleware('auth', 'checkRole:qtv,admin');
 });
 
-
-Route::prefix('client')->middleware('check.api.key')->group(function () {
+// ->middleware('check.api.key')
+Route::prefix('client')->group(function () {
 
 
     // oder qua web 
