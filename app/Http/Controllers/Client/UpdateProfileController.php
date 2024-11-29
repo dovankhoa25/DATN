@@ -80,8 +80,8 @@ class UpdateProfileController extends Controller
             'commune' => $request->get('commune'),
             'address' => $request->get('address'),
             'city' => $request->get('city'),
-            'postal_code' => $request->get('postal_code'),
-            'country' => $request->get('country'),
+            'postal_code' => $request->get('postal_code') ?? 70000,
+            'country' => 'Việt Nam Fpl',
             'is_default' => $request->get('is_default')
         ]);
 

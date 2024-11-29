@@ -29,7 +29,7 @@ class AddressRequest extends BaseApiRequest
             'address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'postal_code' => ['required', 'string', 'max:255'],
-            'country' => ['required', 'string', 'max:255'],
+            'country' => ['string', 'max:255'],
             'is_default' => ['nullable', 'boolean']
         ];
     }
