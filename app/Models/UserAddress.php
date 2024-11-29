@@ -11,12 +11,13 @@ class UserAddress extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'user_addresses';
-  
+
     protected $fillable = [
-       'user_id',
+        'user_id',
         'fullname',
         'phone',
-        'city',
+        'province',
+        'district',
         'commune',
         'address',
         'postal_code',
@@ -34,7 +35,4 @@ class UserAddress extends Model
     {
         return $this->hasMany(Bill::class, 'user_addresses_id');
     }
-
-    
-
 }

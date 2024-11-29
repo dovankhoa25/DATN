@@ -13,7 +13,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('fullname');
             $table->bigInteger('phone');
-            $table->string('city');
+            $table->string('province');
+            $table->string('district');
             $table->string('commune');
             $table->string('address');
             $table->string('postal_code')->nullable();

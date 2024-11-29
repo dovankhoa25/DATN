@@ -83,11 +83,12 @@ class UpdateProfileController extends Controller
             'user_id' => $user->id,
             'fullname' => $request->get('fullname'),
             'phone' => $request->get('phone'),
+            'province' => $request->get('province'),
+            'district' => $request->get('district'),
             'commune' => $request->get('commune'),
             'address' => $request->get('address'),
-            'city' => $request->get('city'),
             'postal_code' => $request->get('postal_code') ?? 70000,
-            'country' => 'Việt Nam Fpl',
+            'country' => $request->get('country') ?? 'Việt Nam Fpl',
             'is_default' => $request->get('is_default')
         ]);
 
@@ -130,12 +131,14 @@ class UpdateProfileController extends Controller
                 'user_id' => $user->id,
                 'fullname' => $request->get('fullname'),
                 'phone' => $request->get('phone'),
+                'province' => $request->get('province'),
+                'district' => $request->get('district'),
                 'commune' => $request->get('commune'),
                 'address' => $request->get('address'),
-                'city' => $request->get('city'),
                 'postal_code' => $request->get('postal_code') ?? 70000,
-                'country' => 'Việt Nam Fpl',
+                'country' => $request->get('country') ?? 'Việt Nam Fpl',
                 'is_default' => $request->get('is_default')
+
             ]);
         $addressAupdate = DB::table('user_addresses')->where('id', $idAddress)->first();
         if ($addressAupdate) {
