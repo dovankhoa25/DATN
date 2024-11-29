@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Jobs\CreateOrUpdateCustomerJob;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,21 @@ class AuthController extends Controller
             'password' => Hash::make($request->get('password')),
         ]);
 
+        // Tạo khách hàng ngay trong luồng đăng ký
+        $customer = Customer::where('email', $user->email)->first();
+        if ($customer) {
+            $customer->update([
+                'user_id' => $user->id,
+            ]);
+        } else {
+            Customer::create([
+                'name' => $user->name ?? 'Unknown',
+                'email' => $user->email,
+                'phone_number' => '0982950550',
+                'user_id' => $user->id,
+            ]);
+        }
+
         $accessToken = JWTAuth::fromUser($user);
         $refreshToken = JWTAuth::claims(['refresh' => true])->fromUser($user);
 
@@ -37,7 +53,7 @@ class AuthController extends Controller
             'expires_at' => now()->addDays(7),
         ]);
 
-        CreateOrUpdateCustomerJob::dispatch($user);
+        // CreateOrUpdateCustomerJob::dispatch($user);
         return response()->json([
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
