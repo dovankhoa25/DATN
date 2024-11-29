@@ -40,7 +40,7 @@ class AuthController extends Controller
             'expires_at' => now()->addDays(7),
         ]);
 
-        CreateOrUpdateCustomerJob::dispatch($user);
+        // CreateOrUpdateCustomerJob::dispatch($user);
         return response()->json([
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
