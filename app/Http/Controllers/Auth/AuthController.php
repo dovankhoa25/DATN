@@ -57,10 +57,11 @@ class AuthController extends Controller
                 'user_id' => $user->id,
             ]);
         } else {
+            $phoneNumber = '0982950550' . $user->id;
             Customer::create([
                 'name' => $user->name ?? 'Unknown',
                 'email' => $user->email,
-                'phone_number' => '0982950550',
+                'phone_number' => $phoneNumber,
                 'user_id' => $user->id,
             ]);
         }
