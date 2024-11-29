@@ -10,6 +10,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 
 class CategoryController extends Controller
 {
@@ -65,7 +66,8 @@ class CategoryController extends Controller
             'parent_id' => $request->get('parent_id') ?? null
         ]);
 
-        $cacheKeys = Cache::getKeys('categories_page_*');
+        // $cacheKeys = Cache::getKeys('categories_page_*');
+        $cacheKeys = Redis::keys('categories_page_*');
         foreach ($cacheKeys as $key) {
             Cache::forget($key);
         }
