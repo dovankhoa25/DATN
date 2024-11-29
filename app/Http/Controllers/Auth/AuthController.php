@@ -29,7 +29,28 @@ class AuthController extends Controller
             'password' => Hash::make($request->get('password')),
         ]);
 
-        // Tạo khách hàng ngay trong luồng đăng ký
+        $this->createOrUpdateCustomer($user);
+
+        $accessToken = JWTAuth::fromUser($user);
+        $refreshToken = JWTAuth::claims(['refresh' => true])->fromUser($user);
+
+        DB::table('refresh_tokens')->insert([
+            'user_id' => $user->id,
+            'token' => hash('sha256', $refreshToken),
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        CreateOrUpdateCustomerJob::dispatch($user);
+        return response()->json([
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
+            'user' => $user,
+            'expires_in' => JWTAuth::factory()->getTTL() * 60 // 60 phút
+        ]);
+    }
+
+    private function createOrUpdateCustomer(User $user)
+    {
         $customer = Customer::where('email', $user->email)->first();
         if ($customer) {
             $customer->update([
@@ -43,26 +64,7 @@ class AuthController extends Controller
                 'user_id' => $user->id,
             ]);
         }
-
-        $accessToken = JWTAuth::fromUser($user);
-        $refreshToken = JWTAuth::claims(['refresh' => true])->fromUser($user);
-
-        DB::table('refresh_tokens')->insert([
-            'user_id' => $user->id,
-            'token' => hash('sha256', $refreshToken),
-            'expires_at' => now()->addDays(7),
-        ]);
-
-        // CreateOrUpdateCustomerJob::dispatch($user);
-        return response()->json([
-            'access_token' => $accessToken,
-            'refresh_token' => $refreshToken,
-            'user' => $user,
-            'expires_in' => JWTAuth::factory()->getTTL() * 60 // 60 phút
-        ]);
     }
-
-
 
     public function login(Request $request)
     {

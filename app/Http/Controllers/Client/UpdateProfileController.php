@@ -57,9 +57,7 @@ class UpdateProfileController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function storeAddress(AddressRequest $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -67,7 +65,15 @@ class UpdateProfileController extends Controller
             return response()->json(['message' => 'Người dùng không tồn tại'], 404);
         }
 
-        if ($request->get('is_default') == 1) {
+        $addressCount = UserAddress::where('user_id', $user->id)->count();
+        if ($addressCount >= 5) {
+            return response()->json(['message' => 'Người dùng chỉ có thể tạo tối đa 5 địa chỉ'], 403);
+        }
+
+        $isFirstAddress = $addressCount === 0;
+        if ($isFirstAddress) {
+            $request->merge(['is_default' => 1]);
+        } elseif ($request->get('is_default') == 1) {
             UserAddress::where('user_id', $user->id)
                 ->where('is_default', 1)
                 ->update(['is_default' => 0]);
@@ -95,9 +101,7 @@ class UpdateProfileController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function updateAddress(AddressRequest $request, int $idAddress)
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -129,8 +133,8 @@ class UpdateProfileController extends Controller
                 'commune' => $request->get('commune'),
                 'address' => $request->get('address'),
                 'city' => $request->get('city'),
-                'postal_code' => $request->get('postal_code'),
-                'country' => $request->get('country'),
+                'postal_code' => $request->get('postal_code') ?? 70000,
+                'country' => 'Việt Nam Fpl',
                 'is_default' => $request->get('is_default')
             ]);
         $addressAupdate = DB::table('user_addresses')->where('id', $idAddress)->first();
@@ -144,9 +148,7 @@ class UpdateProfileController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(ProfileRequest $request, int $idUser)
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -200,9 +202,7 @@ class UpdateProfileController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroyAddress(int $idAddress)
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -223,5 +223,31 @@ class UpdateProfileController extends Controller
         } else {
             return response()->json(['error' => 'Xóa thất bại']);
         }
+    }
+
+    public function updateDefaultAddress(int $idAddress)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        if (!$user) {
+            return response()->json(['message' => 'Người dùng không tồn tại'], 404);
+        }
+
+        $address = UserAddress::where('id', $idAddress)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$address) {
+            return response()->json(['error' => 'Địa chỉ không tồn tại hoặc không thuộc về bạn'], 403);
+        }
+        UserAddress::where('user_id', $user->id)
+            ->where('is_default', 1)
+            ->update(['is_default' => 0]);
+
+        $address->update(['is_default' => 1]);
+
+        return response()->json([
+            'data' => $address->makeHidden(['created_at', 'updated_at']),
+            'message' => 'Cập nhật địa chỉ mặc định thành công',
+        ], 200);
     }
 }

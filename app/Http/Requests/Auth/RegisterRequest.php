@@ -32,7 +32,4 @@ class RegisterRequest extends BaseApiRequest
             'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
         ];
     }
-
-   
-    
 }
