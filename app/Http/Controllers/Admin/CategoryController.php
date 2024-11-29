@@ -66,9 +66,9 @@ class CategoryController extends Controller
             'parent_id' => $request->get('parent_id') ?? null
         ]);
 
-        $cacheKeys = Cache::getKeys('categories_page_*');
+        $cacheKeys = Redis::keys('categories_page_*');
         foreach ($cacheKeys as $key) {
-            Cache::forget($key);
+            Redis::del($key);
         }
 
         return response()->json([
@@ -113,9 +113,9 @@ class CategoryController extends Controller
                 'image' => $imgUrl ? $imgUrl : $category->image,
                 'parent_id' => $request->input('parent_id', $category->parent_id)
             ]);
-            $cacheKeys = Cache::getKeys('categories_page_*');
+            $cacheKeys = Redis::keys('categories_page_*');
             foreach ($cacheKeys as $key) {
-                Cache::forget($key);
+                Redis::del($key);
             }
 
             return response()->json([
