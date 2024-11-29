@@ -23,30 +23,43 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request)
     {
+        DB::beginTransaction();
 
-        $user = User::create([
-            'email' => $request->get('email'),
-            'password' => Hash::make($request->get('password')),
-        ]);
+        try {
+            $user = User::create([
+                'email' => $request->get('email'),
+                'password' => Hash::make($request->get('password')),
+            ]);
 
-        $this->createOrUpdateCustomer($user);
+            $this->createOrUpdateCustomer($user);
 
-        $accessToken = JWTAuth::fromUser($user);
-        $refreshToken = JWTAuth::claims(['refresh' => true])->fromUser($user);
+            $accessToken = JWTAuth::fromUser($user);
+            $refreshToken = JWTAuth::claims(['refresh' => true])->fromUser($user);
 
-        DB::table('refresh_tokens')->insert([
-            'user_id' => $user->id,
-            'token' => hash('sha256', $refreshToken),
-            'expires_at' => now()->addDays(7),
-        ]);
+            DB::table('refresh_tokens')->insert([
+                'user_id' => $user->id,
+                'token' => hash('sha256', $refreshToken),
+                'expires_at' => now()->addDays(7),
+            ]);
 
-        // CreateOrUpdateCustomerJob::dispatch($user);
-        return response()->json([
-            'access_token' => $accessToken,
-            'refresh_token' => $refreshToken,
-            'user' => $user,
-            'expires_in' => JWTAuth::factory()->getTTL() * 60 // 60 phút
-        ]);
+            // CreateOrUpdateCustomerJob::dispatch($user);
+
+            DB::commit();
+
+            return response()->json([
+                'access_token' => $accessToken,
+                'refresh_token' => $refreshToken,
+                'user' => $user,
+                'expires_in' => JWTAuth::factory()->getTTL() * 60 // 60 phút
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'error' => 'Đăng ký không thành công, vui lòng thử lại.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     private function createOrUpdateCustomer(User $user)
@@ -57,11 +70,11 @@ class AuthController extends Controller
                 'user_id' => $user->id,
             ]);
         } else {
-            $phoneNumber = '0982950550' . $user->id;
+
             Customer::create([
                 'name' => $user->name ?? 'Unknown',
                 'email' => $user->email,
-                'phone_number' => $phoneNumber,
+                'phone_number' => $user->id,
                 'user_id' => $user->id,
             ]);
         }
