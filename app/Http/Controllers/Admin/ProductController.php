@@ -97,9 +97,13 @@ class ProductController extends Controller
                 'thumbnail' => $this->storeImage($request->file('thumbnail'), 'product/thumbal'),
                 'description' => $request->description,
                 'status' => true,
-                'category_id' => $request->category_id,
+                // 'category_id' => $request->category_id,
             ]);
 
+
+            if ($request->categories && is_array($request->categories)) {
+                $product->categories()->attach($request->categories);
+            }
 
             foreach ($request->product_details as $detail) {
                 $productDetail = ProductDetail::create([
@@ -249,8 +253,14 @@ class ProductController extends Controller
                 'thumbnail' => $thumbnailPath,
                 'description' => $request->description,
                 'status' => $request->status,
-                'category_id' => $request->category_id,
+                // 'category_id' => $request->category_id,
             ]);
+
+            // Cập nhật danh mục
+            if ($request->categories && is_array($request->categories)) {
+                $product->categories()->sync($request->categories);
+            }
+
 
             if ($request->has('product_details')) {
                 $this->syncProductDetails($request->product_details, $product);
@@ -258,15 +268,18 @@ class ProductController extends Controller
 
             DB::commit();
 
-            // Cache::put('product:' . $product->id, $product->load('productDetails.images'), 600);
-            Cache::put('product:' . $product->id, Product::getProductWithDetails($product->id), 600);
+            $product = Product::getProductWithDetails($product->id);
+            Cache::put('product:' . $product->id, $product, 600);
 
-            return new ProductResource($product->load('productDetails.images'));
+
+            return new ProductResource($product);
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
+
+
 
     private function handleThumbnail($request, $product)
     {

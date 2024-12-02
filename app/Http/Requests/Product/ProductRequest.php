@@ -27,7 +27,11 @@ class ProductRequest extends BaseApiRequest
                 'name' => 'required|string|max:255',
                 'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'status' => 'boolean',
-                'category_id' => 'required|exists:categories,id',
+                // 'category_id' => 'required|exists:categories,id',
+
+                // product+categories
+                'categories' => 'required|array',
+                'categories.*' => 'exists:categories,id',
 
                 // Product Detail
                 'product_details' => 'required|array',
@@ -48,7 +52,11 @@ class ProductRequest extends BaseApiRequest
                 'name' => 'required|string|max:255',
                 'thumbnail' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
                 'status' => 'boolean',
-                'category_id' => 'required|exists:categories,id',
+                // 'category_id' => 'required|exists:categories,id',
+
+                // product+categories
+                'categories' => 'required|array',
+                'categories.*' => 'exists:categories,id',
 
                 //Product Detail
                 'product_details' => 'required|array',

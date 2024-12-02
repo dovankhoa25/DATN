@@ -9,7 +9,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'thumbnail', 'status', 'description', 'category_id'];
+    protected $fillable = ['name', 'thumbnail', 'status', 'description'];
 
 
     public function scopeFilter($query, $filters)
@@ -35,7 +35,7 @@ class Product extends Model
 
     public static function getProductWithDetails($id)
     {
-        return self::with(['productDetails.images', 'category', 'productDetails.size'])->findOrFail($id);
+        return self::with(['productDetails.images', 'categories', 'productDetails.size'])->findOrFail($id);
     }
 
 
@@ -59,8 +59,14 @@ class Product extends Model
         return $this->hasManyThrough(Size::class, ProductDetail::class, 'product_id', 'id', 'id', 'size_id');
     }
 
-    public function category()
+    // public function category()
+    // {
+    //     return $this->belongsTo(Category::class, 'category_id');
+    // }
+
+
+    public function categories()
     {
-        return $this->belongsTo(Category::class, 'category_id');
+        return $this->belongsToMany(Category::class, 'category_product');
     }
 }

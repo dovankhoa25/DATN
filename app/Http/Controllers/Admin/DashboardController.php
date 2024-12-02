@@ -44,7 +44,7 @@ class DashboardController extends Controller
         $userCount = User::count();
         $productCount = Product::count();
         $orderCount = TimeOrderTable::count();
-        // $tableCount = Table::count();
+        $tableCount = Table::count();
         $billCount = Bill::count();
 
         $filteredUserCount = $statistics(User::class, $startDate, $endDate);
@@ -61,14 +61,14 @@ class DashboardController extends Controller
                 'users' => $userCount,
                 'products' => $productCount,
                 'orders' => $orderCount,
-                // 'tables' => $tableCount,
+                'tables' => $tableCount,
                 'bills' => $billCount,
             ],
             'filtered' => [
                 'users' => $filteredUserCount,
                 'products' => $filteredProductCount,
                 'orders' => $filteredOrderCount,
-                // 'tables' => $filteredTableCount,
+                'tables' => $filteredTableCount,
                 'bills' => $filteredBillCount,
             ],
             'default' => [
@@ -76,14 +76,14 @@ class DashboardController extends Controller
                     'users' => $lastMonthUserCount,
                     'products' => $statistics(Product::class, $defaultLastMonthStart, $defaultLastMonthEnd),
                     'orders' => $statistics(TimeOrderTable::class, $defaultLastMonthStart, $defaultLastMonthEnd),
-                    // 'tables' => $statistics(Table::class, $defaultLastMonthStart, $defaultLastMonthEnd),
+                    'tables' => $statistics(Table::class, $defaultLastMonthStart, $defaultLastMonthEnd),
                     'bills' => $statistics(Bill::class, $defaultLastMonthStart, $defaultLastMonthEnd),
                 ],
                 'current_month' => [
                     'users' => $currentMonthUserCount,
                     'products' => $statistics(Product::class, $defaultCurrentMonthStart, $defaultCurrentMonthEnd),
                     'orders' => $statistics(TimeOrderTable::class, $defaultCurrentMonthStart, $defaultCurrentMonthEnd),
-                    // 'tables' => $statistics(Table::class, $defaultCurrentMonthStart, $defaultCurrentMonthEnd),
+                    'tables' => $statistics(Table::class, $defaultCurrentMonthStart, $defaultCurrentMonthEnd),
                     'bills' => $statistics(Bill::class, $defaultCurrentMonthStart, $defaultCurrentMonthEnd),
                 ],
             ],

@@ -14,21 +14,26 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-       
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'thumbnail' => $this->thumbnail,
             'description' => $this->description,
             'status' => $this->status,
-            'category' => [
-                'id' =>  $this->category->id,
-                'name' =>  $this->category->name,
-            ],
+            // 'category' => [
+            //     'id' =>  $this->category->id,
+            //     'name' =>  $this->category->name,
+            // ],
+            'categories' => $this->categories->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                ];
+            }),
             'product_details' => ProductDetailResource::collection($this->whenLoaded('productDetails')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
-
     }
 }
