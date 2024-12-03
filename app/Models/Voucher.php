@@ -40,14 +40,17 @@ class Voucher extends Model
     }
 
 
+
     protected $fillable = [
         'name',
         'value',
+        'discount_percentage',
+        'max_discount_value',
         'image',
         'start_date',
         'end_date',
         'status',
         'customer_id',
-        'quantity',
+        'quantity'
     ];
 }

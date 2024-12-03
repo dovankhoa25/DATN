@@ -33,6 +33,9 @@ class Table extends Model
         'table',
         'description',
         'status',
-        'reservation_status'
+        'reservation_status',
+        'min_guest',
+        'max_guest',
+        'deposit',
     ];
 }

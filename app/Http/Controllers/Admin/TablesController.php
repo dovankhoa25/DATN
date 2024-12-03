@@ -34,7 +34,10 @@ class TablesController extends Controller
                 'table' => $request->get('table'),
                 'description' => $request->get('description') ?? Null,
                 'status' => 1,
-                'reservation_status' => 'close'
+                'reservation_status' => 'close',
+                'min_guest' => $request->get('min_guest') ?? null,
+                'max_guest' => $request->get('max_guest') ?? null,
+                'deposit' => $request->get('deposit') ?? null,
             ]);
             return response()->json([
                 'data' => new TableResource($table),
@@ -64,17 +67,24 @@ class TablesController extends Controller
             $table = Table::findOrFail($id);
 
             $table->update([
-                'table' => $request->get('table'),
+                'table' => $request->get('table', $table->table),
                 'description' => $request->get('description', $table->description),
+                'status' => $request->get('status', $table->status),
+                'reservation_status' => $request->get('reservation_status', $table->reservation_status),
+                'min_guest' => $request->get('min_guest', $table->min_guest),
+                'max_guest' => $request->get('max_guest', $table->max_guest),
+                'deposit' => $request->get('deposit', $table->deposit),
             ]);
+
             return response()->json([
                 'data' => new TableResource($table),
-                'message' => 'success',
-            ], 201);
+                'message' => 'Cập nhật bàn thành công',
+            ], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'table không tồn tại'], 404);
+            return response()->json(['error' => 'Bàn không tồn tại'], 404);
         }
     }
+
 
     public function destroy(string $id)
     {

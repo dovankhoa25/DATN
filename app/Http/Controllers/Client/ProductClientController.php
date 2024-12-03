@@ -82,10 +82,17 @@ class ProductClientController extends Controller
                 'id' => $product->id,
                 'name' => $product->name,
                 'description' => $product->description,
-                'category' => [
-                    'id' => $product->category->id,
-                    'name' => $product->category->name,
-                ],
+                // 'category' => [
+                //     'id' => $product->category->id,
+                //     'name' => $product->category->name,
+                // ],
+                'categories' => $product->categories->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'image' => $category->image,
+                    ];
+                }),
                 'min_price' => $minPrice,
                 'max_price' => $maxPrice,
                 'thumbnail' => $product->thumbnail,
@@ -176,11 +183,18 @@ class ProductClientController extends Controller
                 'thumbnail' => $product->thumbnail,
                 'description' => $product->description,
                 'status' => $product->status,
-                'category' => [
-                    'id' => $product->category->id,
-                    'name' => $product->category->name,
-                    'image' => $product->category->image
-                ],
+                // 'category' => [
+                //     'id' => $product->category->id,
+                //     'name' => $product->category->name,
+                //     'image' => $product->category->image
+                // ],
+                'categories' => $product->categories->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'image' => $category->image,
+                    ];
+                }),
                 'product_details' => collect($product->productDetails)->map(function ($detail) {
                     return [
                         'id' => $detail->id,
@@ -226,11 +240,19 @@ class ProductClientController extends Controller
                 'thumbnail' => $product->thumbnail,
                 'status' => $product->status,
                 'description' => $product->description,
-                'category' => [
-                    'id' => $product->category->id,
-                    'name' => $product->category->name,
-                    'image' => $product->category->image,
-                ],
+                // 'category' => [
+                //     'id' => $product->category->id,
+                //     'name' => $product->category->name,
+                //     'image' => $product->category->image,
+                // ],
+                'categories' => $product->categories->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'image' => $category->image,
+                    ];
+                }),
+
                 'product_details' => $product->productDetails->map(function ($detail) {
                     return [
                         'id' => $detail->id,
@@ -339,10 +361,17 @@ class ProductClientController extends Controller
                 'name' => $product->name,
                 'thumbnail' => $product->thumbnail,
                 'description' => $product->description,
-                'category' => [
-                    'id' => $product->category->id,
-                    'name' => $product->category->name,
-                ],
+                // 'category' => [
+                //     'id' => $product->category->id,
+                //     'name' => $product->category->name,
+                // ],
+                'categories' => $product->categories->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'image' => $category->image,
+                    ];
+                }),
                 'product_details' => $product->productDetails->map(function ($detail) {
                     return [
                         'id' => $detail->id,

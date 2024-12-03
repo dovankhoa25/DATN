@@ -295,8 +295,6 @@ class BillUser extends Controller
     }
 
 
-
-
     private function applyVoucher($voucherId, $totalAmount)
     {
         $voucher = Voucher::find($voucherId);
@@ -307,16 +305,30 @@ class BillUser extends Controller
             $voucher->end_date >= now() &&
             $voucher->quantity > 0
         ) {
+            $discount = 0;
 
-            $totalAmount -= $voucher->value;
+            if (!is_null($voucher->value) && $voucher->value > 0) {
+                $discount = $voucher->value;
+            } elseif (!is_null($voucher->discount_percentage) && $voucher->discount_percentage > 0) {
+                $discount = $totalAmount * ($voucher->discount_percentage / 100);
+                if (!is_null($voucher->max_discount_value)) {
+                    $discount = min($discount, $voucher->max_discount_value);
+                }
+            }
 
+            // Tính tổng sau khi áp dụng giảm giá
+            $totalAmount -= $discount;
+
+            // Cập nhật số lượng voucher còn lại
             $voucher->decrement('quantity');
 
+            // Đảm bảo tổng không âm
             return max(0, $totalAmount);
         }
 
         return $totalAmount;
     }
+
 
 
     private function applyPoints(Customer $customer, $totalAmount)

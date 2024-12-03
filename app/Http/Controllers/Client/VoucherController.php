@@ -123,19 +123,63 @@ class VoucherController extends Controller
     }
 
 
+    // public function voucherYagi()
+    // {
+    //     $vouchers = Voucher::whereNull('customer_id')->get();
+
+    //     if ($vouchers->isEmpty()) {
+    //         return response()->json([
+    //             'message' => 'Customer này không có voucher nào.',
+    //         ], 404);
+    //     }
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $vouchers,
+    //     ], 200);
+    // }
+
     public function voucherYagi()
     {
-        $vouchers = Voucher::whereNull('customer_id')->get();
 
-        if ($vouchers->isEmpty()) {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $customer = DB::table('customers')->where('user_id', $user->id)->first();
+
+        if (!$customer) {
             return response()->json([
-                'message' => 'Customer này không có voucher nào.',
+                'message' => 'Không tìm thấy thông tin khách hàng.',
+            ], 404);
+        }
+        $currentDate = Carbon::now()->toDateString();
+
+        $allVouchers = DB::table('vouchers')
+            ->select('id', 'name', 'value', 'image', 'customer_id', 'quantity', 'start_date', 'end_date')
+            ->where('quantity', '>=', 1)
+            ->whereDate('start_date', '<=', $currentDate)
+            ->whereDate('end_date', '>=', $currentDate)
+            ->get();
+
+        if ($allVouchers->isEmpty()) {
+            return response()->json([
+                'message' => 'Không có voucher nào phù hợp.',
             ], 404);
         }
 
+        $vouchersWithoutCustomer = $allVouchers->filter(function ($voucher) {
+            return is_null($voucher->customer_id);
+        });
+
+        $vouchersForCustomer = $allVouchers->filter(function ($voucher) use ($customer) {
+            return $voucher->customer_id == $customer->id;
+        });
+
         return response()->json([
             'success' => true,
-            'data' => $vouchers,
+            'data' => [
+                'vouchers_without_customer' => $vouchersWithoutCustomer,
+                'vouchers_for_customer' => $vouchersForCustomer,
+            ],
         ], 200);
     }
 }

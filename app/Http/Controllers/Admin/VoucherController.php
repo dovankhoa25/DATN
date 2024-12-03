@@ -19,10 +19,8 @@ class VoucherController extends Controller
             $perPage = $request->get('per_page', 10);
 
             $filters = $request->all();
-            // \Log::info('Filters applied: ', $filters);
 
             $vouchers = Voucher::filter($filters);
-            // \Log::info('Query result: ', $vouchers->toSql());
 
             $paginated = $vouchers->paginate($perPage);
 
@@ -37,7 +35,25 @@ class VoucherController extends Controller
 
     public function store(VoucherRequest $request)
     {
-        $data = $request->only(['name', 'value', 'image', 'start_date', 'end_date', 'status', 'customer_id', 'quantity']);
+        $data = $request->only([
+            'name',
+            'value',
+            'discount_percentage',
+            'max_discount_value',
+            'image',
+            'start_date',
+            'end_date',
+            'status',
+            'customer_id',
+            'quantity'
+
+        ]);
+        // Kiểm tra và tự động cập nhật max_discount_value
+        if ($data['discount_percentage'] == 0) {
+            $data['max_discount_value'] = 0;
+        } else {
+            $data['value'] = 0;
+        }
 
         $voucher = Voucher::create($data);
 
@@ -46,8 +62,6 @@ class VoucherController extends Controller
             'data' => $voucher
         ], 201);
     }
-
-
 
 
 
@@ -61,26 +75,29 @@ class VoucherController extends Controller
 
     public function update(VoucherRequest $request, $id)
     {
-        try {
-            $voucher = Voucher::findOrFail($id);
 
-            $data = $request->only(['name', 'value', 'image', 'start_date', 'end_date', 'status', 'customer_id', 'quantity']);
+        $voucher = Voucher::findOrFail($id);
+        $data = $request->only([
+            'name',
+            'value',
+            'discount_percentage',
+            'max_discount_value',
+            'image',
+            'start_date',
+            'end_date',
+            'status',
+            'customer_id',
+            'quantity'
 
-            $voucher->update($data);
-
-            return response()->json([
-                'message' => 'Cập Nhật Thành Công!',
-                'data' => $voucher
-            ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'error' => 'Không tìm thấy voucher để cập nhật!'
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Đã xảy ra lỗi trong quá trình cập nhật.',
-                'details' => $e->getMessage()
-            ], 500);
+        ]);
+        if ($data['discount_percentage'] == 0) {
+            $data['max_discount_value'] = 0;
         }
+        $voucher->update($data);
+
+        return response()->json([
+            'message' => 'Thêm Mới Thành Công!',
+            'data' => $voucher
+        ], 200);
     }
 }

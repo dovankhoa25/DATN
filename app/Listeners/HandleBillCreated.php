@@ -24,6 +24,7 @@ class HandleBillCreated implements ShouldQueue
 
         $bill = $event->bill;
 
+
         // meo sác nhận 
         SendBillCreatedEmail::dispatch($bill);
 
