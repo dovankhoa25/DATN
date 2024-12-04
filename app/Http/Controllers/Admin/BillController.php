@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\ItemConfirmedByAdmin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\BillRequest;
 use App\Http\Requests\Bill\FilterBillRequest;
@@ -220,7 +221,7 @@ class BillController extends Controller
             $bill->save();
 
             DB::commit();
-
+            broadcast(new ItemConfirmedByAdmin($detail));
             return response()->json([
                 'message' => 'Tất cả món ăn đã được cập nhật trạng thái.',
                 'data' => [

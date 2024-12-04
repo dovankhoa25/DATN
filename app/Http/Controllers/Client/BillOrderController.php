@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Events\ItemAddedToBill;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\Client\BillOderRequest;
 use App\Http\Requests\Bill\Client\ItemBillRequest;
@@ -79,6 +80,10 @@ class BillOrderController extends Controller
 
         OrderCart::whereIn('id', $request->id_order_cart)->delete();
 
+        broadcast(new ItemAddedToBill([
+            'bill_id' => $bill->id,
+            'items' => $billDetailsData
+        ]));
 
         return response()->json([
             'success' => true,

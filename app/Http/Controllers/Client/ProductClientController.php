@@ -202,7 +202,12 @@ class ProductClientController extends Controller
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
 
-        $paginatedProducts = Product::filter($request->all())->where('category_id', '=', $id)
+        // $paginatedProducts = Product::filter($request->all())->where('category_id', '=', $id)
+        //     ->paginate($perPage);
+        $paginatedProducts = Product::filter($request->all())
+            ->whereHas('categories', function ($query) use ($id) {
+                $query->where('categories.id', '=', $id);
+            })
             ->paginate($perPage);
 
         $productIds = $paginatedProducts->pluck('id');
@@ -226,10 +231,6 @@ class ProductClientController extends Controller
                 'name' => $product->name,
                 'thumbnail' => $product->thumbnail,
                 'description' => $product->description,
-                // 'category' => [
-                //     'id' => $product->category->id,
-                //     'name' => $product->category->name,
-                // ],
                 'categories' => $product->categories->map(function ($category) {
                     return [
                         'id' => $category->id,

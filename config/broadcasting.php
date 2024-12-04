@@ -37,15 +37,14 @@ return [
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
-                // 'host' => env('PUSHER_HOST') ?: 'api-'.env('PUSHER_APP_CLUSTER', 'mt1').'.pusher.com',
-                // 'port' => env('PUSHER_PORT', 443),
-                // 'scheme' => env('PUSHER_SCHEME', 'https'),
-                // 'encrypted' => true,
-                // 'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
-                'useTLS' => false,
+                'host' => env('PUSHER_HOST', 'api-' . env('PUSHER_APP_CLUSTER', 'mt1') . '.pusher.com'),
+                'port' => env('PUSHER_PORT', 443), // Cổng mặc định là 443 (HTTPS)
+                'scheme' => env('PUSHER_SCHEME', 'https'), // Dùng 'https' nếu bạn sử dụng HTTPS
+                'encrypted' => true,  // Bật mã hóa (sử dụng nếu dùng HTTPS)
+                'useTLS' => true,     // Kết nối qua TLS (bật khi dùng HTTPS)
             ],
             'client_options' => [
-                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+                // Guzzle client options nếu cần thiết
             ],
         ],
 
