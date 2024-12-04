@@ -28,17 +28,18 @@ class UserController extends Controller
             $cacheKey = 'users_page_' . $page . '_per_page_' . $perPage;
 
             // $users = Cache::remember($cacheKey, 600, function () use ($request, $perPage, $cacheKey) {
-            // Log::info("Cache is being created for key: {$cacheKey}");
+            //     Log::info("Cache is being created for key: {$cacheKey}");
+            //     $userList = User::with('roles')->filter($request)->paginate($perPage);
+
+            //     foreach ($userList as $user) {
+            //         Cache::put('user:' . $user->id, $user, 600);
+            //     }
+
+            //     return $userList;
+            // });
             $userList = User::with('roles')->filter($request)->paginate($perPage);
 
-            // foreach ($userList as $user) {
-            //     Cache::put('user:' . $user->id, $user, 600);
-            // }
-
-            return $userList;
-            // });
-
-            return new UserCollection($users);
+            return new UserCollection($userList);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Không tìm thấy người dùng'], 404);
         }
