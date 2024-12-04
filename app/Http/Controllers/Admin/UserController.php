@@ -137,7 +137,7 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
-            if ($user->is_admin === 0) {
+            if ($user->is_admin === 1) {
                 return response()->json(['message' => 'User bạn đang cố xóa là admin mặc định'], 400);
             }
             $user->is_locked = !$user->is_locked;
