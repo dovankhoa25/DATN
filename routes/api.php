@@ -60,7 +60,7 @@ Route::post('refresh', [AuthController::class, 'refreshToken']);
 
 
 //power
-Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin'])->group(function () {
+Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(function () {
 
     //dash
     Route::get('dashboard', [DashboardController::class, 'index']);

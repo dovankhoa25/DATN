@@ -177,7 +177,7 @@ class BillUser extends Controller
 
         $selectedItems = $request->get('cart_items');
         $usePoints = $request->get('use_points', false);
-        $voucherId = $request->get('voucher_id');
+        $vouchers = $request->get('vouchers');
         $paymentId = $request->get('payment_id');
 
         if (empty($selectedItems)) {
@@ -197,7 +197,7 @@ class BillUser extends Controller
             DB::beginTransaction();
 
             $totalAmount = $this->calculateTotalAmount($cartItems);
-            $totalAmount = $this->applyVoucher($voucherId, $totalAmount);
+            $totalAmount = $this->applyVoucher($vouchers, $totalAmount);
 
             $customer = Customer::where('user_id', $user->id)->first();
             if ($usePoints && $customer) {
@@ -224,7 +224,7 @@ class BillUser extends Controller
                 'total_amount' => $totalAmount,
                 'branch_address' => $request->get('branch_address'),
                 'payment_id' => $paymentId,
-                'voucher_id' => $voucherId,
+                // 'voucher_id' => $voucherId,
                 'note' => $request->get('note'),
                 'order_type' => $request->get('order_type', 'online'),
                 'status' => 'pending',
@@ -295,39 +295,61 @@ class BillUser extends Controller
     }
 
 
-    private function applyVoucher($voucherId, $totalAmount)
+    private function applyVoucher(array $vouchers, $totalAmount)
     {
-        $voucher = Voucher::find($voucherId);
+        $yagiVoucher = null;
+        $customerVoucher = null;
 
-        if (
-            $voucher && $voucher->status &&
-            $voucher->start_date <= now() &&
-            $voucher->end_date >= now() &&
-            $voucher->quantity > 0
-        ) {
-            $discount = 0;
+        foreach ($vouchers as $voucherId) {
+            $voucher = Voucher::find($voucherId);
 
-            if (!is_null($voucher->value) && $voucher->value > 0) {
-                $discount = $voucher->value;
-            } elseif (!is_null($voucher->discount_percentage) && $voucher->discount_percentage > 0) {
-                $discount = $totalAmount * ($voucher->discount_percentage / 100);
-                if (!is_null($voucher->max_discount_value)) {
-                    $discount = min($discount, $voucher->max_discount_value);
+            if (
+                $voucher &&
+                $voucher->status &&
+                $voucher->start_date <= now() &&
+                $voucher->end_date >= now() &&
+                $voucher->quantity > 0
+            ) {
+                if ($voucher->customer_id) {
+                    if ($customerVoucher) {
+                        return response()->json(['error' => 'Chỉ được chọn một voucher của khách hàng'], 400);
+                    }
+                    $customerVoucher = $voucher;
+                } else {
+                    if ($yagiVoucher) {
+                        return response()->json(['error' => 'Chỉ được chọn một voucher của Yagi'], 400);
+                    }
+                    $yagiVoucher = $voucher;
                 }
             }
-
-            // Tính tổng sau khi áp dụng giảm giá
-            $totalAmount -= $discount;
-
-            // Cập nhật số lượng voucher còn lại
-            $voucher->decrement('quantity');
-
-            // Đảm bảo tổng không âm
-            return max(0, $totalAmount);
         }
 
-        return $totalAmount;
+        if ($yagiVoucher) {
+            $totalAmount = $this->applyVoucherDiscount($yagiVoucher, $totalAmount);
+        }
+
+        if ($customerVoucher) {
+            $totalAmount = $this->applyVoucherDiscount($customerVoucher, $totalAmount);
+        }
+
+        return max(0, $totalAmount);
     }
+
+    private function applyVoucherDiscount($voucher, $totalAmount)
+    {
+        if ($voucher->discount_percentage > 0) {
+            $discount = min(
+                ($totalAmount * $voucher->discount_percentage) / 100,
+                $voucher->max_discount_value ?? $totalAmount
+            );
+        } else {
+            $discount = $voucher->value;
+        }
+
+        return $totalAmount - $discount;
+    }
+
+
 
 
 

@@ -5,7 +5,7 @@
     - qtv ( dưới qtv không dùng được 1 số module)
     - ctv ( dưới qtv,admin giới hạn quyền module)
     - các module cấp tùy thuộc : 
-        (user , customer , category , subcategory , size , voucher , subcategory , table , product , payment , bill)
+        (user , customer , categories  , size , voucher ,  table , product , payment , bill)
 
 3. Bổ sung chức năng dự án 31/8 ( tách luồng )
     - oder_cart ( cart lưu trữ tại cửa hàng )
