@@ -113,12 +113,7 @@ class BillController extends Controller
 
     private function randomMaBill()
     {
-        do {
-            $maBill = strtoupper(Str::random(10));
-            $exists = Bill::where('ma_bill', $maBill)->exists();
-        } while ($exists);
-
-        return $maBill;
+        return 'BILL_' . Str::uuid()->toString();
     }
 
     public function getBillByTableNumber(int $tableNumber)

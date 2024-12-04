@@ -123,21 +123,6 @@ class VoucherController extends Controller
     }
 
 
-    // public function voucherYagi()
-    // {
-    //     $vouchers = Voucher::whereNull('customer_id')->get();
-
-    //     if ($vouchers->isEmpty()) {
-    //         return response()->json([
-    //             'message' => 'Customer này không có voucher nào.',
-    //         ], 404);
-    //     }
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'data' => $vouchers,
-    //     ], 200);
-    // }
 
     public function voucherYagi()
     {

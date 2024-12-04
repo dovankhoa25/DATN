@@ -77,7 +77,7 @@ class BillUser extends Controller
 
     private function randomMaBill()
     {
-        return 'BILL_' . (string) Str::uuid();
+        return 'BILL_' . Str::uuid()->toString();
     }
 
 

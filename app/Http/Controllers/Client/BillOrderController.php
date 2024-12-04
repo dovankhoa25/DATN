@@ -148,7 +148,7 @@ class BillOrderController extends Controller
             $qrExpiration = ($payment->name === 'ATM') ? now()->addMinutes(10) : null;
             $bill->customer_id = $customerId;
             $bill->payment_id = $paymentId;
-            $bill->voucher_id = $voucherId;
+            // $bill->voucher_id = $voucherId;
             $bill->note = $note;
             $bill->branch_address = 'FPT Poly';
             $bill->payment_status = $paymentStatus;
