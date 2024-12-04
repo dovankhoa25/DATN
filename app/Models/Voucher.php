@@ -13,7 +13,8 @@ class Voucher extends Model
 
     public function bills()
     {
-        return $this->hasMany(Bill::class, 'voucher_id');
+        return $this->belongsToMany(Bill::class, 'bill_vouchers', 'voucher_id', 'bill_id')
+            ->withTimestamps();
     }
 
     public function scopeFilter($query, $filters)

@@ -39,9 +39,10 @@ class Bill extends Model
         return $this->belongsTo(Payment::class, 'payment_id');
     }
 
-    public function voucher()
+    public function vouchers()
     {
-        return $this->belongsTo(Voucher::class, 'voucher_id');
+        return $this->belongsToMany(Voucher::class, 'bill_vouchers', 'bill_id', 'voucher_id')
+            ->withTimestamps();
     }
 
     public function UserAddress()

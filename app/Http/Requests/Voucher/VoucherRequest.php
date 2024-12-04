@@ -19,6 +19,7 @@ class VoucherRequest extends BaseApiRequest
         $rules = [
             'name' => 'required|string|max:255',
             'value' => 'nullable|numeric|min:0',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'discount_percentage' => 'nullable|numeric|min:0|max:100',
             'max_discount_value' => 'nullable|numeric|min:0',
             'quantity' => 'required|integer|min:1',
@@ -43,6 +44,9 @@ class VoucherRequest extends BaseApiRequest
             'name.required' => 'Tên voucher là bắt buộc.',
             'name.string' => 'Tên voucher phải là một chuỗi văn bản.',
             'name.max' => 'Tên voucher không được vượt quá 255 ký tự.',
+
+            'image.required' => 'Ảnh đại diện là bắt buộc.',
+            'image.max' => 'Đường dẫn ảnh đại diện không được vượt quá 2048.',
 
             'value.required' => 'Giá trị voucher là bắt buộc khi không có tỷ lệ giảm giá.',
             'value.numeric' => 'Giá trị voucher phải là một số.',

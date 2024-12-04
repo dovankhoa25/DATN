@@ -9,6 +9,7 @@ use App\Http\Resources\VoucherResource;
 use App\Models\Voucher;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class VoucherController extends Controller
 {
@@ -31,29 +32,44 @@ class VoucherController extends Controller
     }
 
 
+    protected function storeImage($file, $directory)
+    {
+        if ($file) {
+            $filePath = $file->store($directory, 'public');
+            return Storage::url($filePath); // Trả về URL công khai
+        }
 
+        return null;
+    }
 
     public function store(VoucherRequest $request)
     {
+
+
+        $image = $this->storeImage($request->file('image'), 'voucher');
+
         $data = $request->only([
             'name',
             'value',
             'discount_percentage',
             'max_discount_value',
-            'image',
             'start_date',
             'end_date',
             'status',
             'customer_id',
             'quantity'
-
         ]);
-        // Kiểm tra và tự động cập nhật max_discount_value
-        if ($data['discount_percentage'] == 0) {
-            $data['max_discount_value'] = 0;
-        } else {
+
+        $data['image'] = $image;
+
+
+        if ($data['discount_percentage'] > 0) {
             $data['value'] = 0;
+        } elseif ($data['value'] > 0) {
+            $data['discount_percentage'] = 0;
+            $data['max_discount_value'] = 0;
         }
+
 
         $voucher = Voucher::create($data);
 
@@ -75,28 +91,41 @@ class VoucherController extends Controller
 
     public function update(VoucherRequest $request, $id)
     {
-
         $voucher = Voucher::findOrFail($id);
+
+        if ($request->hasFile('image')) {
+            if ($voucher->image) {
+                $oldImagePath = str_replace('/storage/', '', $voucher->image);
+                Storage::disk('public')->delete($oldImagePath);
+            }
+
+            $imagePath = $this->storeImage($request->file('image'), 'voucher');
+            $data['image'] = $imagePath;
+        }
+
         $data = $request->only([
             'name',
             'value',
             'discount_percentage',
             'max_discount_value',
-            'image',
             'start_date',
             'end_date',
             'status',
             'customer_id',
-            'quantity'
-
+            'quantity',
         ]);
-        if ($data['discount_percentage'] == 0) {
+
+        if ($data['discount_percentage'] > 0) {
+            $data['value'] = 0;
+        } elseif ($data['value'] > 0) {
+            $data['discount_percentage'] = 0;
             $data['max_discount_value'] = 0;
         }
+
         $voucher->update($data);
 
         return response()->json([
-            'message' => 'Thêm Mới Thành Công!',
+            'message' => 'Cập nhật thành công!',
             'data' => $voucher
         ], 200);
     }

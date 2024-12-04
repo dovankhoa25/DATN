@@ -234,17 +234,11 @@ class BillUser extends Controller
                 'table_number' => $request->get('table_number'),
             ]);
 
-            if (!empty($vouchers)) {
-                foreach ($vouchers as $voucherId) {
-                    $voucher = Voucher::find($voucherId);
-                    if ($voucher) {
-                        BillVoucher::create([
-                            'bill_id' => $bill->id,
-                            'voucher_id' => $voucherId
-                        ]);
-                    }
-                }
+
+            if ($vouchers) {
+                $bill->vouchers()->attach($vouchers);
             }
+
 
             $billDetails = [];
             $productDetailsToUpdate = [];
