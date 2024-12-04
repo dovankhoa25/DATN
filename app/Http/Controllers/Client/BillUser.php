@@ -10,6 +10,7 @@ use App\Http\Resources\BillResource;
 use App\Jobs\CheckBillExpiration;
 use App\Models\Bill;
 use App\Models\BillDetail;
+use App\Models\BillVoucher;
 use App\Models\Customer;
 use App\Models\OnlineCart;
 use App\Models\Payment;
@@ -232,6 +233,18 @@ class BillUser extends Controller
                 'qr_expiration' => $qrExpiration,
                 'table_number' => $request->get('table_number'),
             ]);
+
+            if (!empty($vouchers)) {
+                foreach ($vouchers as $voucherId) {
+                    $voucher = Voucher::find($voucherId);
+                    if ($voucher) {
+                        BillVoucher::create([
+                            'bill_id' => $bill->id,
+                            'voucher_id' => $voucherId
+                        ]);
+                    }
+                }
+            }
 
             $billDetails = [];
             $productDetailsToUpdate = [];

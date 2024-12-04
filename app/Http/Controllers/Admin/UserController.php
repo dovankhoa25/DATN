@@ -27,16 +27,16 @@ class UserController extends Controller
 
             $cacheKey = 'users_page_' . $page . '_per_page_' . $perPage;
 
-            $users = Cache::remember($cacheKey, 600, function () use ($request, $perPage, $cacheKey) {
-                Log::info("Cache is being created for key: {$cacheKey}");
-                $userList = User::with('roles')->filter($request)->paginate($perPage);
+            // $users = Cache::remember($cacheKey, 600, function () use ($request, $perPage, $cacheKey) {
+            // Log::info("Cache is being created for key: {$cacheKey}");
+            $userList = User::with('roles')->filter($request)->paginate($perPage);
 
-                foreach ($userList as $user) {
-                    Cache::put('user:' . $user->id, $user, 600);
-                }
+            // foreach ($userList as $user) {
+            //     Cache::put('user:' . $user->id, $user, 600);
+            // }
 
-                return $userList;
-            });
+            return $userList;
+            // });
 
             return new UserCollection($users);
         } catch (ModelNotFoundException $e) {
@@ -167,5 +167,4 @@ class UserController extends Controller
             Cache::forget($cacheKey);
         }
     }
-    
 }
