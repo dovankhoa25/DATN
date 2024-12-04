@@ -34,30 +34,13 @@ class ProductController extends Controller
     //     }
     // }
 
-    // public function index(FilterProductRequest $request)
-    // {
-    //     $perPage = $request->get('per_page', 10);
-    //     $page = $request->get('page', 1);
-
-    //     $productIds = Product::filter($request->all())
-    //         ->paginate($perPage)
-    //         ->pluck('id');
-
-    //     $products = $productIds->map(function ($id) {
-    //         return Cache::remember('product:' . $id, 600, function () use ($id) {
-    //             // return Product::with(['productDetails.images', 'category'])->find($id);
-    //             return Product::getProductWithDetails($id);
-    //         });
-    //     });
-
-    //     return ProductResource::collection($products);
-    // }
 
     public function index(FilterProductRequest $request)
     {
         $perPage = $request->get('per_page', 10);
 
         $paginatedProductIds = Product::filter($request->all())
+            ->latest()
             ->select('id')
             ->paginate($perPage);
 

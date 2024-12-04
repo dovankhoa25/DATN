@@ -17,7 +17,9 @@ class PaymentController extends Controller
     public function index(FilterPaymentRequest $request)
     {
         $perPage = $request['per_page'] ?? 10;
-        $listPayment = Payment::filter($request)->paginate($perPage);
+        $listPayment = Payment::filter($request)
+            ->latest()
+            ->paginate($perPage);
         $paymentCollection = PaymentResource::collection($listPayment);
         return $paymentCollection;
     }

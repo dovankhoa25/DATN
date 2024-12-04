@@ -21,7 +21,9 @@ class TimeOrderTableController extends Controller
     {
         try {
             $perPage = $request->get('per_page', 10);
-            $timeOrderTable = TimeOrderTable::filter($request)->paginate($perPage);
+            $timeOrderTable = TimeOrderTable::filter($request)
+                ->latest()
+                ->paginate($perPage);
             return TimeOrderTableResource::collection($timeOrderTable);
         } catch (Exception  $e) {
             return response()->json(['error' => 'Có lỗi xảy ra, vui lòng thử lại sau'], 404);

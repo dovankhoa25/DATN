@@ -46,6 +46,7 @@ class CategoryController extends Controller
         $categories = Category::with('subcategories')
             ->filter($request)
             ->whereNull('parent_id')
+            ->latest()
             ->paginate($perPage);
         return CategoryAdminResource::collection($categories);
     }

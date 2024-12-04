@@ -21,7 +21,7 @@ class BillController extends Controller
     {
 
         $perPage = $request['per_page'] ?? 10;
-        $bills = Bill::filter($request->filters())->paginate($perPage);
+        $bills = Bill::filter($request->filters())->latest()->paginate($perPage);
         return BillResource::collection($bills);
     }
 

@@ -37,7 +37,9 @@ class UserController extends Controller
 
             //     return $userList;
             // });
-            $userList = User::with('roles')->filter($request)->paginate($perPage);
+            $userList = User::with('roles')->filter($request)
+                ->latest()
+                ->paginate($perPage);
 
             return new UserCollection($userList);
         } catch (ModelNotFoundException $e) {

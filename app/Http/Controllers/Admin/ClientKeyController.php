@@ -14,27 +14,30 @@ use Illuminate\Support\Str;
 class ClientKeyController extends Controller
 {
 
-    public function index(FilterClientRequest $request){
+    public function index(FilterClientRequest $request)
+    {
         try {
-            
-            $perPage = $request->get('per_page', 10);
-            $apiKey = Client::filter($request)->paginate($perPage);
-            return ClientResource::collection($apiKey);
 
+            $perPage = $request->get('per_page', 10);
+            $apiKey = Client::filter($request)
+                ->latest()
+                ->paginate($perPage);
+            return ClientResource::collection($apiKey);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Không tìm thấy Category'], 404);
         }
     }
 
 
-    public function store(StoreClientRequest $request) {
+    public function store(StoreClientRequest $request)
+    {
         $apiKey = Str::random(60);
-        
+
         Client::create([
             'name' => $request->name,
             'api_key' => hash('sha256', $apiKey),
         ]);
-    
+
         return response()->json([
             'message' => 'store api key ok',
             'api_key' => $apiKey
@@ -57,5 +60,4 @@ class ClientKeyController extends Controller
             return response()->json(['error' => ' không tồn tại'], 404);
         }
     }
-    
 }

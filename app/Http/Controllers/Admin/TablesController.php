@@ -19,7 +19,9 @@ class TablesController extends Controller
         try {
             $perPage = $request->get('per_page', 10);
 
-            $tables = Table::filter($request)->paginate($perPage);
+            $tables = Table::filter($request)
+                ->latest()
+                ->paginate($perPage);
             return TableResource::collection($tables);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Không tìm thấy Table'], 404);

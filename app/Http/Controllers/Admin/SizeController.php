@@ -18,9 +18,11 @@ class SizeController extends Controller
     public function index(FilterSizeRequest $request)
     {
         $perPage = $request['per_page'] ?? 10;
-        $listSize = Size::filter($request)->paginate($perPage);
+        $listSize = Size::filter($request)
+            ->latest()
+            ->paginate($perPage);
         // $sizeCollection = SizeResource::collection($listSize);
-        return SizeResource::collection($listSize,200);
+        return SizeResource::collection($listSize, 200);
     }
 
     /**
@@ -31,7 +33,7 @@ class SizeController extends Controller
     {
         $sizedata = $request->all();
         $sizedata['status'] = true;
-       
+
         $size = Size::create($sizedata);
 
         $sizeCollection = new SizeResource($size);
@@ -54,7 +56,7 @@ class SizeController extends Controller
         }
     }
 
- 
+
     public function update(SizeRequest $request, string $id)
     {
         $size = Size::FindorFail($id);
@@ -68,7 +70,7 @@ class SizeController extends Controller
         }
     }
 
-    
+
     public function destroy(string $id)
     {
         $size = Size::FindorFail($id);
@@ -96,6 +98,4 @@ class SizeController extends Controller
             return response()->json(['error' => ' không tồn tại'], 404);
         }
     }
-
-    
 }

@@ -23,7 +23,9 @@ class VoucherController extends Controller
 
             $vouchers = Voucher::filter($filters);
 
-            $paginated = $vouchers->paginate($perPage);
+            $paginated = $vouchers
+                ->latest()
+                ->paginate($perPage);
 
             return VoucherResource::collection($paginated);
         } catch (ModelNotFoundException $e) {
