@@ -37,13 +37,16 @@ class CategoryController extends Controller
 
         $cacheKey = 'categories_page_' . $page . '_per_page_' . $perPage;
 
-        $categories = Cache::remember($cacheKey, 600, function () use ($request, $perPage) {
-            return Category::with('subcategories')
-                ->filter($request)
-                ->whereNull('parent_id')
-                ->paginate($perPage);
-        });
-
+        // $categories = Cache::remember($cacheKey, 600, function () use ($request, $perPage) {
+        //     return Category::with('subcategories')
+        //         ->filter($request)
+        //         ->whereNull('parent_id')
+        //         ->paginate($perPage);
+        // });
+        $categories = Category::with('subcategories')
+            ->filter($request)
+            ->whereNull('parent_id')
+            ->paginate($perPage);
         return CategoryAdminResource::collection($categories);
     }
 
@@ -113,10 +116,10 @@ class CategoryController extends Controller
                 'image' => $imgUrl ? $imgUrl : $category->image,
                 'parent_id' => $request->input('parent_id', $category->parent_id)
             ]);
-            $cacheKeys = Redis::keys('categories_page_*');
-            foreach ($cacheKeys as $key) {
-                Redis::del($key);
-            }
+            // $cacheKeys = Redis::keys('categories_page_*');
+            // foreach ($cacheKeys as $key) {
+            //     Redis::del($key);
+            // }
 
             return response()->json([
                 'data' => new CategoryAdminResource($category),
