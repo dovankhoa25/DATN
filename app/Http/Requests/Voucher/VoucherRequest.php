@@ -19,7 +19,7 @@ class VoucherRequest extends BaseApiRequest
         $rules = [
             'name' => 'required|string|max:255',
             'value' => 'nullable|numeric|min:0',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'discount_percentage' => 'nullable|numeric|min:0|max:100',
             'max_discount_value' => 'nullable|numeric|min:0',
             'quantity' => 'required|integer|min:1',
