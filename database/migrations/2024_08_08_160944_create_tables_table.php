@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('table');
             $table->text('description')->nullable();
+            $table->integer('min_guest')->nullable();
+            $table->integer('max_guest')->nullable();
+            $table->decimal('deposit', 10, 2)->nullable();
             $table->boolean('status')->default(true);
+            $table->enum('reservation_status', ['open', 'close', 'pending'])->default('close');
             $table->softDeletes();
             $table->timestamps();
         });

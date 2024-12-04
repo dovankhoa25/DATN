@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('thumbnail');
             $table->text('description')->nullable();
             $table->boolean('status')->default(true);
-            $table->foreignId('category_id')->constrained('categories');
             $table->softDeletes();
             $table->timestamps();
         });

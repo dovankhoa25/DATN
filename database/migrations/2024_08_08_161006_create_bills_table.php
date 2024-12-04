@@ -23,8 +23,6 @@ return new class extends Migration
             $table->decimal('total_amount', 15, 2)->default(0.00);
             $table->string('branch_address')->nullable();
             $table->foreignId('payment_id')->constrained('payments');
-            $table->foreignId('voucher_id')->nullable()->constrained('vouchers');
-
             $table->text('note')->nullable();
             $table->enum('order_type', ['in_restaurant', 'online'])->default('online');
             $table->string('table_number')->nullable();

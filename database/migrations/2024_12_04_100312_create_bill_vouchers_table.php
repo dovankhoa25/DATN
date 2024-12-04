@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('tables', function (Blueprint $table) {
-            $table->enum('reservation_status', ['open', 'close', 'pending'])->default('close')->after('status');
+        Schema::create('bill_vouchers', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('bill_id')->constrained('bills')->onDelete('cascade');
+            $table->foreignId('voucher_id')->constrained('vouchers')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('tables', function (Blueprint $table) {
-            $table->dropColumn('reservation_status');
-        });
+        Schema::dropIfExists('bill_vouchers');
     }
 };
