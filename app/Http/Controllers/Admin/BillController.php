@@ -90,6 +90,17 @@ class BillController extends Controller
                 return response()->json(['error' => 'Chỉ có thể cập nhật trạng thái cho đơn hàng online'], 400);
             }
 
+            if ($bill->order_type == 'online') {
+                if (
+                    $bill->order_type == 'pending'
+                    && $bill->order_type == 'failed'
+                    && $bill->order_type == 'refunded'
+                    && $bill->order_type == 'paid'
+                ) {
+                    return response()->json(['error' => 'đơn hàng này không được phép cập nhật'], 400);
+                }
+            }
+
 
             if (in_array($currentStatus, ['completed', 'failed'])) {
                 return response()->json(['error' => 'Không thể cập nhật khi trạng thái đã là completed hoặc failed'], 400);
