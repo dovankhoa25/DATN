@@ -48,6 +48,8 @@ class BillUser extends Controller
                     'note' => $bill->note,
                     'order_type' => $bill->order_type,
                     'status' => $bill->status,
+                    'payment_status' => $bill->payment_status,
+                    'qr_expiration' => $bill->qr_expiration,
                 ];
             } elseif ($bill->order_type === 'in_restaurant') {
                 return [
@@ -63,6 +65,10 @@ class BillUser extends Controller
                     'order_type' => $bill->order_type,
                     'table_number' => $bill->table_number,
                     'status' => $bill->status,
+                    'payment_status' => $bill->payment_status,
+                    'qr_expiration' => $bill->qr_expiration,
+                    'created_at' => $bill->created_at,
+                    'updated_at' => $bill->updated_at
                 ];
             }
         });
