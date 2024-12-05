@@ -92,10 +92,10 @@ class BillController extends Controller
 
             if ($bill->order_type == 'online') {
                 if (
-                    $bill->order_type == 'pending'
-                    && $bill->order_type == 'failed'
-                    && $bill->order_type == 'refunded'
-                    && $bill->order_type == 'paid'
+                    $bill->payment_status == 'pending'
+                    && $bill->payment_status == 'failed'
+                    && $bill->payment_status == 'refunded'
+                    && $bill->payment_status == 'paid'
                 ) {
                     return response()->json(['error' => 'đơn hàng này không được phép cập nhật'], 400);
                 }

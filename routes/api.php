@@ -63,14 +63,14 @@ Route::post('refresh', [AuthController::class, 'refreshToken']);
 Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(function () {
 
     //dash
-    Route::get('dashboard', [DashboardController::class, 'index']);
+    Route::get('dashboard', [DashboardController::class, 'index'])->middleware('auth', 'checkRole:qtv,admin');
 
 
     // users
     Route::apiResource('users', UserController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::get('/user/{user}/roles', [UserController::class, 'getUserRoles']);
+    Route::get('/user/{user}/roles', [UserController::class, 'getUserRoles'])->middleware('auth', 'checkRole:qtv,admin');
     Route::put('/user/{user}/roles', [UserController::class, 'updateUserRoles'])->middleware('checkRole:admin');
     Route::put('/user/{user}/locked', [UserController::class, 'is_locked'])->middleware('checkRole:admin');
 
