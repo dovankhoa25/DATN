@@ -95,7 +95,7 @@ class BillController extends Controller
                     $bill->payment_status == 'pending'
                     && $bill->payment_status == 'failed'
                     && $bill->payment_status == 'refunded'
-                    && $bill->payment_status == 'paid'
+                    // && $bill->payment_status == 'paid'
                 ) {
                     return response()->json(['error' => 'đơn hàng này không được phép cập nhật'], 400);
                 }

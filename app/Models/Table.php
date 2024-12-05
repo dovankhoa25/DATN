@@ -38,4 +38,9 @@ class Table extends Model
         'max_guest',
         'deposit',
     ];
+
+    public function bills()
+    {
+        return $this->belongsToMany(Bill::class, 'bill_table');
+    }
 }

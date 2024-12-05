@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\BillOpenTableRequest;
 use App\Http\Requests\Bill\BillRequest;
+use App\Http\Requests\Bill\OpenTablesRequest;
 use App\Http\Requests\TimeOrderTable\TimeOrderTableRequest;
 use App\Http\Resources\TableResource;
 use App\Models\Bill;
@@ -39,19 +40,11 @@ class TableController extends Controller
         ]);
     }
 
-    // nhận id table, user -> tạo bill
-    // return mã bill, table id
+
     public function openTable(BillOpenTableRequest $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        // $userRoles = $user->roles()->pluck('name')->toArray();
 
-        // if (!in_array('qtv', $userRoles) && !in_array('admin', $userRoles) && !in_array('ctv', $userRoles)) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Bạn không có quyền mở bàn',
-        //     ], 403);
-        // }
 
         $table = Table::find($request->table_id);
         if (!$table || !$table->status) {
@@ -61,7 +54,6 @@ class TableController extends Controller
             ], 404);
         }
 
-        // chỉ khi reservation_status = close -> được mở bàn
         if ($table->reservation_status != 'close') {
             return response()->json([
                 'success' => false,
@@ -94,6 +86,9 @@ class TableController extends Controller
                 'reservation_status' => 'open'
             ]);
 
+            $tableIds = is_array($request->table_id) ? $request->table_id : [$request->table_id];
+
+            $bill->tables()->attach($tableIds);
             DB::commit();
 
             return response()->json([
@@ -112,58 +107,66 @@ class TableController extends Controller
     }
 
 
+    public function openTables(OpenTablesRequest $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $tables = Table::whereIn('id', $request->table_ids)->get();
+        if ($tables->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có bàn nào hợp lệ',
+            ], 404);
+        }
+
+        $invalidTables = $tables->filter(fn($table) => !$table->status || $table->reservation_status != 'close');
+        if ($invalidTables->isNotEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Một số bàn không sẵn sàng: ' . $invalidTables->pluck('id')->join(', '),
+            ], 400);
+        }
 
 
-    // public function openTable(TimeOrderTableRequest $request)
-    // {
-    //     $user = JWTAuth::parseToken()->authenticate();
+        DB::beginTransaction();
+        try {
 
-    //     $tableId = $request->table_id;
-    //     $dateOrder = $request->date_oder;
-    //     $timeOrderInput = $request->time_oder;
+            $bill = Bill::create([
+                'ma_bill' => $this->randomMaBill(),
+                'user_id' => $user->id,
+                'customer_id' => null,
+                'order_date' => Carbon::now(),
+                'user_addresses_id' => null,
+                'total_amount' => 0.00,
+                'branch_address' => $request->branch_address ?? 'Fpoly',
+                'payment_id' => $request->payment_id ?? null,
+                'note' => null,
+                'order_type' => 'in_restaurant',
+                'table_number' => null,
+                'status' => 'pending',
+                'qr_expiration' => null,
+                'payment_status' => 'pending',
+            ]);
 
-    //     $timeSlots = [
-    //         'sáng' => '07:00:00',
-    //         'trưa' => '12:00:00',
-    //         'tối'  => '19:00:00',
-    //     ];
-    //     $selectedTime = $timeSlots[$timeOrderInput];
+            $bill->tables()->attach($request->table_ids);
 
-    //     // Kiểm tra xem bàn đã được đặt vào thời điểm này chưa
-    //     $existingOrder = TimeOrderTable::where('table_id', $tableId)
-    //         ->where('date_oder', $dateOrder)
-    //         ->where('time_oder', $selectedTime)
-    //         ->first();
+            Table::whereIn('id', $request->table_ids)->update([
+                'reservation_status' => 'open',
+            ]);
 
-    //     if ($existingOrder) {
-    //         return response()->json([
-    //             'message' => "Đặt bàn thất bại. Bàn này đã được đặt vào buổi $timeOrderInput",
-    //         ], 409);
-    //     }
 
-    //     DB::beginTransaction();
-    //     try {
-    //         $timeOrder = TimeOrderTable::create([
-    //             'table_id' => $tableId,
-    //             'user_id' => $user->id,
-    //             'phone_number' => $request->phone_number,
-    //             'date_oder' => $dateOrder,
-    //             'time_oder' => $selectedTime,
-    //             'description' => $request->description ?? null,
-    //             'status' => 'pending',
-    //         ]);
+            DB::commit();
 
-    //         DB::commit();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Đặt bàn thành công',
-    //             'time_oder_id' => $timeOrder->id,
-    //             'stk' => '0123456789',
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return response()->json(['success' => false, 'message' => 'Có lỗi xảy ra, vui lòng thử lại sau'], 500);
-    //     }
-    // }
+            return response()->json([
+                'message' => 'Bàn đã được mở thành công',
+                'ma_bill' => $bill->ma_bill,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra, vui lòng thử lại sau',
+            ], 500);
+        }
+    }
 }

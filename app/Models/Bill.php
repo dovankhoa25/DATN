@@ -55,7 +55,10 @@ class Bill extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-
+    public function tables()
+    {
+        return $this->belongsToMany(Table::class, 'bill_table');
+    }
 
     public function scopeFilter($query, $filters)
     {

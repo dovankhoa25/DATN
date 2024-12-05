@@ -182,6 +182,7 @@ Route::prefix('client')->group(function () {
 
     Route::get('list_tables', [TableController::class, 'getAllTables']);
     Route::post('open_table', [TableController::class, 'openTable'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::post('open_tables', [TableController::class, 'openTables'])->middleware('auth', 'checkRole:qtv,admin,ctv');
 
 
     Route::get('list_payments', [ClientPaymentController::class, 'listPaymentTrue']);
