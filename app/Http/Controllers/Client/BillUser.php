@@ -88,98 +88,18 @@ class BillUser extends Controller
 
 
 
-    // public function store(StoreBillRequest $request)
-    // {
-    //     $user = JWTAuth::parseToken()->authenticate();
-
-    //     $selectedItems = $request->get('cart_items');
-    //     $usePoints = $request->get('use_points', false);
-    //     $voucherId = $request->get('voucher_id');
-
-    //     if (empty($selectedItems)) {
-    //         return response()->json(['message' => 'Không có sản phẩm nào được chọn'], 400);
-    //     }
-
-    //     $cartItems = OnlineCart::where('user_id', $user->id)
-    //         ->whereIn('id', $selectedItems)
-    //         ->with('productDetail')
-    //         ->get();
-
-    //     if ($cartItems->isEmpty()) {
-    //         return response()->json(['error' => 'Giỏ hàng không tồn tại hoặc đã bị xóa.'], 400);
-    //     }
-
-    //     try {
-    //         DB::beginTransaction();
-
-    //         $totalAmount = $this->calculateTotalAmount($cartItems);
-
-    //         $totalAmount = $this->applyVoucher($voucherId, $totalAmount);
-
-    //         $customer = Customer::where('user_id', $user->id)->first();
-    //         if ($usePoints && $customer) {
-    //             [$totalAmount, $diemtru] = $this->applyPoints($customer, $totalAmount);
-    //         }
-
-    //         $bill = Bill::create([
-    //             'ma_bill' => $this->randomMaBill(),
-    //             'user_id' => $user->id,
-    //             'customer_id' => null,
-    //             'user_addresses_id' => $request->get('user_addresses_id'),
-    //             'order_date' => now(),
-    //             'total_amount' => $totalAmount,
-    //             'branch_address' => $request->get('branch_address'),
-    //             'payment_id' => $request->get('payment_id'),
-    //             'voucher_id' => $voucherId,
-    //             'note' => $request->get('note'),
-    //             'order_type' => $request->get('order_type', 'online'),
-    //             'status' => 'pending',
-    //             'table_number' => $request->get('table_number'),
-    //         ]);
-
-    //         $billDetails = [];
-    //         $productDetailsToUpdate = [];
-
-    //         foreach ($cartItems as $cartItem) {
-    //             $billDetails[] = [
-    //                 'bill_id' => $bill->id,
-    //                 'product_detail_id' => $cartItem->product_detail_id,
-    //                 'quantity' => $cartItem->quantity,
-    //                 'price' => $cartItem->productDetail->price,
-    //             ];
-
-    //             if (isset($productDetailsToUpdate[$cartItem->product_detail_id])) {
-    //                 $productDetailsToUpdate[$cartItem->product_detail_id] += $cartItem->quantity;
-    //             } else {
-    //                 $productDetailsToUpdate[$cartItem->product_detail_id] = $cartItem->quantity;
-    //             }
-    //         }
-    //         BillDetail::insert($billDetails);
-    //         foreach ($productDetailsToUpdate as $productDetailId => $quantity) {
-    //             ProductDetail::where('id', $productDetailId)->decrement('quantity', $quantity);
-    //         }
-
-
-    //         OnlineCart::where('user_id', $user->id)
-    //             ->whereIn('product_detail_id', $cartItems->pluck('product_detail_id'))
-    //             ->delete();
-
-    //         DB::commit();
-
-    //         event(new BillCreated($bill));
-
-    //         return response()->json([
-    //             'message' => 'Đặt hàng thành công',
-    //             'bill' => new BillResource($bill)
-    //         ], 201);
-    //     } catch (Exception $e) {
-    //         DB::rollBack();
-    //         return response()->json(['error' => $e->getMessage()], 400);
-    //     }
-    // }
-
     public function store(StoreBillRequest $request)
     {
+
+        $openHour = 8;
+        $closeHour = 22;
+
+        $currentHour = now()->hour;
+
+        if ($currentHour < $openHour || $currentHour >= $closeHour) {
+            return response()->json(['message' => 'Nhà hàng đã đóng cửa. Vui lòng đặt hàng trong khung giờ từ 8h sáng đến 22h tối.'], 400);
+        }
+
         $user = JWTAuth::parseToken()->authenticate();
 
         $selectedItems = $request->get('cart_items');
