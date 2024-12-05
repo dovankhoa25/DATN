@@ -32,7 +32,7 @@ class BillUser extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
 
-        $bills = Bill::where('user_id', $user->id)->get();
+        $bills = Bill::where('user_id', $user->id)->latest()->get();
 
         $formattedBills = $bills->map(function ($bill) {
             if ($bill->order_type === 'online') {
