@@ -139,7 +139,7 @@ class VoucherController extends Controller
         $currentDate = Carbon::now()->toDateString();
 
         $allVouchers = DB::table('vouchers')
-            ->select('id', 'name', 'value', 'image', 'customer_id', 'quantity', 'start_date', 'end_date')
+            ->select('id', 'name', 'value', 'discount_percentage', 'max_discount_value', 'image', 'customer_id', 'quantity', 'start_date', 'end_date')
             ->where('quantity', '>=', 1)
             ->whereDate('start_date', '<=', $currentDate)
             ->whereDate('end_date', '>=', $currentDate)

@@ -147,7 +147,7 @@ Route::prefix('client')->group(function () {
     Route::post('/change_voucher', [ClientVoucherController::class, 'changeVoucher']);
     // vouchers của customer
     Route::get('/vouchers_customer', [ClientVoucherController::class, 'vouchersCustomer'])->middleware('auth');
-    Route::get('/vouchers_yagi', [ClientVoucherController::class, 'voucherYagi']);
+    Route::get('/vouchers_yagi', [ClientVoucherController::class, 'voucherYagi'])->middleware('auth');
 
     // table
 

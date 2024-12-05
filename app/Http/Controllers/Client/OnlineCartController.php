@@ -54,7 +54,6 @@ class OnlineCartController extends Controller
             } else {
                 return response()->json(['message' => 'Giỏ hàng trống'], 404);
             }
-
         } catch (JWTException $e) {
             return response()->json(['message' => $e], 403);
         }
@@ -128,6 +127,7 @@ class OnlineCartController extends Controller
             if ($res) {
                 return response()->json([
                     'data' => [
+                        'id' => $res->id,
                         'product_name' => $productDetail->product->name,
                         'price' => $productDetail->price,
                         'quantity' => $res->quantity,
