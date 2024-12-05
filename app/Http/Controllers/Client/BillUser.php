@@ -15,6 +15,7 @@ use App\Models\Customer;
 use App\Models\OnlineCart;
 use App\Models\Payment;
 use App\Models\ProductDetail;
+use App\Models\ShippingHistory;
 use App\Models\User;
 use App\Models\Voucher;
 use Exception;
@@ -318,50 +319,76 @@ class BillUser extends Controller
     }
 
 
-    public function requestCancelBill($id)
+    public function requestCancelBill(Request $req, $id)
     {
-        $user = JWTAuth::parseToken()->authenticate();
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
 
-        $bill = Bill::where('id', $id)->where('user_id', $user->id)->first();
+            $bill = Bill::where('id', $id)->where('user_id', $user->id)->first();
 
-        if (!$bill) {
-            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
-        }
-
-        if ($bill->status == 'pending') {
-            $bill->status = 'cancelled';
-            $bill->save();
-
-            $billDetails = BillDetail::where('bill_id', $bill->id)->get();
-
-            foreach ($billDetails as $detail) {
-                $productDetail = ProductDetail::find($detail->product_detail_id);
-                if ($productDetail) {
-                    $productDetail->quantity += $detail->quantity;
-                    $productDetail->save();
-                }
+            if (!$bill) {
+                return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
             }
 
-            return response()->json(['message' => 'Đơn hàng đã được hủy'], 200);
+            if (in_array($bill->status, ['completed', 'cancelled', 'failed', 'shipping'])) {
+                return response()->json(['message' => 'Đơn hàng không thể hủy ở trạng thái hiện tại'], 400);
+            }
+
+            if ($bill->status == 'cancellation_requested') {
+                return response()->json(['message' => 'Bạn đã gửi yêu cầu hủy đơn hàng này rồi'], 400);
+            }
+
+            $hasCancellationHistory = ShippingHistory::where('bill_id', $bill->id)
+                ->where('event', 'cancellation_requested')
+                ->exists();
+
+            if ($hasCancellationHistory) {
+                return response()->json(['message' => 'Bạn không thể yêu cầu hủy lại lần nữa'], 400);
+            }
+
+            if ($bill->status == 'pending') {
+                $this->cancelBillAndUpdateStock($bill);
+                return response()->json(['message' => 'Đơn hàng đã được hủy'], 200);
+            }
+
+            DB::beginTransaction();
+
+            $bill->status = 'cancellation_requested';
+            $bill->save();
+
+            ShippingHistory::create([
+                'bill_id' => $bill->id,
+                'user_id' => $user->id,
+                'event' => 'cancellation_requested',
+                'description' => $req->input('description') ?? 'Yêu cầu hủy đơn hàng',
+                'image_url' => null,
+            ]);
+
+            DB::commit();
+
+            return response()->json(['message' => 'Yêu cầu hủy đơn hàng đã được gửi'], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()], 400);
         }
-
-
-        if (in_array($bill->status, ['completed', 'cancelled', 'failed', 'shipping'])) {
-            return response()->json(['message' => 'Đơn hàng không thể hủy ở trạng thái hiện tại'], 400);
-        }
-
-        if ($bill->status == 'cancellation_requested') {
-            return response()->json(['message' => 'Bạn đã gửi yêu cầu hủy đơn hàng này rồi'], 400);
-        }
-
-        $bill->status = 'cancellation_requested';
-        $bill->save();
-        // $this->notifyUser($bill);
-
-        return response()->json(['message' => 'Yêu cầu hủy đơn hàng đã được gửi'], 200);
     }
 
 
+    private function cancelBillAndUpdateStock($bill)
+    {
+        $bill->status = 'cancelled';
+        $bill->save();
+
+        $billDetails = BillDetail::where('bill_id', $bill->id)->get();
+
+        foreach ($billDetails as $detail) {
+            $productDetail = ProductDetail::find($detail->product_detail_id);
+            if ($productDetail) {
+                $productDetail->quantity += $detail->quantity;
+                $productDetail->save();
+            }
+        }
+    }
 
     public function showBillDetail(string $id)
     {

@@ -7,13 +7,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\BillRequest;
 use App\Http\Requests\Bill\FilterBillRequest;
 use App\Http\Requests\Bill\ItemBillActiveRequest;
+use App\Http\Requests\Bill\UpdateBillRequest;
 use App\Http\Resources\BillResource;
 use App\Models\Bill;
 use App\Models\BillDetail;
+use App\Models\ShippingHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class BillController extends Controller
 {
@@ -64,64 +69,239 @@ class BillController extends Controller
         }
     }
 
+    protected function storeImage($file, $directory)
+    {
+        if ($file) {
+            $filePath = $file->store($directory, 'public');
+            return Storage::url($filePath); // Trả về URL công khai
+        }
 
-    public function update(Request $request, string $id)
+        return null;
+    }
+
+    // public function update(Request $request, string $id)
+    // {
+    //     try {
+    //         $request->validate([
+    //             'status' => 'required|in:confirmed,preparing,shipping,completed,failed,cancellation_approved,cancellation_rejected',
+    //             'shiper_id' => 'nullable|exists:users,id',
+    //             'description' => 'nullable',
+    //             'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //         ]);
+
+    //         $user = JWTAuth::parseToken()->authenticate();
+    //         $bill = Bill::findOrFail($id);
+
+    //         $currentStatus = $bill->status;
+    //         $newStatus = $request->input('status');
+    //         $usership = $request->input('shiper_id');
+    //         $des = $request->input('description');
+    //         $img = $request->input('image_url');
+
+    //         $validStatuses = [
+    //             'pending' => 'confirmed',
+    //             'confirmed' => 'preparing',
+    //             'preparing' => 'shipping',
+    //             'shipping' => 'completed',
+    //             'completed' => null,
+    //             'failed' => null,
+    //         ];
+
+    //         // if ($validStatuses[$currentStatus] !== $newStatus) {
+    //         //     return response()->json([
+    //         //         'error' => "Trạng thái không hợp lệ. Bạn chỉ có thể cập nhật từ '{$currentStatus}' đến '{$validStatuses[$currentStatus]}'"
+    //         //     ], 400);
+    //         // }
+    //         if (!array_key_exists($currentStatus, $validStatuses) || $validStatuses[$currentStatus] !== $newStatus) {
+    //             return response()->json([
+    //                 'error' => "Trạng thái không hợp lệ. Bạn chỉ có thể cập nhật từ '{$currentStatus}' đến '{$validStatuses[$currentStatus]}'"
+    //             ], 400);
+    //         }
+
+    //         if (in_array($currentStatus, ['completed', 'failed'])) {
+    //             return response()->json([
+    //                 'error' => 'Không thể cập nhật khi trạng thái đã là completed hoặc failed.'
+    //             ], 400);
+    //         }
+
+    //         if ($bill->order_type !== 'online') {
+    //             return response()->json([
+    //                 'error' => 'Chỉ có thể cập nhật trạng thái cho đơn hàng online.'
+    //             ], 400);
+    //         }
+
+    //         if (in_array($bill->payment_status, ['pending', 'failed', 'refunded'])) {
+    //             return response()->json(['error' => 'Đơn hàng này không được phép cập nhật'], 400);
+    //         }
+
+    //         if ($newStatus == 'shipping') {
+    //             $this->createShippingHistory($bill, $usership, 'shipping_started', $des, $img);
+    //         }
+
+    //         if ($currentStatus == 'cancellation_requested' && in_array($newStatus, ['cancellation_approved', 'cancellation_rejected'])) {
+    //             $event = $newStatus == 'cancellation_approved' ? 'cancellation_approved' : 'cancellation_rejected';
+    //             $description = $newStatus == 'cancellation_approved'
+    //                 ? 'Chấp nhận hủy đơn hàng'
+    //                 : 'Hủy thất bại đơn hàng quay lại trạng thái chuẩn bị';
+    //             $this->createShippingHistory($bill, $user->id, $event, $des ?? $description, $img);
+    //             $newStatus = $newStatus == 'cancellation_rejected' ? 'preparing' : $newStatus;
+    //         }
+
+    //         $bill->status = $newStatus;
+    //         $bill->save();
+
+    //         return response()->json([
+    //             'message' => 'Cập nhật trạng thái thành công.',
+    //             'data' => new BillResource($bill),
+    //         ]);
+    //     } catch (ModelNotFoundException $e) {
+    //         return response()->json(['error' => 'Không tìm thấy hóa đơn.'], 404);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => 'Đã xảy ra lỗi: ' . $e->getMessage()], 500);
+    //     }
+    // }
+
+
+    public function update(UpdateBillRequest $request, int $id)
     {
         try {
+
+            $user = JWTAuth::parseToken()->authenticate();
+            $bill = Bill::findOrFail($id);
+
+            $newStatus = $request->input('status');
+            $image = $request->file('image_url') ? $this->storeImage($request->file('image_url'), 'shipping') : null;
+
+            $this->validateStatusTransition($bill, $newStatus);
+            $this->handleSpecialStatuses($bill, $newStatus, $user->id, $request->input('description'), $image);
+
+            $bill->status = $newStatus;
+            $bill->save();
+
+            return response()->json([
+                'message' => 'Cập nhật trạng thái thành công.',
+                'data' => new BillResource($bill),
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy hóa đơn.'], 404);
+        } catch (\Exception $e) {
+            Log::error('Lỗi cập nhật hóa đơn', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Đã xảy ra lỗi: ' . $e->getMessage()], 500);
+        }
+    }
+
+    private function validateStatusTransition($bill, $newStatus)
+    {
+        $validStatuses = [
+            'pending' => 'confirmed',
+            'confirmed' => 'preparing',
+            'preparing' => 'shipping',
+            'shipping' => 'completed',
+            'completed' => null,
+            'failed' => null,
+        ];
+
+        $currentStatus = $bill->status;
+
+        if (!array_key_exists($currentStatus, $validStatuses) || $validStatuses[$currentStatus] !== $newStatus) {
+            throw new \Exception("Trạng thái không hợp lệ. Bạn chỉ có thể cập nhật từ '{$currentStatus}' đến '{$validStatuses[$currentStatus]}'");
+        }
+
+        if (in_array($currentStatus, ['completed', 'failed'])) {
+            throw new \Exception('Không thể cập nhật khi trạng thái đã là completed hoặc failed.');
+        }
+
+        if ($bill->order_type !== 'online') {
+            throw new \Exception('Chỉ có thể cập nhật trạng thái cho đơn hàng online.');
+        }
+
+        if (in_array($bill->payment_status, ['pending', 'failed', 'refunded'])) {
+            throw new \Exception('Đơn hàng này không được phép cập nhật.');
+        }
+    }
+
+    private function handleSpecialStatuses($bill, $newStatus, $userId, $description, $image)
+    {
+        if ($newStatus === 'shipping') {
+            $this->createShippingHistory($bill, $userId, 'shipping_started', $description ?? 'Giao hàng', $image);
+        }
+
+        if ($bill->status === 'cancellation_requested') {
+            if (in_array($newStatus, ['cancellation_approved', 'cancellation_rejected'])) {
+                $event = $newStatus === 'cancellation_approved' ? 'cancellation_approved' : 'cancellation_rejected';
+                $description = $newStatus === 'cancellation_approved'
+                    ? 'Chấp nhận hủy đơn hàng'
+                    : 'Hủy thất bại đơn hàng quay lại trạng thái chuẩn bị';
+                $this->createShippingHistory($bill, $userId, $event, $description, $image);
+            }
+
+            if ($newStatus === 'cancellation_rejected') {
+                $bill->status = 'preparing';
+            }
+        }
+    }
+
+
+    private function createShippingHistory($bill, $userId, $event, $description, $image)
+    {
+        ShippingHistory::create([
+            'bill_id' => $bill->id,
+            'user_id' => $userId,
+            'event' => $event,
+            'description' => $description ?? 'Không có mô tả',
+            'image_url' => $this->storeImage($image, 'shipping') ?? null,
+        ]);
+    }
+
+
+
+
+    public function updateShippingStatus(Request $request, string $id)
+    {
+        try {
+
+            $user = JWTAuth::parseToken()->authenticate();
+
             $request->validate([
-                'status' => 'required|in:confirmed,preparing,shipping,completed,failed',
+                'status' => 'required|in:shipping_started,delivered,delivery_failed',
+                'description' => 'nullable|string',
+                'image_url' => 'nullable|url',
             ]);
 
             $bill = Bill::findOrFail($id);
 
-            $validStatuses = [
-                'pending' => 1,
-                'confirmed' => 2,
-                'preparing' => 3,
-                'shipping' => 4,
-                'completed' => 5,
-                'failed' => 6
-            ];
-
-            $currentStatus = $bill->status;
-            $newStatus = $request->input('status');
-
-            if ($bill->order_type !== 'online') {
-                return response()->json(['error' => 'Chỉ có thể cập nhật trạng thái cho đơn hàng online'], 400);
+            if ($bill->status == 'completed' || $bill->status == 'failed') {
+                return response()->json(['error' => 'Không thể thay đổi trạng thái khi đơn hàng đã hoàn thành hoặc thất bại'], 400);
             }
 
-            if ($bill->order_type == 'online') {
-                if (
-                    $bill->payment_status == 'pending'
-                    && $bill->payment_status == 'failed'
-                    && $bill->payment_status == 'refunded'
-                    // && $bill->payment_status == 'paid'
-                ) {
-                    return response()->json(['error' => 'đơn hàng này không được phép cập nhật'], 400);
-                }
+            // Lưu lịch sử giao hàng
+            $status = $request->input('status');
+            ShippingHistory::create([
+                'bill_id' => $bill->id,
+                'user_id' => $user->id,
+                'event' => $status,
+                'description' => $request->input('description'),
+                'image_url' => $request->input('image_url'),
+            ]);
+
+            // Cập nhật trạng thái giao hàng nếu cần
+            if ($status == 'delivered') {
+                $bill->status = 'completed';
+            } elseif ($status == 'delivery_failed') {
+                $bill->status = 'failed';
             }
 
-
-            if (in_array($currentStatus, ['completed', 'failed'])) {
-                return response()->json(['error' => 'Không thể cập nhật khi trạng thái đã là completed hoặc failed'], 400);
-            }
-
-            if ($validStatuses[$newStatus] < $validStatuses[$currentStatus]) {
-                return response()->json(['error' => 'Không thể cập nhật trạng ngược lại'], 400);
-            }
-
-
-            $bill->status = $request->input('status');
             $bill->save();
 
             return response()->json([
-                'message' => 'Status updated successfully',
+                'message' => 'Trạng thái giao hàng đã được cập nhật',
                 'data' => new BillResource($bill)
             ]);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'không tìm thấy bills'], 404);
+            return response()->json(['error' => 'Không tìm thấy đơn hàng'], 404);
         }
     }
+
 
     private function randomMaBill()
     {

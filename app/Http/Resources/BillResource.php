@@ -23,7 +23,13 @@ class BillResource extends JsonResource
             'total_amount' => $this->total_amount,
             'branch_address' => $this->branch_address,
             'payment' => $this->payment ? $this->payment->name : null,
-            'voucher' => $this->voucher ? $this->voucher->value : null,
+            // 'voucher' => $this->voucher ? $this->voucher->value : null,
+            'vouchers' => $this->vouchers->map(function ($voucher) {
+                return [
+                    'id' => $voucher->id,
+                    'name' => $voucher->name,
+                ];
+            }),
             'note' => $this->note,
             'order_type' => $this->order_type,
             'table_number' => $this->table_number,
