@@ -178,7 +178,7 @@ class BillUser extends Controller
 
         $selectedItems = $request->get('cart_items');
         $usePoints = $request->get('use_points', false);
-        $vouchers = $request->get('vouchers');
+        $vouchers = $request->get('vouchers') ?? null;
         $paymentId = $request->get('payment_id');
 
         if (empty($selectedItems)) {

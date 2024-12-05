@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Voucher\FilterVoucherRequest;
 use App\Http\Requests\Voucher\VoucherRequest;
 use App\Http\Resources\VoucherResource;
+use App\Models\Bill;
+use App\Models\BillVoucher;
 use App\Models\Voucher;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -94,6 +96,12 @@ class VoucherController extends Controller
     public function update(VoucherRequest $request, $id)
     {
         $voucher = Voucher::findOrFail($id);
+        $billVoucher = BillVoucher::where('voucher_id', $id)->find();
+        if ($billVoucher) {
+            return response()->json([
+                'message' => 'vouche đã được sử dụng không thể sủa.',
+            ], 404);
+        }
 
         if ($request->hasFile('image')) {
             if ($voucher->image) {
