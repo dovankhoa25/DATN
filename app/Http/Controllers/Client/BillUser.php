@@ -198,7 +198,9 @@ class BillUser extends Controller
             DB::beginTransaction();
 
             $totalAmount = $this->calculateTotalAmount($cartItems);
-            $totalAmount = $this->applyVoucher($vouchers, $totalAmount);
+            if ($vouchers) {
+                $totalAmount = $this->applyVoucher($vouchers, $totalAmount);
+            }
 
             $customer = Customer::where('user_id', $user->id)->first();
             if ($usePoints && $customer) {
