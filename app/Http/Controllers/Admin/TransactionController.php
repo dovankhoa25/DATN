@@ -7,15 +7,19 @@ use App\Http\Requests\Transaction\TransactionRequest;
 use App\Models\Bill;
 use App\Models\TransactionHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
     public function webhook(TransactionRequest $request)
     {
-
         $apiKey = $request->header('Authorization');
+        $expectedApiKey = 'Apikey ' . config('sepay.api_key');
 
-        if ($apiKey !== 'Apikey ' . config('sepay.api_key')) {
+        Log::info('API Key from request: ' . $apiKey);
+        Log::info('Expected API Key: ' . $expectedApiKey);
+
+        if ($apiKey !== $expectedApiKey) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
