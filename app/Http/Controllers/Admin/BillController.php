@@ -173,7 +173,7 @@ class BillController extends Controller
             $image = $request->file('image_url') ? $this->storeImage($request->file('image_url'), 'shipping') : null;
 
             $this->validateStatusTransition($bill, $newStatus);
-            $this->handleSpecialStatuses($bill, $newStatus, $user->id, $request->input('description'), $image);
+            $this->handleSpecialStatuses($bill, $newStatus, $request->shiper_id ?? $user->id, $request->input('description'), $image);
 
             $bill->status = $newStatus;
             $bill->save();
@@ -263,32 +263,44 @@ class BillController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
 
             $request->validate([
-                'status' => 'required|in:shipping_started,delivered,delivery_failed',
+                'status' => 'required|in:shipping_started,pending_retry,delivered,delivery_failed',
                 'description' => 'nullable|string',
                 'image_url' => 'nullable|url',
             ]);
 
             $bill = Bill::findOrFail($id);
 
+            $status = $request->input('status');
+
+            if ($bill->status == 'pending_retry' && $status !== 'shipping_started') {
+                throw new \Exception('Trạng thái không hợp lệ. Bạn cần chuyển sang vận chuyển lại trước.');
+            }
+
             if ($bill->status == 'completed' || $bill->status == 'failed') {
                 return response()->json(['error' => 'Không thể thay đổi trạng thái khi đơn hàng đã hoàn thành hoặc thất bại'], 400);
             }
 
-            // Lưu lịch sử giao hàng
-            $status = $request->input('status');
             ShippingHistory::create([
                 'bill_id' => $bill->id,
                 'user_id' => $user->id,
                 'event' => $status,
-                'description' => $request->input('description'),
-                'image_url' => $request->input('image_url'),
+                'description' => $request->input('description') ?? null,
+                'image_url' => $request->input('image_url') ?  $this->storeImage($request->file('image_url'), 'shipping') : null,
             ]);
 
-            // Cập nhật trạng thái giao hàng nếu cần
-            if ($status == 'delivered') {
-                $bill->status = 'completed';
-            } elseif ($status == 'delivery_failed') {
-                $bill->status = 'failed';
+            if ($bill->status == 'shipping') {
+                if ($status == 'delivered') {
+                    $bill->status = 'completed';
+                } elseif ($status == 'delivery_failed') {
+                    $bill->status = 'pending_retry';
+                    ShippingHistory::create([
+                        'bill_id' => $bill->id,
+                        'user_id' => $user->id,
+                        'event' => $status,
+                        'description' => $request->input('description') ?? 'giao hàng không thành công',
+                        'image_url' => $request->input('image_url') ?  $this->storeImage($request->file('image_url'), 'shipping') : null,
+                    ]);
+                }
             }
 
             $bill->save();
@@ -301,6 +313,39 @@ class BillController extends Controller
             return response()->json(['error' => 'Không tìm thấy đơn hàng'], 404);
         }
     }
+
+
+
+
+    public function retryShipping(Request $request, string $id)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            $bill = Bill::findOrFail($id);
+
+            if ($bill->status !== 'pending_retry') {
+                return response()->json(['error' => 'Chỉ có thể thử lại khi trạng thái là pending_retry'], 400);
+            }
+
+            $bill->status = 'shipping_started';
+
+            ShippingHistory::create([
+                'bill_id' => $bill->id,
+                'user_id' => $user->id,
+                'event' => 'shipping_started',
+                'description' => 'Bắt đầu vận chuyển lại',
+            ]);
+
+            $bill->save();
+
+            return response()->json(['message' => 'Đã chuyển trạng thái sang vận chuyển lại', 'data' => new BillResource($bill)]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Không tìm thấy đơn hàng'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Đã xảy ra lỗi: ' . $e->getMessage()], 500);
+        }
+    }
+
 
 
     private function randomMaBill()

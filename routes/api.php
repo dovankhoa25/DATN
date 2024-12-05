@@ -60,7 +60,10 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth');
 Route::post('refresh', [AuthController::class, 'refreshToken']);
 Route::post('pay_check', [TransactionController::class, 'webhook']);
 
-
+Route::prefix('shipper')->middleware('auth')->group(function () {
+    Route::put('updateShippingStatus', [BillController::class, 'updateShippingStatus']);
+    Route::put('retryShipping', [BillController::class, 'retryShipping']);
+});
 //power
 Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(function () {
 

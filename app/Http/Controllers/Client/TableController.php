@@ -44,7 +44,14 @@ class TableController extends Controller
     public function openTable(BillOpenTableRequest $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
+        $openHour = 8;
+        $closeHour = 22;
 
+        $currentHour = now()->hour;
+
+        if ($currentHour < $openHour || $currentHour >= $closeHour) {
+            return response()->json(['message' => 'Nhà hàng đã đóng cửa. Vui lòng quay lại trong khung giờ từ 8h sáng đến 22h tối.'], 400);
+        }
 
         $table = Table::find($request->table_id);
         if (!$table || !$table->status) {
@@ -110,7 +117,14 @@ class TableController extends Controller
     public function openTables(OpenTablesRequest $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
+        $openHour = 8;
+        $closeHour = 22;
 
+        $currentHour = now()->hour;
+
+        if ($currentHour < $openHour || $currentHour >= $closeHour) {
+            return response()->json(['message' => 'Nhà hàng đã đóng cửa. Vui lòng quay lại trong khung giờ từ 8h sáng đến 22h tối.'], 400);
+        }
         $tables = Table::whereIn('id', $request->table_ids)->get();
         if ($tables->isEmpty()) {
             return response()->json([

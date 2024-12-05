@@ -15,7 +15,15 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('bill_id');
             $table->unsignedBigInteger('user_id');
-            $table->enum('event', ['cancellation_requested', 'cancellation_approved', 'cancellation_rejected', 'shipping_started', 'delivered', 'delivery_failed']);
+            $table->enum('event', [
+                'cancellation_requested',
+                'cancellation_approved',
+                'cancellation_rejected',
+                'shipping_started',
+                'delivered',
+                'delivery_failed',
+                'pending_retry'
+            ]);
             $table->text('description')->nullable();
             $table->string('image_url')->nullable();
             $table->timestamps();
