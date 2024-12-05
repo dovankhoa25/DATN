@@ -27,6 +27,12 @@ class BillResource extends JsonResource
             'note' => $this->note,
             'order_type' => $this->order_type,
             'table_number' => $this->table_number,
+            'tables' => $this->tables->map(function ($table) {
+                return [
+                    'id' => $table->id,
+                    'name' => $table->name,
+                ];
+            }),
             'payment_status' => $this->payment_status,
             'status' => $this->status,
             'qr_expiration' => $this->qr_expiration,

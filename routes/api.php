@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SubcategoryController;
 use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
+use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Client\BillOrderController;
@@ -57,6 +58,7 @@ Route::get('user', [AuthController::class, 'getUser'])->middleware('auth');
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth');
 
 Route::post('refresh', [AuthController::class, 'refreshToken']);
+Route::post('pay_check', [TransactionController::class, 'webhook']);
 
 
 //power
