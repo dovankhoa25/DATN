@@ -227,6 +227,11 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
+
+            $sizeIds = array_column($request->product_details, 'size_id');
+            if (count($sizeIds) !== count(array_unique($sizeIds))) {
+                return response()->json(['message' => 'không thể thêm trùng size'], 422);
+            }
             $product = Product::with('productDetails.images')->findOrFail($id);
 
             $thumbnailPath = $this->handleThumbnail($request, $product);
