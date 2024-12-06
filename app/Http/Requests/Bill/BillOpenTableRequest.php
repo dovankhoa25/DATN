@@ -23,19 +23,19 @@ class BillOpenTableRequest extends BaseApiRequest
     public function rules()
     {
         return [
-            'user_id' => 'nullable|exists:users,id',
+            // 'user_id' => 'nullable|exists:users,id',
             'table_id' => 'required|exists:tables,id',
-            'customer_id' => 'nullable|exists:customers,id',
-            'user_addresses_id' => 'nullable|exists:user_addresses,id',
-            'order_date' => 'date|after_or_equal:today',
-            'total_amount' => 'numeric|min:0',
-            'branch_address' => 'nullable|string|max:255',
-            'payment_id' => 'nullable|exists:payments,id',
-            'voucher_id' => 'nullable|exists:vouchers,id',
-            'note' => 'nullable|string',
-            'order_type' => 'in:in_restaurant,online',
-            'status' => 'in:pending,confirmed,preparing,shipping,completed,cancelled,failed',
-            'table_number' => 'nullable|string|max:255',
+            // 'customer_id' => 'nullable|exists:customers,id',
+            // 'user_addresses_id' => 'nullable|exists:user_addresses,id',
+            // 'order_date' => 'date|after_or_equal:today',
+            // 'total_amount' => 'numeric|min:0',
+            // 'branch_address' => 'nullable|string|max:255',
+            // 'payment_id' => 'nullable|exists:payments,id',
+            // 'voucher_id' => 'nullable|exists:vouchers,id',
+            // 'note' => 'nullable|string',
+            // 'order_type' => 'in:in_restaurant,online',
+            // 'status' => 'in:pending,confirmed,preparing,shipping,completed,cancelled,failed',
+            // 'table_number' => 'nullable|string|max:255',
         ];
     }
 
