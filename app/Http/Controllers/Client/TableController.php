@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\BillOpenTableRequest;
 use App\Http\Requests\Bill\BillRequest;
-use App\Http\Requests\Bill\OpenTablesRequest;
+use App\Http\Requests\Table\OpenTablesListRequest;
 use App\Http\Requests\TimeOrderTable\TimeOrderTableRequest;
 use App\Http\Resources\TableResource;
 use App\Models\Bill;
@@ -114,7 +114,7 @@ class TableController extends Controller
     }
 
 
-    public function openTables(OpenTablesRequest $request)
+    public function openTables(OpenTablesListRequest $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
         $openHour = 8;
