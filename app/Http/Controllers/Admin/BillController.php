@@ -116,7 +116,7 @@ class BillController extends Controller
 
 
             $this->validateStatusTransition($bill, $newStatus);
-            $this->handleSpecialStatuses($bill, $newStatus, $user->id, $shipper, $request->input('description'), $image);
+            $this->handleSpecialStatuses($bill, $newStatus, $user->id, $shipper, $request->input('description') ?? null, $image);
 
             $bill->status = $newStatus;
             $bill->save();
@@ -146,8 +146,14 @@ class BillController extends Controller
 
         $currentStatus = $bill->status;
 
-        if (!array_key_exists($currentStatus, $validStatuses) || $validStatuses[$currentStatus] !== $newStatus) {
-            throw new \Exception("Trạng thái không hợp lệ. Bạn chỉ có thể cập nhật từ '{$currentStatus}' đến '{$validStatuses[$currentStatus]}'");
+        if ($currentStatus === 'cancellation_requested') {
+            if (!in_array($newStatus, ['cancellation_approved', 'cancellation_rejected'])) {
+                throw new \Exception("Trạng thái không hợp lệ. Bạn chỉ có thể cập nhật từ 'cancellation_requested' đến 'cancellation_approved' hoặc 'cancellation_rejected'.");
+            }
+        } else {
+            if (!array_key_exists($currentStatus, $validStatuses) || $validStatuses[$currentStatus] !== $newStatus) {
+                throw new \Exception("Trạng thái không hợp lệ. Bạn chỉ có thể cập nhật từ '{$currentStatus}' đến '{$validStatuses[$currentStatus]}'");
+            }
         }
 
         if (in_array($currentStatus, ['completed', 'failed'])) {
