@@ -94,25 +94,19 @@ class BillController extends Controller
             $image = $request->file('image_url') ? $this->storeImage($request->file('image_url'), 'shipping') : null;
 
 
-            if (!$request->shiper_id) {
-                $shippers = User::whereHas('roles', function ($query) {
-                    $query->where('name', 'shipper');
-                })->withCount(['bills' => function ($query) {
-                    $query->where('status', 'shipping');
-                }])->orderBy('bills_count', 'asc')
-                    ->first();
+            $shippers = User::whereHas('roles', function ($query) {
+                $query->where('name', 'shipper');
+            })->withCount(['bills' => function ($query) {
+                $query->where('status', 'shipping');
+            }])->get();
+            if ($shippers->isEmpty()) {
+                return response()->json(['error' => 'Không tìm thấy shipper nào.'], 404);
+            }
 
-                if (!$shippers) {
-                    return response()->json(['error' => 'Không tìm thấy shipper nào.'], 404);
-                }
-
-                if ($shippers->first()->bills_count == $shippers->last()->bills_count) {
-                    $shipper = $shippers->random()->id;
-                } else {
-                    $shipper = $shippers->first()->id;
-                }
+            if ($shippers->pluck('bills_count')->unique()->count() === 1) {
+                $shipper = $shippers->random()->id;
             } else {
-                $shipper = $request->shiper_id;
+                $shipper = $shippers->sortBy('bills_count')->first()->id;
             }
 
             if (!$shipper) {

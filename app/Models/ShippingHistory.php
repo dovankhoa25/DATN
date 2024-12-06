@@ -10,6 +10,8 @@ class ShippingHistory extends Model
     use HasFactory;
     protected $fillable = [
         'bill_id',
+        'admin_id',
+        'shipper_id',
         'event',
         'description',
         'image_url'
