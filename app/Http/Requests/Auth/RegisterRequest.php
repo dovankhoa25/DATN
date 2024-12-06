@@ -16,6 +16,8 @@ class RegisterRequest extends BaseApiRequest
     public function rules()
     {
         return [
+            'name' => 'nullable|string|max:50|min:5',
+            'phone_number' => 'required|phone|unique:customers,phone_number',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
         ];
@@ -24,9 +26,20 @@ class RegisterRequest extends BaseApiRequest
     public function messages()
     {
         return [
+
+            'name.string' => 'name phải là 1 chuỗi',
+            'name.max' => 'name nhiều nhất 50 kí tự',
+            'name.min' => 'name phải ít nhất có 5 kí tự',
+
             'email.required' => 'Email là bắt buộc.',
             'email.email' => 'Email phải là một địa chỉ email hợp lệ.',
             'email.unique' => 'Email này đã được sử dụng.',
+
+            'phone_number.required' => 'phone_number là bắt buộc.',
+            'phone_number.phone_number' => 'phone_number phải là một địa chỉ phone_number hợp lệ.',
+            'phone_number.unique' => 'phone_number này đã được sử dụng.',
+
+
             'password.required' => 'Mật khẩu là bắt buộc.',
             'password.min' => 'Mật khẩu phải có ít nhất :min ký tự.',
             'password.confirmed' => 'Xác nhận mật khẩu không khớp.',

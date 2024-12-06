@@ -27,11 +27,15 @@ class AuthController extends Controller
 
         try {
             $user = User::create([
+                'name' => $request->get('name') ?? 'unknow',
                 'email' => $request->get('email'),
                 'password' => Hash::make($request->get('password')),
             ]);
 
-            $this->createOrUpdateCustomer($user);
+
+            $phone = $request->get('phone_number');
+
+            $this->createOrUpdateCustomer($user, $phone);
 
             $accessToken = JWTAuth::fromUser($user);
             $refreshToken = JWTAuth::claims(['refresh' => true])->fromUser($user);
@@ -62,7 +66,7 @@ class AuthController extends Controller
         }
     }
 
-    private function createOrUpdateCustomer(User $user)
+    private function createOrUpdateCustomer(User $user, $phone)
     {
         $customer = Customer::where('email', $user->email)->first();
         if ($customer) {
@@ -74,7 +78,7 @@ class AuthController extends Controller
             Customer::create([
                 'name' => $user->name ?? 'Unknown',
                 'email' => $user->email,
-                'phone_number' => $user->id,
+                'phone_number' => $phone,
                 'user_id' => $user->id,
             ]);
         }

@@ -421,7 +421,7 @@ class BillUser extends Controller
                     'payment_method' => $bill->payment->name ?? null,
                     'address' => $bill->userAddress->address ?? null,
                     'customer' => $bill->user ? [
-                        'name' => $bill->user->name,
+                        'name' => $bill->user->name ?? $bill->user->gmail,
                         // 'phone' => $bill->user->phone_number,
                     ] : null,
                     'vouchers' => $bill->vouchers->map(function ($voucher) {
