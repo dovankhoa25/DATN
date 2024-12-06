@@ -190,10 +190,13 @@ class BillController extends Controller
                     ? 'Chấp nhận hủy đơn hàng'
                     : 'Hủy thất bại đơn hàng quay lại trạng thái chuẩn bị';
 
-                $this->createShippingHistory($bill, $userId, $shipper, $event, $description, $image);
+                $res = $this->createShippingHistory($bill, $userId, $shipper, $event, $description, $image);
 
-                if ($newStatus === 'cancellation_rejected') {
+                if ($res) {
                     $bill->status = 'preparing';
+                    $bill->save();
+
+                    $this->createShippingHistory($bill, $userId, $shipper, $event, 'đơn hàng đang được chuẩn bị ', $image);
                 }
             }
         }
