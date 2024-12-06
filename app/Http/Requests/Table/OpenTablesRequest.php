@@ -5,7 +5,7 @@ namespace App\Http\Requests\Table;
 use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class OpenTablesListRequest extends BaseApiRequest
+class OpenTablesRequest extends BaseApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

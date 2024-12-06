@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\BillOpenTableRequest;
 use App\Http\Requests\Bill\BillRequest;
-use App\Http\Requests\Table\OpenTablesListRequest;
+use App\Http\Requests\Bill\OpenTablesRequest;
+use App\Http\Requests\Table\OpenTablesRequest as TableOpenTablesRequest;
 use App\Http\Requests\TimeOrderTable\TimeOrderTableRequest;
 use App\Http\Resources\TableResource;
 use App\Models\Bill;
@@ -79,7 +80,7 @@ class TableController extends Controller
                 'user_addresses_id' => null,
                 'total_amount' => 0.00,
                 'branch_address' => $request->branch_address ?? 'Fpoly',
-                'payment_id' => null,
+                'payment_id' => $request->payment_id ?? null,
                 // 'voucher_id' => null,
                 'note' => null,
                 'order_type' => 'in_restaurant',
@@ -114,11 +115,11 @@ class TableController extends Controller
     }
 
 
-    public function openTables(OpenTablesListRequest $request)
+    public function openTables(TableOpenTablesRequest $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
         $openHour = 8;
-        $closeHour = 23;
+        $closeHour = 22;
 
         $currentHour = now()->hour;
 
@@ -153,7 +154,7 @@ class TableController extends Controller
                 'user_addresses_id' => null,
                 'total_amount' => 0.00,
                 'branch_address' => $request->branch_address ?? 'Fpoly',
-                'payment_id' => null,
+                'payment_id' => $request->payment_id ?? null,
                 'note' => null,
                 'order_type' => 'in_restaurant',
                 'table_number' => null,
