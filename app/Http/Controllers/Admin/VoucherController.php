@@ -12,6 +12,7 @@ use App\Models\Voucher;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class VoucherController extends Controller
 {
@@ -65,6 +66,14 @@ class VoucherController extends Controller
         ]);
 
         $data['image'] = $image;
+
+        $voucherCode = Str::upper(Str::random(6));
+
+        while (Voucher::where('code', $voucherCode)->exists()) {
+            $voucherCode = Str::upper(Str::random(10));
+        }
+
+        $data['code'] = $voucherCode;
 
 
         if ($data['discount_percentage'] > 0) {

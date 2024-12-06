@@ -44,6 +44,7 @@ class Voucher extends Model
 
     protected $fillable = [
         'name',
+        'code',
         'value',
         'discount_percentage',
         'max_discount_value',
