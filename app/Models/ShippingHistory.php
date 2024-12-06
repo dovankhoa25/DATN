@@ -16,4 +16,8 @@ class ShippingHistory extends Model
         'description',
         'image_url'
     ];
+    public function shipper()
+    {
+        return $this->belongsTo(User::class, 'shipper_id');
+    }
 }

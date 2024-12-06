@@ -210,6 +210,7 @@ Route::prefix('client')->group(function () {
     Route::post('bill_store', [BillUser::class, 'store'])->middleware('auth');
     Route::put('bills/{id}/cancel', [BillUser::class, 'requestCancelBill'])->middleware('auth');
     Route::get('billdetail/{id}', [BillUser::class, 'showBillDetail'])->middleware('auth');
+    Route::get('shipping/{id}', [BillUser::class, 'showShippingHistory'])->middleware('auth'); // lịch sử đơn
 
 
     // order + bill order
