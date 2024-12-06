@@ -181,7 +181,7 @@ class BillController extends Controller
     {
         ShippingHistory::create([
             'bill_id' => $bill->id,
-            'user_id' => $userId,
+            'admin_id' => $userId,
             'shipper_id' => $shiper,
             'event' => $event,
             'description' => $description ?? 'Không có mô tả',
