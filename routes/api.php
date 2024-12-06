@@ -35,6 +35,7 @@ use App\Http\Controllers\Client\TableController;
 use App\Http\Controllers\Client\TimeOrderTableController as ClientTimeOrderTableController;
 use App\Http\Controllers\Client\UpdateProfileController;
 use App\Http\Controllers\Client\PaymentController as ClientPaymentController;
+use App\Http\Controllers\Shipper\ShipperController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -60,10 +61,12 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth');
 Route::post('refresh', [AuthController::class, 'refreshToken']);
 Route::post('pay_check', [TransactionController::class, 'webhook']);
 
-Route::prefix('shipper')->middleware('auth')->group(function () {
-    Route::put('updateShippingStatus', [BillController::class, 'updateShippingStatus']);
-    Route::put('retryShipping', [BillController::class, 'retryShipping']);
+Route::prefix('shipper')->middleware(['auth', 'checkRole:qtv,admin,shipper'])->group(function () {
+    Route::put('updateShippingStatus', [ShipperController::class, 'updateShippingStatus']);
+    Route::put('retryShipping', [ShipperController::class, 'retryShipping']);
 });
+
+
 //power
 Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(function () {
 
