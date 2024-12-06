@@ -87,10 +87,13 @@ class BillController extends Controller
         try {
 
             $user = JWTAuth::parseToken()->authenticate();
+            Log::info('User Authenticated: ', ['user' => $user]);
             $bill = Bill::findOrFail($id);
 
             $newStatus = $request->input('status');
             $image = $request->file('image_url') ? $this->storeImage($request->file('image_url'), 'shipping') : null;
+
+
             if (!$request->shiper_id) {
                 $shippers = User::whereHas('roles', function ($query) {
                     $query->where('name', 'shipper');
@@ -103,10 +106,20 @@ class BillController extends Controller
                     return response()->json(['error' => 'Không tìm thấy shipper nào.'], 404);
                 }
 
-                $shipper = $shippers->id;
+                if ($shippers->first()->bills_count == $shippers->last()->bills_count) {
+                    $shipper = $shippers->random()->id;
+                } else {
+                    $shipper = $shippers->first()->id;
+                }
             } else {
                 $shipper = $request->shiper_id;
             }
+
+            if (!$shipper) {
+                return response()->json(['error' => 'Không tìm thấy shipper hợp lệ.'], 400);
+            }
+
+
             $this->validateStatusTransition($bill, $newStatus);
             $this->handleSpecialStatuses($bill, $newStatus, $user->id, $shipper, $request->input('description'), $image);
 
@@ -179,6 +192,16 @@ class BillController extends Controller
 
     private function createShippingHistory($bill, $userId, $shiper, $event, $description, $image)
     {
+
+        Log::info('Creating Shipping History: ', [
+            'bill_id' => $bill->id,
+            'admin_id' => $userId,
+            'shipper_id' => $shiper,
+            'event' => $event,
+            'description' => $description,
+            'image_url' => $image,
+        ]);
+
         ShippingHistory::create([
             'bill_id' => $bill->id,
             'admin_id' => $userId,

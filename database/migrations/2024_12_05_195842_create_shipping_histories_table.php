@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('shipping_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('bill_id');
-            $table->unsignedBigInteger('admin_id')->nullable()->after('shipper_id');
-            $table->unsignedBigInteger('shipper_id')->nullable();
+            $table->unsignedBigInteger('admin_id');
+            $table->unsignedBigInteger('shipper_id');
             $table->enum('event', [
                 'cancellation_requested',
                 'cancellation_approved',
