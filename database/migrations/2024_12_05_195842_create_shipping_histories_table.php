@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('shipping_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('bill_id');
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('admin_id');
+            $table->unsignedBigInteger('shipper_id')->nullable();
             $table->enum('event', [
                 'cancellation_requested',
                 'cancellation_approved',
@@ -29,7 +30,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('bill_id')->references('id')->on('bills')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('admin_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('shipper_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 

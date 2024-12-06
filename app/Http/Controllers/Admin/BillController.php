@@ -12,6 +12,7 @@ use App\Http\Resources\BillResource;
 use App\Models\Bill;
 use App\Models\BillDetail;
 use App\Models\ShippingHistory;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -90,9 +91,24 @@ class BillController extends Controller
 
             $newStatus = $request->input('status');
             $image = $request->file('image_url') ? $this->storeImage($request->file('image_url'), 'shipping') : null;
+            if (!$request->shiper_id) {
+                $shippers = User::whereHas('roles', function ($query) {
+                    $query->where('name', 'shipper');
+                })->withCount(['bills' => function ($query) {
+                    $query->where('status', 'shipping');
+                }])->orderBy('bills_count', 'asc')
+                    ->first();
 
+                if (!$shippers) {
+                    return response()->json(['error' => 'Không tìm thấy shipper nào.'], 404);
+                }
+
+                $shipper = $shippers->id;
+            } else {
+                $shipper = $request->shiper_id;
+            }
             $this->validateStatusTransition($bill, $newStatus);
-            $this->handleSpecialStatuses($bill, $newStatus, $request->shiper_id ?? $user->id, $request->input('description'), $image);
+            $this->handleSpecialStatuses($bill, $newStatus, $user->id, $shipper, $request->input('description'), $image);
 
             $bill->status = $newStatus;
             $bill->save();
@@ -139,10 +155,10 @@ class BillController extends Controller
         }
     }
 
-    private function handleSpecialStatuses($bill, $newStatus, $userId, $description, $image)
+    private function handleSpecialStatuses($bill, $newStatus, $userId, $shiper, $description, $image)
     {
         if ($newStatus === 'shipping') {
-            $this->createShippingHistory($bill, $userId, 'shipping_started', $description ?? 'Giao hàng', $image);
+            $this->createShippingHistory($bill, $userId, $shiper, 'shipping_started', $description ?? 'Giao hàng', $image);
         }
 
         if ($bill->status === 'cancellation_requested') {
@@ -151,7 +167,7 @@ class BillController extends Controller
                 $description = $newStatus === 'cancellation_approved'
                     ? 'Chấp nhận hủy đơn hàng'
                     : 'Hủy thất bại đơn hàng quay lại trạng thái chuẩn bị';
-                $this->createShippingHistory($bill, $userId, $event, $description, $image);
+                $this->createShippingHistory($bill, $userId, $shiper, $event, $description, $image);
             }
 
             if ($newStatus === 'cancellation_rejected') {
@@ -161,11 +177,12 @@ class BillController extends Controller
     }
 
 
-    private function createShippingHistory($bill, $userId, $event, $description, $image)
+    private function createShippingHistory($bill, $userId, $shiper, $event, $description, $image)
     {
         ShippingHistory::create([
             'bill_id' => $bill->id,
             'user_id' => $userId,
+            'shipper_id' => $shiper,
             'event' => $event,
             'description' => $description ?? 'Không có mô tả',
             'image_url' => $this->storeImage($image, 'shipping') ?? null,

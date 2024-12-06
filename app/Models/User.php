@@ -10,7 +10,7 @@ class User extends Authenticatable implements JWTSubject
 {
 
 
-   
+
 
 
 
@@ -44,7 +44,10 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
     }
-
+    public function bills()
+    {
+        return $this->hasMany(Bill::class, 'shiper_id', 'id');
+    }
     public function getJWTIdentifier()
     {
         return $this->getKey();
@@ -82,5 +85,4 @@ class User extends Authenticatable implements JWTSubject
 
         return $query;
     }
-
 }

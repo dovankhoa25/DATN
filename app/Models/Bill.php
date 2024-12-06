@@ -60,6 +60,11 @@ class Bill extends Model
         return $this->belongsToMany(Table::class, 'bill_table');
     }
 
+    public function shipper()
+    {
+        return $this->belongsTo(User::class, 'shiper_id', 'id');
+    }
+
     public function scopeFilter($query, $filters)
     {
         if (isset($filters['ma_bill'])) {
