@@ -154,7 +154,7 @@ class TableController extends Controller
                 'user_addresses_id' => null,
                 'total_amount' => 0.00,
                 'branch_address' => $request->branch_address ?? 'Fpoly',
-                'payment_id' => $request->payment_id ?? null,
+                'payment_id' => null,
                 'note' => null,
                 'order_type' => 'in_restaurant',
                 'table_number' => null,

@@ -77,7 +77,7 @@ class BillController extends Controller
     {
         if ($file) {
             $filePath = $file->store($directory, 'public');
-            return Storage::url($filePath); // Trả về URL công khai
+            return Storage::url($filePath);
         }
 
         return null;
@@ -90,12 +90,10 @@ class BillController extends Controller
         try {
 
             $user = JWTAuth::parseToken()->authenticate();
-            Log::info('User Authenticated: ', ['user' => $user]);
             $bill = Bill::findOrFail($id);
 
             $newStatus = $request->input('status');
             $image = $request->file('image_url') ? $this->storeImage($request->file('image_url'), 'shipping') : null;
-
 
             $shippers = User::whereHas('roles', function ($query) {
                 $query->where('name', 'shipper');
@@ -165,23 +163,32 @@ class BillController extends Controller
         }
     }
 
-    private function handleSpecialStatuses($bill, $newStatus, $userId, $shiper, $description, $image)
+    private function handleSpecialStatuses($bill, $newStatus, $userId, $shipper, $description, $image)
     {
         if ($newStatus === 'shipping') {
-            $this->createShippingHistory($bill, $userId, $shiper, 'shipping_started', $description ?? 'Giao hàng', $image);
+            $this->createShippingHistory(
+                $bill,
+                $userId,
+                $shipper,
+                'shipping_started',
+                $description ?? 'Giao hàng',
+                $image
+            );
         }
+
 
         if ($bill->status === 'cancellation_requested') {
             if (in_array($newStatus, ['cancellation_approved', 'cancellation_rejected'])) {
-                $event = $newStatus === 'cancellation_approved' ? 'cancellation_approved' : 'cancellation_rejected';
+                $event = $newStatus;
                 $description = $newStatus === 'cancellation_approved'
                     ? 'Chấp nhận hủy đơn hàng'
                     : 'Hủy thất bại đơn hàng quay lại trạng thái chuẩn bị';
-                $this->createShippingHistory($bill, $userId, $shiper, $event, $description, $image);
-            }
 
-            if ($newStatus === 'cancellation_rejected') {
-                $bill->status = 'preparing';
+                $this->createShippingHistory($bill, $userId, $shipper, $event, $description, $image);
+
+                if ($newStatus === 'cancellation_rejected') {
+                    $bill->status = 'preparing';
+                }
             }
         }
     }
@@ -205,7 +212,7 @@ class BillController extends Controller
             'shipper_id' => $shiper,
             'event' => $event,
             'description' => $description ?? 'Không có mô tả',
-            'image_url' => $this->storeImage($image, 'shipping') ?? null,
+            'image_url' => $image,
         ]);
     }
 
