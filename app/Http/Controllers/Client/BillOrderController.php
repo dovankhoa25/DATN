@@ -146,7 +146,7 @@ class BillOrderController extends Controller
             if (!$payment) {
                 return response()->json(['error' => 'Phương thức thanh toán không hợp lệ.'], 400);
             }
-            $tableIds = $bill->tables()->pluck('id');
+            $tableIds = $bill->tables()->pluck('tables.id');
 
 
             $paymentStatus = ($payment->name == 'ATM') ? 'pending' : 'successful';

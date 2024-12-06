@@ -67,7 +67,7 @@ class VoucherController extends Controller
 
         $data['image'] = $image;
 
-        $voucherCode = Str::upper(Str::random(6));
+        $voucherCode = Str::upper(Str::random(10));
 
         while (Voucher::where('code', $voucherCode)->exists()) {
             $voucherCode = Str::upper(Str::random(10));
