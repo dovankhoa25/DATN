@@ -395,13 +395,16 @@ class BillUser extends Controller
         try {
             $user = JWTAuth::parseToken()->authenticate();
 
-            $bill = Bill::where('id', $id)->where('user_id', $user->id)->first();
+            $bill = Bill::with(['payment', 'vouchers', 'userAddress', 'user'])
+                ->where('id', $id)
+                ->where('user_id', $user->id)
+                ->first();
 
             if (!$bill) {
                 return response()->json(['error' => 'Hóa đơn không tồn tại hoặc không thuộc về người dùng'], 403);
             }
 
-            $billDetails = BillDetail::with(['productDetail.product'])
+            $billDetails = BillDetail::with(['productDetail.product', 'productDetail.size'])
                 ->where('bill_id', $id)
                 ->get();
 
@@ -410,7 +413,27 @@ class BillUser extends Controller
             }
 
             return response()->json([
-                'data' => BillDetailResource::collection($billDetails),
+                'bill' => [
+                    'id' => $bill->id,
+                    'ma_bill' => $bill->ma_bill,
+                    'total_amount' => $bill->total_amount,
+                    'order_date' => $bill->order_date,
+                    'payment_method' => $bill->payment->name ?? null,
+                    'address' => $bill->userAddress->address ?? null,
+                    'customer' => $bill->user ? [
+                        'name' => $bill->user->name,
+                        // 'phone' => $bill->user->phone_number,
+                    ] : null,
+                    'vouchers' => $bill->vouchers->map(function ($voucher) {
+                        return [
+                            'id' => $voucher->id,
+                            'code' => $voucher->code,
+                            'name' => $voucher->name,
+                            // 'discount' => $voucher->discount,
+                        ];
+                    }),
+                ],
+                'bill_details' => BillDetailResource::collection($billDetails),
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Chi tiết hóa đơn không tồn tại'], 404);

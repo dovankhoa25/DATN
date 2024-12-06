@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('code');
             $table->decimal('value', 8, 2);
             $table->unsignedDecimal('discount_percentage', 5, 2)->default(0);
             $table->unsignedDecimal('max_discount_value', 10, 2)->nullable();
