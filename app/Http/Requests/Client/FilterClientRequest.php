@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\Client;
 
+use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FilterClientRequest extends FormRequest
+class FilterClientRequest extends BaseApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

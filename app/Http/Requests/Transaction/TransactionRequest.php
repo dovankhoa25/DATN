@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\Transaction;
 
+use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class TransactionRequest extends FormRequest
+class TransactionRequest extends BaseApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

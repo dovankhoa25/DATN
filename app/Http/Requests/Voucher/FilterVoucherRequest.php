@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\Voucher;
 
+use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FilterVoucherRequest extends FormRequest
+class FilterVoucherRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {

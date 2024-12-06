@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Product;
 
-
+use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FilterProductRequest extends FormRequest
+class FilterProductRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {

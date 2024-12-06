@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\Bill;
 
+use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FilterBillRequest extends FormRequest
+class FilterBillRequest extends BaseApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -43,5 +44,4 @@ class FilterBillRequest extends FormRequest
             'branch_address',
         ]);
     }
-
 }

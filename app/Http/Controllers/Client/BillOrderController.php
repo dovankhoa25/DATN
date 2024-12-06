@@ -146,11 +146,11 @@ class BillOrderController extends Controller
             if (!$payment) {
                 return response()->json(['error' => 'Phương thức thanh toán không hợp lệ.'], 400);
             }
-            $tableId = $bill->table_number;
+            $tableIds = $bill->tables()->pluck('id');
 
 
             $paymentStatus = ($payment->name == 'ATM') ? 'pending' : 'successful';
-            $qrExpiration = ($payment->name === 'ATM') ? now()->addMinutes(10) : null;
+            $qrExpiration = ($payment->name === 'ATM') ? now()->addMinutes(30) : null;
             $bill->customer_id = $customerId;
             $bill->payment_id = $paymentId;
             // $bill->voucher_id = $voucherId;
@@ -161,15 +161,11 @@ class BillOrderController extends Controller
             $bill->qr_expiration = $qrExpiration;
             $bill->save();
 
-            $table = Table::where('id', $tableId)->first();
-            $table->reservation_status = 'close';
-            $table->save();
-
+            Table::whereIn('id', $tableIds)->update(['reservation_status' => 'close']);
 
             DB::commit();
 
-
-            dispatch(new CheckBillExpiration($bill->id))->delay(now()->addMinutes(10));
+            dispatch(new CheckBillExpiration($bill->id))->delay(now()->addMinutes(30));
             return response()->json([
                 'message' => 'Đặt hàng thành công',
                 'bill' => new BillOrderResource($bill)

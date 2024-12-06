@@ -118,7 +118,7 @@ class TableController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $openHour = 8;
-        $closeHour = 22;
+        $closeHour = 23;
 
         $currentHour = now()->hour;
 

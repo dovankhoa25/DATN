@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests\User;
 
+use App\Http\Requests\BaseApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FilterUserRequest extends FormRequest
+class FilterUserRequest extends BaseApiRequest
 {
-   
+
     public function authorize(): bool
     {
         return true;
@@ -28,7 +29,7 @@ class FilterUserRequest extends FormRequest
         ];
     }
 
-   
+
     public function messages(): array
     {
         return [
@@ -41,5 +42,4 @@ class FilterUserRequest extends FormRequest
             'name.string' => 'Giá trị của name phải là chuỗi ký tự hợp lệ.',
         ];
     }
-    
 }

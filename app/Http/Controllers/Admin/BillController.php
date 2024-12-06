@@ -4,14 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\ItemConfirmedByAdmin;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Bill\addTableRequest;
 use App\Http\Requests\Bill\BillRequest;
 use App\Http\Requests\Bill\FilterBillRequest;
 use App\Http\Requests\Bill\ItemBillActiveRequest;
+use App\Http\Requests\Bill\removedTableRequest;
 use App\Http\Requests\Bill\UpdateBillRequest;
 use App\Http\Resources\BillResource;
 use App\Models\Bill;
 use App\Models\BillDetail;
 use App\Models\ShippingHistory;
+use App\Models\Table;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -335,5 +338,78 @@ class BillController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+
+
+
+    function addTableGroupToBill(addTableRequest $req)
+    {
+
+
+        $tableIds = $req->input('tableIds');
+        $billId = $req->input('bill_id');
+
+        $bill = Bill::find($billId);
+
+        if (!$bill) {
+            return response()->json(['message' => 'Hóa đơn không tồn tại'], 404);
+        }
+
+        $existingTableIds = $bill->tables()->pluck('id')->toArray();
+
+        $newTableIds = array_diff($tableIds, $existingTableIds);
+
+        $invalidTables = Table::whereIn('id', $newTableIds)
+            ->where('reservation_status', '!=', 'close')
+            ->pluck('id')
+            ->toArray();
+
+        if (!empty($invalidTables)) {
+            return response()->json([
+                'message' => 'Một số bàn đang có khách vui lòng chọn lại',
+                'table_false' => $invalidTables,
+            ], 400);
+        }
+
+        $bill->tables()->attach($newTableIds);
+        Table::whereIn('id', $newTableIds)->update(['reservation_status' => 'open']);
+        return response()->json([
+            'message' => 'Thêm bàn vào hóa đơn thành công',
+            'addedTableIds' => $newTableIds,
+        ]);
+    }
+
+
+    public function removedTableFromBill(removedTableRequest $req)
+    {
+        $tableIds = $req->input('tableIds');
+        $billId = $req->input('bill_id');
+
+        $bill = Bill::find($billId);
+
+        if (!$bill) {
+            return response()->json(['message' => 'Hóa đơn không tồn tại'], 404);
+        }
+
+        $existingTableIds = $bill->tables()->pluck('id')->toArray();
+
+        $invalidTableIds = array_diff($tableIds, $existingTableIds);
+
+        if (!empty($invalidTableIds)) {
+            return response()->json([
+                'message' => 'Một số bàn không thuộc hóa đơn này',
+                'invalid_table_ids' => $invalidTableIds,
+            ], 400);
+        }
+
+        $bill->tables()->detach($tableIds);
+
+        Table::whereIn('id', $tableIds)->update(['reservation_status' => 'close']);
+
+        return response()->json([
+            'message' => 'Các bàn đã được xóa khỏi hóa đơn và đổi trạng thái thành close',
+            'removed_table_ids' => $tableIds,
+        ]);
     }
 }
