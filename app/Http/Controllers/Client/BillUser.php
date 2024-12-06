@@ -177,7 +177,7 @@ class BillUser extends Controller
                     'bill_id' => $bill->id,
                     'product_detail_id' => $cartItem->product_detail_id,
                     'quantity' => $cartItem->quantity,
-                    'price' => $cartItem->productDetail->price,
+                    'price' => $cartItem->productDetail->sale ?? $cartItem->productDetail->price,
                 ];
 
                 if (isset($productDetailsToUpdate[$cartItem->product_detail_id])) {
