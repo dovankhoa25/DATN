@@ -113,14 +113,15 @@ class BillController extends Controller
             if (!$shipper) {
                 return response()->json(['error' => 'Không tìm thấy shipper hợp lệ.'], 400);
             }
-
+            $statusUpdated = false;
 
             $this->validateStatusTransition($bill, $newStatus);
-            $this->handleSpecialStatuses($bill, $newStatus, $user->id, $shipper, $request->input('description') ?? null, $image);
+            $this->handleSpecialStatuses($bill, $newStatus, $user->id, $shipper, $request->input('description') ?? null, $image, $statusUpdated);
 
-            if (empty($bill->wasUpdatedInHandler)) {
+            if (!$statusUpdated) {
                 $bill->status = $newStatus;
             }
+
             $bill->save();
 
             return response()->json([
@@ -171,7 +172,7 @@ class BillController extends Controller
         }
     }
 
-    private function handleSpecialStatuses($bill, $newStatus, $userId, $shipper, $description, $image)
+    private function handleSpecialStatuses($bill, $newStatus, $userId, $shipper, $description, $image, &$statusUpdated)
     {
         if ($newStatus === 'shipping') {
             $this->createShippingHistory(
@@ -198,7 +199,7 @@ class BillController extends Controller
                     Log::info('Trạng thái bị từ chối, cập nhật lại trạng thái hóa đơn thành preparing');
                     $bill->status = 'preparing';
                     $bill->save();
-                    $bill->wasUpdatedInHandler = true;
+                    $statusUpdated = true;
                 }
                 $this->createShippingHistory($bill, $userId, $shipper, $event, 'đơn hàng đang được chuẩn bị để tiếp tục vận chuyển ', $image);
             }
