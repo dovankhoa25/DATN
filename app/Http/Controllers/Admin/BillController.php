@@ -118,7 +118,9 @@ class BillController extends Controller
             $this->validateStatusTransition($bill, $newStatus);
             $this->handleSpecialStatuses($bill, $newStatus, $user->id, $shipper, $request->input('description') ?? null, $image);
 
-            $bill->status = $newStatus;
+            if (empty($bill->wasUpdatedInHandler)) {
+                $bill->status = $newStatus;
+            }
             $bill->save();
 
             return response()->json([
@@ -190,18 +192,18 @@ class BillController extends Controller
                     ? 'Chấp nhận hủy đơn hàng'
                     : 'Hủy thất bại đơn hàng quay lại trạng thái chuẩn bị';
 
-                $res = $this->createShippingHistory($bill, $userId, $shipper, $event, $description, $image);
+                $this->createShippingHistory($bill, $userId, $shipper, $event, $description, $image);
 
-                if ($res) {
+                if ($newStatus === 'cancellation_rejected') {
+                    Log::info('Trạng thái bị từ chối, cập nhật lại trạng thái hóa đơn thành preparing');
                     $bill->status = 'preparing';
                     $bill->save();
-
-                    $this->createShippingHistory($bill, $userId, $shipper, $event, 'đơn hàng đang được chuẩn bị ', $image);
+                    $bill->wasUpdatedInHandler = true;
                 }
+                $this->createShippingHistory($bill, $userId, $shipper, $event, 'đơn hàng đang được chuẩn bị để tiếp tục vận chuyển ', $image);
             }
         }
     }
-
 
     private function createShippingHistory($bill, $userId, $shiper, $event, $description, $image)
     {
