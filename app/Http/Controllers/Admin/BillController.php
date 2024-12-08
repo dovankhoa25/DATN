@@ -249,7 +249,7 @@ class BillController extends Controller
             'tables'
         )
             ->whereHas('tables', function ($query) use ($tableNumber) {
-                $query->where('id', $tableNumber);
+                $query->where('tables.id', $tableNumber);
             })
             ->where('status', 'pending')
             ->where('order_type', 'in_restaurant')
