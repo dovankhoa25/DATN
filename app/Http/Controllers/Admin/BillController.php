@@ -242,8 +242,15 @@ class BillController extends Controller
     public function getBillByTableNumber(int $tableNumber)
     {
         // Lấy dữ liệu bill kèm theo các quan hệ billDetails, productDetail, product, size và images load quan hệ
-        $bills = Bill::with('billDetails.productDetail.product', 'billDetails.productDetail.size', 'billDetails.productDetail.images')
-            ->where('table_number', $tableNumber)
+        $bills = Bill::with(
+            'billDetails.productDetail.product',
+            'billDetails.productDetail.size',
+            'billDetails.productDetail.images',
+            'tables'
+        )
+            ->whereHas('tables', function ($query) use ($tableNumber) {
+                $query->where('number', $tableNumber);
+            })
             ->where('status', 'pending')
             ->where('order_type', 'in_restaurant')
             ->get();
@@ -284,7 +291,12 @@ class BillController extends Controller
                 'ma_bill' => $bill->ma_bill,
                 'order_date' => $bill->order_date,
                 'total_amount' => $bill->total_amount,
-                'table_number' => $bill->table_number,
+                'tables' => $bill->tables->map(function ($table) {
+                    return [
+                        'id' => $table->id,
+                        'table' => $table->table,
+                    ];
+                }),
                 'status' => $bill->status,
                 'order_type' => $bill->order_type,
                 'bill_details' => $billDetails,

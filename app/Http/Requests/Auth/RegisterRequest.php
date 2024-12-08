@@ -17,7 +17,7 @@ class RegisterRequest extends BaseApiRequest
     {
         return [
             'name' => 'nullable|string|max:50|min:5',
-            'phone_number' => 'required|phone|unique:customers,phone_number',
+            'phone_number' => 'required|numeric|unique:customers,phone_number',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
         ];

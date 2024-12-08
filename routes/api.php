@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\StatisticController;
 use App\Http\Controllers\Admin\SubcategoryController;
 use App\Http\Controllers\Admin\TablesController;
 use App\Http\Controllers\Admin\TimeOrderTableController;
@@ -72,6 +73,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(f
 
     //dash
     Route::get('dashboard', [DashboardController::class, 'index'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::get('dashboardfull', [StatisticController::class, 'getStatistics'])->middleware('auth', 'checkRole:qtv,admin');
 
 
     // users
