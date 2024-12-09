@@ -73,7 +73,7 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(f
 
     //dash
     Route::get('dashboard', [DashboardController::class, 'index'])->middleware('auth', 'checkRole:qtv,admin');
-    Route::get('dashboardfull', [StatisticController::class, 'getStatistics'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::get('dashboardfull', [StatisticController::class, 'index'])->middleware('auth', 'checkRole:qtv,admin');
 
 
     // users
