@@ -91,7 +91,11 @@ class BillController extends Controller
 
             $user = JWTAuth::parseToken()->authenticate();
 
-            if ($request->input('status') === 'completed' || $request->input('status') === 'failed' && $user->role !== 'admin') {
+            if (
+                $request->input('status') === 'completed' ||
+                $request->input('status') === 'failed' &&
+                $user->roles->contains('name', 'admin')
+            ) {
                 return response()->json(['error' => 'Chỉ admin mới có thể cập nhật trạng thái thành completed hoặc failed.'], 403);
             }
 
