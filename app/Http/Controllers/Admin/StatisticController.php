@@ -7,6 +7,7 @@ use App\Http\Requests\StatisticRequest;
 use App\Models\Bill;
 use App\Models\Customer;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class StatisticController extends Controller
 {
@@ -62,13 +63,13 @@ class StatisticController extends Controller
             ->groupBy('month')
             ->get();
 
-        $userData = User::selectRaw('DATE(created_at) as day, COUNT(*) as new_users')
-            ->whereYear('order_date', $year)
+        $userData = User::selectRaw('MONTH(created_at) as month, COUNT(*) as new_users')
+            ->whereYear('created_at', $year)
             ->groupBy('month')
             ->get();
 
-        $customerData = Customer::selectRaw('DATE(created_at) as day, COUNT(*) as new_customers')
-            ->whereYear('order_date', $year)
+        $customerData = Customer::selectRaw('MONTH(created_at) as month, COUNT(*) as new_customers')
+            ->whereYear('created_at', $year)
             ->groupBy('month')
             ->get();
 
@@ -79,6 +80,7 @@ class StatisticController extends Controller
             'new_customers' => $customerData,
         ];
     }
+
 
     private function getQuarterlyStatistics($year, $quarter)
     {
@@ -91,20 +93,19 @@ class StatisticController extends Controller
 
         $revenueData = Bill::selectRaw('MONTH(order_date) as month, SUM(total_amount) as revenue')
             ->whereYear('order_date', $year)
-            ->whereIn('MONTH(order_date)', $months[$quarter])
+            ->whereIn(DB::raw('MONTH(order_date)'), $months[$quarter])
             ->groupBy('month')
             ->get();
 
-
-        $userData = User::selectRaw('DATE(created_at) as day, COUNT(*) as new_users')
-            ->whereYear('order_date', $year)
-            ->whereIn('MONTH(order_date)', $months[$quarter])
+        $userData = User::selectRaw('MONTH(created_at) as month, COUNT(*) as new_users')
+            ->whereYear('created_at', $year)
+            ->whereIn(DB::raw('MONTH(created_at)'), $months[$quarter])
             ->groupBy('month')
             ->get();
 
-        $customerData = Customer::selectRaw('DATE(created_at) as day, COUNT(*) as new_customers')
-            ->whereYear('order_date', $year)
-            ->whereIn('MONTH(order_date)', $months[$quarter])
+        $customerData = Customer::selectRaw('MONTH(created_at) as month, COUNT(*) as new_customers')
+            ->whereYear('created_at', $year)
+            ->whereIn(DB::raw('MONTH(created_at)'), $months[$quarter])
             ->groupBy('month')
             ->get();
 
