@@ -118,6 +118,9 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(f
 
     //Bill detail
     Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::put('/addtablefrombill', [BillController::class, 'addTableGroupToBill']);
+    Route::put('/remotablefrombill', [BillController::class, 'removedTableFromBill']);
+
 
     // tables
     Route::apiResource('tables', TablesController::class)->middleware('auth', 'checkRole:qtv,admin');
