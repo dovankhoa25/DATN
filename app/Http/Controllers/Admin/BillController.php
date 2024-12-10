@@ -90,6 +90,11 @@ class BillController extends Controller
         try {
 
             $user = JWTAuth::parseToken()->authenticate();
+
+            if ($request->input('status') === 'completed' || $request->input('status') === 'failed' && $user->role !== 'admin') {
+                return response()->json(['error' => 'Chỉ admin mới có thể cập nhật trạng thái thành completed hoặc failed.'], 403);
+            }
+
             $bill = Bill::findOrFail($id);
 
             $newStatus = $request->input('status');
@@ -202,6 +207,31 @@ class BillController extends Controller
                     $statusUpdated = true;
                 }
                 $this->createShippingHistory($bill, $userId, $shipper, $event, 'đơn hàng đang được chuẩn bị để tiếp tục vận chuyển ', $image);
+            }
+        }
+
+        if ($bill->status === 'shipping') {
+            if ($newStatus === 'completed') {
+                $this->createShippingHistory(
+                    $bill,
+                    $userId,
+                    $shipper,
+                    'delivered',
+                    'Admin xác nhận đơn hàng Lí do : ' . $description ?? 'Admin xác nhận đơn hàng Lí do : ' . $description,
+                    $image
+                );
+            }
+        }
+        if ($bill->status === 'shipping') {
+            if ($newStatus === 'failed') {
+                $this->createShippingHistory(
+                    $bill,
+                    $userId,
+                    $shipper,
+                    'delivered',
+                    'Admin xác nhận hủy đơn hàng Lí do : ' . $description ?? 'Admin xác nhận hủy đơn hàng Lí do : ' . $description,
+                    $image
+                );
             }
         }
     }

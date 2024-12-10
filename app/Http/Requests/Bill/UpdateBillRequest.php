@@ -29,4 +29,15 @@ class UpdateBillRequest extends BaseApiRequest
             'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
+
+
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            if (($this->input('status') === 'completed' || $this->input('status') === 'failed') && empty($this->input('description'))) {
+                $validator->errors()->add('description', 'Description là bắt buộc khi trạng thái là completed hoặc failed.');
+            }
+        });
+    }
 }
