@@ -3,15 +3,50 @@
 namespace App\Http\Controllers\Shipper;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Shipper\FilterBillRequest;
 use App\Http\Resources\BillResource;
+use App\Http\Resources\Shipper\BillCollection;
 use App\Models\Bill;
 use App\Models\ShippingHistory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ShipperController extends Controller
 {
+
+    public function listBill(FilterBillRequest $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+
+            $perPage = $request->input('per_page', 10);
+            $status = $request->input('status');
+
+            $bills = Bill::query()
+                ->where('shipper_id', $user->id)
+                ->when($status, function ($query, $status) {
+                    return $query->where('status', $status);
+                })
+                ->orderByRaw("CASE 
+                WHEN status = 'pending' THEN 1 
+                WHEN status = 'confirmed' THEN 2 
+                WHEN status = 'preparing' THEN 3 
+                WHEN status = 'shipping' THEN 4     
+                WHEN status = 'completed' THEN 5 
+                ELSE 6 END")
+                ->orderBy('created_at', 'desc')
+                ->paginate($perPage);
+
+            return new BillCollection($bills);
+        } catch (\Exception $e) {
+            Log::error('Lỗi lấy danh sách hóa đơn', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Đã xảy ra lỗi.'], 500);
+        }
+    }
+
+
 
     public function updateShippingStatus(Request $request, string $id)
     {
@@ -48,6 +83,7 @@ class ShipperController extends Controller
             if ($bill->status == 'shipping') {
                 if ($status == 'delivered') {
                     $bill->status = 'completed';
+                    $bill->payment_status = 'successful';
                     ShippingHistory::create([
                         'bill_id' => $bill->id,
                         'user_id' => $user->id,
@@ -62,6 +98,7 @@ class ShipperController extends Controller
 
                     if ($failedCount >= 2) {
                         $bill->status = 'failed';
+                        $bill->payment_status = 'failed';
                     } else {
                         $bill->status = 'pending_retry';
                     }

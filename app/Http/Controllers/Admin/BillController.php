@@ -142,9 +142,9 @@ class BillController extends Controller
             'pending' => 'confirmed',
             'confirmed' => 'preparing',
             'preparing' => 'shipping',
-            'shipping' => 'completed',
-            'completed' => null,
-            'failed' => null,
+            // 'shipping' => 'completed',
+            // 'completed' => null,
+            // 'failed' => null,
         ];
 
         $currentStatus = $bill->status;
@@ -168,7 +168,7 @@ class BillController extends Controller
         }
 
         if (in_array($bill->payment_status, ['pending', 'failed', 'refunded'])) {
-            throw new \Exception('Đơn hàng này không được phép cập nhật.');
+            throw new \Exception('Đơn hàng này đang đợi thanh toán không được phép cập nhật.');
         }
     }
 
@@ -445,6 +445,14 @@ class BillController extends Controller
                 'invalid_table_ids' => $invalidTableIds,
             ], 400);
         }
+
+        $remainingTables = count($existingTableIds) - count($tableIds);
+        if ($remainingTables <= 0) {
+            return response()->json([
+                'message' => 'Không thể xóa tất cả các bàn khỏi hóa đơn. Cần giữ ít nhất một bàn.',
+            ], 400);
+        }
+
         DB::beginTransaction();
         try {
             $bill->tables()->detach($tableIds);

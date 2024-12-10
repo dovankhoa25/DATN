@@ -93,7 +93,7 @@ class BillUser extends Controller
     {
 
         $openHour = 8;
-        $closeHour = 22;
+        $closeHour = 24;
 
         $currentHour = now()->hour;
 
@@ -262,10 +262,12 @@ class BillUser extends Controller
 
         if ($yagiVoucher) {
             $totalAmount = $this->applyVoucherDiscount($yagiVoucher, $totalAmount);
+            $yagiVoucher->decrement('quantity', 1);
         }
 
         if ($customerVoucher) {
             $totalAmount = $this->applyVoucherDiscount($customerVoucher, $totalAmount);
+            $customerVoucher->decrement('quantity', 1);
         }
 
         return max(0, $totalAmount);
