@@ -385,7 +385,7 @@ class BillController extends Controller
             return response()->json(['message' => 'Hóa đơn không tồn tại'], 404);
         }
 
-        if ($bill->status !== 'open') {
+        if ($bill->status !== 'pending') {
             return response()->json(['message' => 'Hóa đơn không cho phép thêm bàn'], 400);
         }
 
@@ -435,7 +435,7 @@ class BillController extends Controller
             return response()->json(['message' => 'Hóa đơn không tồn tại'], 404);
         }
 
-        $existingTableIds = $bill->tables()->pluck('id')->toArray();
+        $existingTableIds = $bill->tables()->pluck('tables.id')->toArray();
 
         $invalidTableIds = array_diff($tableIds, $existingTableIds);
 
@@ -445,14 +445,23 @@ class BillController extends Controller
                 'invalid_table_ids' => $invalidTableIds,
             ], 400);
         }
+        DB::beginTransaction();
+        try {
+            $bill->tables()->detach($tableIds);
 
-        $bill->tables()->detach($tableIds);
+            Table::whereIn('id', $tableIds)->update(['reservation_status' => 'close']);
+            DB::commit();
 
-        Table::whereIn('id', $tableIds)->update(['reservation_status' => 'close']);
-
-        return response()->json([
-            'message' => 'Các bàn đã được xóa khỏi hóa đơn và đổi trạng thái thành close',
-            'removed_table_ids' => $tableIds,
-        ]);
+            return response()->json([
+                'message' => 'Các bàn đã được xóa khỏi hóa đơn và đổi trạng thái thành close',
+                'removed_table_ids' => $tableIds,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Đã xảy ra lỗi khi thêm bàn vào hóa đơn',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
