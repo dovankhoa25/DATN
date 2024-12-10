@@ -7,6 +7,7 @@ use App\Http\Requests\Shipper\FilterBillRequest;
 use App\Http\Resources\BillResource;
 use App\Http\Resources\Shipper\BillCollection;
 use App\Models\Bill;
+use App\Models\Customer;
 use App\Models\ShippingHistory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -84,6 +85,15 @@ class ShipperController extends Controller
                 if ($status == 'delivered') {
                     $bill->status = 'completed';
                     $bill->payment_status = 'successful';
+
+                    $customer = Customer::where("user_id", $bill->user_id)->first();
+                    if ($customer) {
+                        $customer->diemthuong += ($bill->total_amount / 1000);
+                        $customer->save();
+                    } else {
+                        Log::warning('Không tìm thấy khách hàng để tích điểm.', ['user_id' => $bill->user_id]);
+                    }
+
                     ShippingHistory::create([
                         'bill_id' => $bill->id,
                         'user_id' => $user->id,

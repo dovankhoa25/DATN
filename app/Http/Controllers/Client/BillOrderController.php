@@ -105,6 +105,15 @@ class BillOrderController extends Controller
                 'message' => 'Bill không tồn tại hoặc đã được thanh toán.',
             ], 404);
         }
+
+        if ($bill->billDetails()->count() === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'chưa ăn chưa gọi món mà thanh toán là sao vậy , gọi mon đi.',
+            ], 400);
+        }
+
+
         $phone = $request->get('phone');
         $paymentId = $request->get('payment_id');
         $voucher = $request->get('voucher');
