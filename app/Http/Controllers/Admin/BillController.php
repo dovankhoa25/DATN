@@ -217,9 +217,13 @@ class BillController extends Controller
                     $userId,
                     $shipper,
                     'delivered',
-                    'Admin xác nhận đơn hàng Lí do : ' . $description ?? 'Admin xác nhận đơn hàng Lí do : ' . $description,
+                    'Admin xác nhận đơn hàng Lí do : ' . ($description ?? 'Không có lý do'),
                     $image
                 );
+                $bill->status = 'completed';
+                $bill->payment_status = 'successful';
+                $bill->save();
+                $statusUpdated = true;
             }
         }
         if ($bill->status === 'shipping') {
@@ -229,10 +233,14 @@ class BillController extends Controller
                     $userId,
                     $shipper,
                     'delivered',
-                    'Admin xác nhận hủy đơn hàng Lí do : ' . $description ?? 'Admin xác nhận hủy đơn hàng Lí do : ' . $description,
+                    'Admin xác nhận hủy đơn hàng Lí do : ' . ($description ?? 'Không có lý do'),
                     $image
                 );
             }
+            $bill->payment_status = 'refunded';
+            $bill->status = 'completed';
+            $bill->save();
+            $statusUpdated = true;
         }
     }
 
