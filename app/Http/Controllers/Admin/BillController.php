@@ -376,8 +376,6 @@ class BillController extends Controller
 
     function addTableGroupToBill(addTableRequest $req)
     {
-
-
         $tableIds = $req->input('tableIds');
         $billId = $req->input('bill_id');
 
@@ -387,8 +385,11 @@ class BillController extends Controller
             return response()->json(['message' => 'Hóa đơn không tồn tại'], 404);
         }
 
-        $existingTableIds = $bill->tables()->pluck('id')->toArray();
+        if ($bill->status !== 'open') {
+            return response()->json(['message' => 'Hóa đơn không cho phép thêm bàn'], 400);
+        }
 
+        $existingTableIds = $bill->tables()->pluck('tables.id')->toArray();
         $newTableIds = array_diff($tableIds, $existingTableIds);
 
         $invalidTables = Table::whereIn('id', $newTableIds)
@@ -403,12 +404,23 @@ class BillController extends Controller
             ], 400);
         }
 
-        $bill->tables()->attach($newTableIds);
-        Table::whereIn('id', $newTableIds)->update(['reservation_status' => 'open']);
-        return response()->json([
-            'message' => 'Thêm bàn vào hóa đơn thành công',
-            'addedTableIds' => $newTableIds,
-        ]);
+        DB::beginTransaction();
+        try {
+            $bill->tables()->attach($newTableIds);
+            Table::whereIn('id', $newTableIds)->update(['reservation_status' => 'open']);
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Thêm bàn vào hóa đơn thành công',
+                'addedTableIds' => $newTableIds,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Đã xảy ra lỗi khi thêm bàn vào hóa đơn',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 
