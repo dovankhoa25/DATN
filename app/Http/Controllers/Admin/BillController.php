@@ -162,9 +162,10 @@ class BillController extends Controller
             'pending' => 'confirmed',
             'confirmed' => 'preparing',
             'preparing' => 'shipping',
-            // 'shipping' => 'completed',
-            // 'completed' => null,
-            // 'failed' => null,
+            'shipping' => 'completed',
+            'shipping' => 'failed',
+            'completed' => null,
+            'failed' => null,
         ];
 
         $currentStatus = $bill->status;
