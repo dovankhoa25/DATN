@@ -162,23 +162,31 @@ class BillController extends Controller
             'pending' => 'confirmed',
             'confirmed' => 'preparing',
             'preparing' => 'shipping',
-            'shipping' => 'completed',
-            'shipping' => 'failed',
+            'shipping' => ['completed', 'failed'],
             'completed' => null,
             'failed' => null,
         ];
 
         $currentStatus = $bill->status;
+        $allowedNextStatuses = $validStatuses[$currentStatus] ?? null;
 
-        if ($currentStatus === 'cancellation_requested') {
-            if (!in_array($newStatus, ['cancellation_approved', 'cancellation_rejected'])) {
-                throw new \Exception("Trạng thái không hợp lệ. Bạn chỉ có thể cập nhật từ 'cancellation_requested' đến 'cancellation_approved' hoặc 'cancellation_rejected'.");
+
+        if (is_array($allowedNextStatuses)) {
+            if (!in_array($newStatus, $allowedNextStatuses)) {
+                throw new \Exception("Không thể chuyển trạng thái từ {$currentStatus} thành {$newStatus}.");
             }
-        } else {
-            if (!array_key_exists($currentStatus, $validStatuses) || $validStatuses[$currentStatus] !== $newStatus) {
-                throw new \Exception("Trạng thái không hợp lệ. Bạn chỉ có thể cập nhật từ '{$currentStatus}' đến '{$validStatuses[$currentStatus]}'");
-            }
+        } elseif ($allowedNextStatuses !== $newStatus) {
+            throw new \Exception("Không thể chuyển trạng thái từ {$currentStatus} thành {$newStatus}.");
         }
+        // if ($currentStatus === 'cancellation_requested') {
+        //     if (!in_array($newStatus, ['cancellation_approved', 'cancellation_rejected'])) {
+        //         throw new \Exception("Trạng thái không hợp lệ. Bạn chỉ có thể cập nhật từ 'cancellation_requested' đến 'cancellation_approved' hoặc 'cancellation_rejected'.");
+        //     }
+        // } else {
+        //     if (!array_key_exists($currentStatus, $validStatuses) || $validStatuses[$currentStatus] !== $newStatus) {
+        //         throw new \Exception("Trạng thái không hợp lệ. Bạn chỉ có thể cập nhật từ '{$currentStatus}' đến '{$validStatuses[$currentStatus]}'");
+        //     }
+        // }
 
         if (in_array($currentStatus, ['completed', 'failed'])) {
             throw new \Exception('Không thể cập nhật khi trạng thái đã là completed hoặc failed.');
