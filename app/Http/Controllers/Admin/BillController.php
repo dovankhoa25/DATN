@@ -92,9 +92,8 @@ class BillController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
 
             if (
-                $request->input('status') === 'completed' ||
-                $request->input('status') === 'failed' &&
-                $user->roles->contains('name', 'admin')
+                ($request->input('status') === 'completed' || $request->input('status') === 'failed') &&
+                !$user->roles->contains('name', 'admin')
             ) {
                 return response()->json(['error' => 'Chỉ admin mới có thể cập nhật trạng thái thành completed hoặc failed.'], 403);
             }
@@ -104,19 +103,31 @@ class BillController extends Controller
             $newStatus = $request->input('status');
             $image = $request->file('image_url') ? $this->storeImage($request->file('image_url'), 'shipping') : null;
 
-            $shippers = User::whereHas('roles', function ($query) {
-                $query->where('name', 'shipper');
-            })->withCount(['bills' => function ($query) {
-                $query->where('status', 'shipping');
-            }])->get();
-            if ($shippers->isEmpty()) {
-                return response()->json(['error' => 'Không tìm thấy shipper nào.'], 404);
-            }
-
-            if ($shippers->pluck('bills_count')->unique()->count() === 1) {
-                $shipper = $shippers->random()->id;
+            if ($bill->status === 'shipping' && ($newStatus === 'completed' || $newStatus === 'failed')) {
+                $shippingHistory = ShippingHistory::where('bill_id', $bill->id)
+                    ->where('event', 'shipping_started')
+                    ->latest()
+                    ->first();
+                if ($shippingHistory) {
+                    $shipper = $shippingHistory->shipper_id;
+                } else {
+                    return response()->json(['error' => 'Không tìm thấy thông tin shipper cho hóa đơn này.'], 404);
+                }
             } else {
-                $shipper = $shippers->sortBy('bills_count')->first()->id;
+                $shippers = User::whereHas('roles', function ($query) {
+                    $query->where('name', 'shipper');
+                })->withCount(['bills' => function ($query) {
+                    $query->where('status', 'shipping');
+                }])->get();
+                if ($shippers->isEmpty()) {
+                    return response()->json(['error' => 'Không tìm thấy shipper nào.'], 404);
+                }
+
+                if ($shippers->pluck('bills_count')->unique()->count() === 1) {
+                    $shipper = $shippers->random()->id;
+                } else {
+                    $shipper = $shippers->sortBy('bills_count')->first()->id;
+                }
             }
 
             if (!$shipper) {
@@ -183,6 +194,7 @@ class BillController extends Controller
 
     private function handleSpecialStatuses($bill, $newStatus, $userId, $shipper, $description, $image, &$statusUpdated)
     {
+
         if ($newStatus === 'shipping') {
             $this->createShippingHistory(
                 $bill,
@@ -230,6 +242,7 @@ class BillController extends Controller
                 $statusUpdated = true;
             }
         }
+
         if ($bill->status === 'shipping') {
             if ($newStatus === 'failed') {
                 $this->createShippingHistory(
