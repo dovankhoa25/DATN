@@ -28,6 +28,7 @@ class CheckBillExpiration implements ShouldQueue
 
             if ($bill && $bill->qr_expiration && now()->greaterThan($bill->qr_expiration)) {
                 $bill->payment_status = 'failed';
+                $bill->status = 'failed';
                 $bill->save();
             } else {
             }

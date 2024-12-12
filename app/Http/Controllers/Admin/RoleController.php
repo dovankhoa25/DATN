@@ -14,11 +14,10 @@ class RoleController extends Controller
         $validated = $request->validate([
             'per_page' => 'integer|min:1|max:100'
         ]);
-        $perPage = $validated['per_page'] ?? 10;
-        $roles =  Role::paginate($perPage); 
+        $perPage = $validated['per_page'] ?? 20;
+        $roles =  Role::paginate($perPage);
 
         return RoleResource::collection($roles);
-        
     }
 
     public function store(Request $request)
@@ -53,10 +52,10 @@ class RoleController extends Controller
             // 'status' => 'sometimes|boolean', 
         ]);
         // $validatedData['status'] = true;
-        
+
 
         $role->update($validatedData);
-    
+
         return response()->json([
             'data' => new RoleResource($role),
         ], 201);
@@ -67,9 +66,6 @@ class RoleController extends Controller
         $role = Role::findOrFail($id);
         $role->delete();
 
-        return response()->json(null, 204); 
-        
+        return response()->json(null, 204);
     }
-
-    
 }

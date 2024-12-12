@@ -536,4 +536,64 @@ class BillController extends Controller
             ], 500);
         }
     }
+
+
+    public function showShippingHistory(int $id)
+    {
+        try {
+
+            $bill = Bill::with(['payment', 'vouchers', 'userAddress', 'user'])
+                ->findOrFail($id);
+
+
+            if (!$bill) {
+                return response()->json(['error' => 'Hóa đơn không tồn tại hoặc không thuộc về người dùng'], 403);
+            }
+
+            $billHistory = ShippingHistory::where('bill_id', $bill->id)
+                ->with('shipper')
+                ->get()
+                ->map(function ($res) {
+                    return [
+                        'event' => $res->event,
+                        'description' => $res->description,
+                        'created_at' => $res->created_at->toDateTimeString(),
+                        'image_url' => $res->image_url,
+                        'shipper' => $res->shipper ? [
+                            'id' => $res->shipper->id,
+                            'name' => $res->shipper->name,
+                            'email' => $res->shipper->email,
+                            'phone' => $res->shipper->customer ? $res->shipper->customer->phone_number : null,
+                        ] : null,
+                    ];
+                });
+
+
+            return response()->json([
+                'bill' => [
+                    'id' => $bill->id,
+                    'ma_bill' => $bill->ma_bill,
+                    'total_amount' => $bill->total_amount,
+                    'order_date' => $bill->order_date,
+                    'payment_method' => $bill->payment->name ?? null,
+                    'address' => $bill->userAddress->address ?? null,
+                    'customer' => $bill->user ? [
+                        'name' => $bill->user->name ?? $bill->user->gmail,
+                        // 'phone' => $bill->user->customer->phone_number,
+                    ] : null,
+                    'vouchers' => $bill->vouchers->map(function ($voucher) {
+                        return [
+                            'id' => $voucher->id,
+                            'code' => $voucher->code,
+                            'name' => $voucher->name,
+                            // 'discount' => $voucher->discount,
+                        ];
+                    }),
+                ],
+                'history' => $billHistory,
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Chi tiết lịch sử vận chuyển đơn hàng'], 404);
+        }
+    }
 }

@@ -116,6 +116,8 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(f
     Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
     Route::get('/bill_table/{table_number}', [BillController::class, 'getBillByTableNumber']);
     Route::put('/acive_item', [BillController::class, 'activeItems']);
+    Route::get('shipping/{id}', [BillController::class, 'showShippingHistory'])->middleware('auth');
+
 
     //Bill detail
     Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth', 'checkRole:qtv,admin');
