@@ -264,7 +264,7 @@ class BillController extends Controller
                 );
             }
             $bill->payment_status = 'refunded';
-            $bill->status = 'completed';
+            $bill->status = 'failed';
             $bill->save();
             $statusUpdated = true;
         }

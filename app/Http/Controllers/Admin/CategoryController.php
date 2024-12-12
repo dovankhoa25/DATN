@@ -15,20 +15,7 @@ use Illuminate\Support\Facades\Redis;
 class CategoryController extends Controller
 {
 
-    // public function index(FillterCategoryRequest $request)
-    // {
-    //     try {
-    //         $perPage = $request->get('per_page', 10);
 
-    //         $categories = Category::with('subcategories')
-    //             ->filter($request)
-    //             ->whereNull('parent_id')
-    //             ->paginate($perPage);
-    //         return CategoryAdminResource::collection($categories);
-    //     } catch (ModelNotFoundException $e) {
-    //         return response()->json(['error' => 'Không tìm thấy Category'], 404);
-    //     }
-    // }
 
     public function index(FillterCategoryRequest $request)
     {

@@ -63,7 +63,7 @@ Route::post('refresh', [AuthController::class, 'refreshToken']);
 Route::post('pay_check', [TransactionController::class, 'webhook']);
 
 Route::prefix('shipper')->middleware(['auth', 'checkRole:qtv,admin,shipper'])->group(function () {
-    Route::get('bill', [UserController::class, 'listBill'])->middleware('auth', 'checkRole:shipper');
+    Route::get('bill', [ShipperController::class, 'listBill'])->middleware('auth', 'checkRole:shipper');
     Route::put('updateShippingStatus', [ShipperController::class, 'updateShippingStatus']);
     Route::put('retryShipping', [ShipperController::class, 'retryShipping']);
 });

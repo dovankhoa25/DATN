@@ -33,7 +33,12 @@ class StatisticController extends Controller
         $startDate = "$year-$month-01";
         $endDate = date("Y-m-t", strtotime($startDate));
 
-        $revenueData = Bill::selectRaw('DATE(order_date) as day, SUM(total_amount) as revenue')
+        $revenueData = Bill::selectRaw('
+        DATE(order_date) as day, 
+        SUM(CASE WHEN status = "completed" THEN total_amount ELSE 0 END) as revenue,
+        COUNT(CASE WHEN status = "completed" THEN 1 ELSE NULL END) as completed_bills,
+        COUNT(CASE WHEN status = "failed" THEN 1 ELSE NULL END) as failed_bills
+    ')
             ->whereBetween('order_date', [$startDate, $endDate])
             ->groupBy('day')
             ->get();
