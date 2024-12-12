@@ -85,14 +85,13 @@ class CategoryController extends Controller
     public function update(CategoryRequest $request, string $id)
     {
         try {
-            $imgUrl = null;
             $category = Category::findOrFail($id);
+            $imgUrl = $category->image;
+
             if ($request->hasFile('image')) {
-                // delete image old
-                if ($category->image != null) {
+                if ($category->image && file_exists(public_path($category->image))) {
                     unlink(public_path($category->image));
                 }
-
                 $image = $request->file('image');
                 $imageName = date('YmdHi') . '.' . $image->getClientOriginalExtension();
                 $image->move(public_path('upload/categories'), $imageName);
@@ -168,46 +167,4 @@ class CategoryController extends Controller
             return response()->json(['error' => 'Không tìm thấy Category'], 404);
         }
     }
-
-    // // Lấy category gốc bên client
-    // public function getCategoriesRoot()
-    // {
-    //     try {
-    //         $categories = Category::whereNull('parent_id')->where('status', true)->get();
-    //         return response()->json([
-    //             'data' => $categories,
-    //             'message' => 'success'
-    //         ], 200);
-    //     } catch (ModelNotFoundException $e) {
-    //         return response()->json(['error' => 'Categories rỗng'], 404);
-    //     }
-    // }
-
-    // // lấy all subcategories dựa trên 1 category cụ thể
-    // public function getSubcategories($id)
-    // {
-    //     try {
-    //         $subCategories = Category::where('parent_id', $id)->where('status', true)->get();
-    //         return response()->json([
-    //             'data' => $subCategories,
-    //             'message' => 'success'
-    //         ], 200);
-    //     } catch (ModelNotFoundException $e) {
-    //         return response()->json(['error' => 'Category này Không có subcategory nào !'], 404);
-    //     }
-    // }
-
-    // // lấy all categories cùng all subcategories
-    // public function getAllCateAndAllSubcate()
-    // {
-    //     try {
-    //         $data = Category::with('subcategories')->whereNull('parent_id')->where('status', true)->get();
-    //         return response()->json([
-    //             'data' => $data,
-    //             'message' => 'success'
-    //         ], 200);
-    //     } catch (ModelNotFoundException $e) {
-    //         return response()->json(['error' => 'Category này Không có subcategory nào !'], 404);
-    //     }
-    // }
 }
