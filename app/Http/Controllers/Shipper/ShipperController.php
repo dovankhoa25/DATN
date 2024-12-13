@@ -25,18 +25,9 @@ class ShipperController extends Controller
             $perPage = $request->input('per_page', 10);
             $status = $request->input('status');
 
-            $bills = Bill::query()
+            $bills = Bill::filter($request->all())
+                ->latest()
                 ->where('shipper_id', $user->id)
-                ->when($status, function ($query, $status) {
-                    return $query->where('status', $status);
-                })
-                ->orderByRaw("CASE 
-                WHEN status = 'pending' THEN 1 
-                WHEN status = 'confirmed' THEN 2 
-                WHEN status = 'preparing' THEN 3 
-                WHEN status = 'shipping' THEN 4     
-                WHEN status = 'completed' THEN 5 
-                ELSE 6 END")
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
 

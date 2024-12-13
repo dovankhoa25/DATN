@@ -117,7 +117,7 @@ class UserController extends Controller
     public function updateUserRoles(Request $request, User $user)
     {
         $validatedData = $request->validate([
-            'roles' => 'required|array',
+            'roles' => 'array',
             'roles.*' => 'integer|exists:roles,id',
         ]);
 
