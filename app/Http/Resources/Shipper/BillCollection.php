@@ -46,6 +46,17 @@ class BillCollection extends ResourceCollection
                     'qr_expiration' => $bill->qr_expiration,
                     'created_at' => $bill->created_at,
                     'updated_at' => $bill->updated_at,
+                    'shipping_histories' => $bill->shippingHistories->map(function ($history) {
+                        return [
+                            'id' => $history->id,
+                            'event' => $history->event,
+                            'description' => $history->description,
+                            'image_url' => $history->image_url,
+                            'admin' => $history->admin ? $history->admin->name : null,
+                            'shipper' => $history->shipper ? $history->shipper->name : null,
+                            'created_at' => $history->created_at,
+                        ];
+                    }),
                 ];
             }),
             'pagination' => [

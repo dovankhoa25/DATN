@@ -28,6 +28,7 @@ class ShipperController extends Controller
                 ->latest()
                 ->where('shiper_id', $user->id)
                 ->orderBy('created_at', 'desc')
+                ->with('shippingHistories')
                 ->paginate($perPage);
 
             return new BillCollection($bills);

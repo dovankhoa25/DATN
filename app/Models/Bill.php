@@ -65,6 +65,12 @@ class Bill extends Model
         return $this->belongsTo(User::class, 'shiper_id', 'id');
     }
 
+    public function shippingHistories()
+    {
+        return $this->hasMany(ShippingHistory::class, 'bill_id');
+    }
+
+
     public function scopeFilter($query, $filters)
     {
         if (isset($filters['ma_bill'])) {

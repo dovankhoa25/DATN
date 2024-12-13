@@ -20,4 +20,13 @@ class ShippingHistory extends Model
     {
         return $this->belongsTo(User::class, 'shipper_id');
     }
+    public function bill()
+    {
+        return $this->belongsTo(Bill::class, 'bill_id');
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
 }
