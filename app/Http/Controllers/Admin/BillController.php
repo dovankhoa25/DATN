@@ -213,6 +213,9 @@ class BillController extends Controller
                 $description ?? 'Giao hàng',
                 $image
             );
+            $bill->shiper_id = $shipper;
+            $bill->save();
+            $statusUpdated = true;
         }
 
 
