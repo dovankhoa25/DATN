@@ -30,7 +30,7 @@ class ShipperController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
 
-            return new BillCollection($bills);
+            return BillCollection::collection($bills);
         } catch (\Exception $e) {
             Log::error('Lỗi lấy danh sách hóa đơn', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Đã xảy ra lỗi.'], 500);
