@@ -141,7 +141,7 @@ class BillController extends Controller
             if (!$statusUpdated) {
                 $bill->status = $newStatus;
             }
-
+            $bill->shiper_id = $shipper;
             $bill->save();
 
             return response()->json([
@@ -213,9 +213,6 @@ class BillController extends Controller
                 $description ?? 'Giao hàng',
                 $image
             );
-            $bill->shiper_id = $shipper;
-            $bill->save();
-            $statusUpdated = true;
         }
 
 
