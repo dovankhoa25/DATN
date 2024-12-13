@@ -197,7 +197,7 @@ class BillUser extends Controller
                 ->delete();
 
             DB::commit();
-            dispatch(new CheckBillExpiration($bill->id))->delay(now()->addMinutes(1));
+            dispatch(new CheckBillExpiration($bill->id))->delay(now()->addMinutes(20));
             event(new BillCreated($bill));
 
             return response()->json([
