@@ -23,11 +23,10 @@ class ShipperController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
 
             $perPage = $request->input('per_page', 10);
-            $status = $request->input('status');
 
             $bills = Bill::filter($request->all())
                 ->latest()
-                ->where('shipper_id', $user->id)
+                ->where('shiper_id', $user->id)
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
 
