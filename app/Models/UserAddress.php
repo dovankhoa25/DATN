@@ -35,4 +35,10 @@ class UserAddress extends Model
     {
         return $this->hasMany(Bill::class, 'user_addresses_id');
     }
+
+    public function getFullAddressAttribute()
+    {
+        return "Tên : {$this->fullname}, Phone : {$this->phone}, Địa chỉ : {$this->address},
+         {$this->commune}, {$this->district}, {$this->province}, {$this->country}";
+    }
 }

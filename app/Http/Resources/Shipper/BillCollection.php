@@ -22,26 +22,27 @@ class BillCollection extends ResourceCollection
                     'total_amount' => $bill->total_amount,
                     'branch_address' => $bill->branch_address,
                     'payment' => $bill->payment ? $bill->payment->name : null,
+                    'address' => $bill->userAddress->full_address ?? null,
+                    'note' => $bill->note,
+                    'order_type' => $bill->order_type,
+                    'table_number' => $bill->table_number,
+                    'payment_status' => $bill->payment_status,
+                    'status' => $bill->status,
+                    'qr_expiration' => $bill->qr_expiration,
+                    'created_at' => $bill->created_at,
+                    'updated_at' => $bill->updated_at,
                     'vouchers' => $bill->vouchers->map(function ($voucher) {
                         return [
                             'id' => $voucher->id,
                             'name' => $voucher->name,
                         ];
                     }),
-                    'note' => $bill->note,
-                    'order_type' => $bill->order_type,
-                    'table_number' => $bill->table_number,
                     'tables' => $bill->tables->map(function ($table) {
                         return [
                             'id' => $table->id,
                             'name' => $table->name,
                         ];
                     }),
-                    'payment_status' => $bill->payment_status,
-                    'status' => $bill->status,
-                    'qr_expiration' => $bill->qr_expiration,
-                    'created_at' => $bill->created_at,
-                    'updated_at' => $bill->updated_at,
                     'shipping_histories' => $bill->shippingHistories->map(function ($history) {
                         return [
                             'id' => $history->id,
