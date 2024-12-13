@@ -38,7 +38,6 @@ class UserAddress extends Model
 
     public function getFullAddressAttribute()
     {
-        return "Tên : {$this->fullname}, Phone : {$this->phone}, Địa chỉ : {$this->address},
-         {$this->commune}, {$this->district}, {$this->province}, {$this->country}";
+        return "Tên : {$this->fullname}, Phone : {$this->phone}, Địa chỉ : {$this->address},{$this->commune}, {$this->district}, {$this->province}, {$this->country}";
     }
 }

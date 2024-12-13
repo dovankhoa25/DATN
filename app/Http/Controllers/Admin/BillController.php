@@ -576,7 +576,7 @@ class BillController extends Controller
                     'total_amount' => $bill->total_amount,
                     'order_date' => $bill->order_date,
                     'payment_method' => $bill->payment->name ?? null,
-                    'address' => $bill->userAddress->address ?? null,
+                    'address' => $bill->userAddress->full_address ?? null,
                     'customer' => $bill->user ? [
                         'name' => $bill->user->name ?? $bill->user->gmail,
                         // 'phone' => $bill->user->customer->phone_number,
