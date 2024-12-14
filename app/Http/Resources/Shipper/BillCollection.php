@@ -18,11 +18,11 @@ class BillCollection extends ResourceCollection
                     'id' => $bill->id,
                     'ma_bill' => $bill->ma_bill,
                     'khachhang' => $bill->user_id ? new UserResource($bill->user) : ($bill->customer_id ?? null),
-                    'shipper' => $bill->shipper ? [
-                        'id' => $bill->shipper->id,
-                        'name' => $bill->shipper->name,
-                        'gmail' => $bill->shipper->gmail,
-                        'phone' => $bill->shipper->customer->phone,
+                    'shipper' => $bill->shiper_id ? [
+                        'id' => $bill->shiper_id,
+                        'name' => $bill->shipper->name ?? null,
+                        'gmail' => $bill->shipper->gmail ?? null,
+                        'phone' => $bill->shipper->customer->phone ?? null,
                     ] : null,
                     'order_date' => $bill->order_date,
                     'total_amount' => $bill->total_amount,

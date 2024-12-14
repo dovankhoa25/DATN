@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\TimeOrderTableController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Client\BillOrderController;
 use App\Http\Controllers\Client\BillUser;
 use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
@@ -59,8 +60,15 @@ Route::post('login', [AuthController::class, 'login'])->name('api.login');
 Route::get('user', [AuthController::class, 'getUser'])->middleware('auth');
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth');
 
+
+Route::post('/forgot-password', [ResetPasswordController::class, 'sendResetLink']);
+Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
+
+
 Route::post('refresh', [AuthController::class, 'refreshToken']);
 Route::post('pay_check', [TransactionController::class, 'webhook']);
+
+
 
 Route::prefix('shipper')->middleware(['auth', 'checkRole:qtv,admin,shipper'])->group(function () {
     Route::get('bill', [ShipperController::class, 'listBill'])->middleware('auth', 'checkRole:shipper,admin,qtv');
