@@ -142,8 +142,8 @@ class BillUser extends Controller
                 return response()->json(['error' => 'Phương thức thanh toán không hợp lệ.'], 400);
             }
 
-            $paymentStatus = ($payment->name == 'ATM') ? 'pending' : 'paid';
-            $qrExpiration = ($payment->name === 'ATM') ? now()->addMinutes(1) : null;
+            $paymentStatus = ($payment->id == 2) ? 'pending' : 'paid';
+            $qrExpiration = ($payment->id === 2) ? now()->addMinutes(20) : null;
 
             $bill = Bill::create([
                 'ma_bill' => $this->randomMaBill(),
