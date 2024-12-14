@@ -24,11 +24,24 @@ class ShipperController extends Controller
 
             $perPage = $request->input('per_page', 10);
 
-            $bills = Bill::filter($request->all())
+            // $bills = Bill::filter($request->all())
+            //     ->latest()
+            //     ->where('shiper_id', $user->id)
+            //     ->orderBy('created_at', 'desc')
+            //     // ->with(['shippingHistories.admin', 'shippingHistories.shipper', 'shipper.customer'])
+            //     ->with([
+            //         'shippingHistories.admin',
+            //         'shippingHistories.shipper',
+            //         'shipper.customer',
+            //         'userAddress',
+            //         'vouchers',
+            //         'tables',
+            //     ])
+            //     ->paginate($perPage);
+
+            $query = Bill::filter($request->all())
                 ->latest()
-                ->where('shiper_id', $user->id)
                 ->orderBy('created_at', 'desc')
-                // ->with(['shippingHistories.admin', 'shippingHistories.shipper', 'shipper.customer'])
                 ->with([
                     'shippingHistories.admin',
                     'shippingHistories.shipper',
@@ -36,8 +49,11 @@ class ShipperController extends Controller
                     'userAddress',
                     'vouchers',
                     'tables',
-                ])
-                ->paginate($perPage);
+                ]);
+            if ($user->roles->contains('name', 'shipper')) {
+                $query->where('shiper_id', $user->id);
+            }
+            $bills = $query->paginate($perPage);
 
             return new BillCollection($bills);
         } catch (\Exception $e) {
