@@ -56,7 +56,7 @@ class ShipperController extends Controller
             $request->validate([
                 'status' => 'required|in:shipping_started,pending_retry,delivered,delivery_failed',
                 'description' => 'nullable|string',
-                'image_url' => 'nullable|url',
+                'image_url' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
             $bill = Bill::findOrFail($id);
