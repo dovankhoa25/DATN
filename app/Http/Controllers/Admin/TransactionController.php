@@ -46,7 +46,8 @@ class TransactionController extends Controller
             $bill = Bill::find($billId);
 
             if ($bill) {
-                if ($bill->total_amount <= $request['transferAmount']) {
+                // if ($bill->total_amount <= $request['transferAmount']) {
+                if ($bill->total_amount != $request['transferAmount']) {
                     $bill->payment_status = 'successful';
                     $bill->save();
                 }

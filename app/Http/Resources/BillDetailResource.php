@@ -23,6 +23,7 @@ class BillDetailResource extends JsonResource
             'size' => $this->productDetail->size->name,
             'quantity' => $this->quantity,
             'price' => $this->price,
+            'status' => $this->status,
             'total' => $this->price * $this->quantity,
 
         ];

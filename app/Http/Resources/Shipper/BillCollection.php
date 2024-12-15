@@ -21,8 +21,8 @@ class BillCollection extends ResourceCollection
                     'shipper' => $bill->shiper_id ? [
                         'id' => $bill->shiper_id,
                         'name' => $bill->shipper->name ?? null,
-                        'gmail' => $bill->shipper->gmail ?? null,
-                        'phone' => $bill->shipper->customer->phone ?? null,
+                        'gmail' => $bill->shipper->email ?? null,
+                        'phone' => $bill->shipper->customer->phone_number ?? null,
                     ] : null,
                     'order_date' => $bill->order_date,
                     'total_amount' => $bill->total_amount,
