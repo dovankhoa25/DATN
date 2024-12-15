@@ -14,7 +14,7 @@ class TransactionController extends Controller
     public function webhook(TransactionRequest $request)
     {
         $apiKey = $request->header('Authorization');
-        $expectedApiKey = 'Apikey ' . config('sepay.api_key');
+        $expectedApiKey = 'Apikey 0t48fjgfh4wg3gewg5tg5rg5y5rgy';
 
         Log::info('API Key from request: ' . $apiKey);
         Log::info('Expected API Key: ' . $expectedApiKey);
