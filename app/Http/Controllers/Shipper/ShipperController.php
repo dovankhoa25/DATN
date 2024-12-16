@@ -87,13 +87,13 @@ class ShipperController extends Controller
                 return response()->json(['error' => 'Không thể thay đổi trạng thái khi đơn hàng đã hoàn thành hoặc thất bại'], 400);
             }
 
-            ShippingHistory::create([
-                'bill_id' => $bill->id,
-                'user_id' => $user->id,
-                'event' => $status,
-                'description' => $request->input('description') ?? null,
-                'image_url' => $request->input('image_url') ?  $this->storeImage($request->file('image_url'), 'shipping') : null,
-            ]);
+            // ShippingHistory::create([
+            //     'bill_id' => $bill->id,
+            //     'user_id' => $user->id,
+            //     'event' => $status,
+            //     'description' => $request->input('description') ?? null,
+            //     'image_url' => $request->input('image_url') ?  $this->storeImage($request->file('image_url'), 'shipping') : null,
+            // ]);
 
             if ($bill->status == 'shipping') {
                 if ($status == 'delivered') {

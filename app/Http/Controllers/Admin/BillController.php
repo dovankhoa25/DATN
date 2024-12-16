@@ -244,7 +244,7 @@ class BillController extends Controller
                     $userId,
                     $shipper,
                     'delivered',
-                    'Admin xác nhận đơn hàng Lí do : ' . ($description ?? 'Không có lý do'),
+                    'Admin xác nhận đơn hàng Lí do : ' . ($description ?? 'Không có'),
                     $image
                 );
                 $bill->status = 'completed';
@@ -261,7 +261,7 @@ class BillController extends Controller
                     $userId,
                     $shipper,
                     'delivered',
-                    'Admin xác nhận hủy đơn hàng Lí do : ' . ($description ?? 'Không có lý do'),
+                    'Admin xác nhận hủy đơn hàng Lí do : ' . ($description ?? 'Không có'),
                     $image
                 );
             }
