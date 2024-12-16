@@ -17,9 +17,14 @@ return new class extends Migration
             $table->foreignId('product_detail_id')->constrained('product_details');
             $table->integer('quantity');
             $table->decimal('price', 10, 2);
+            $table->enum('status', [
+                'pending',
+                'confirmed',
+                'completed',
+                'cancelled',
+            ])->default('completed');
             $table->timestamps();
         });
-        
     }
 
     /**

@@ -409,8 +409,11 @@ class BillController extends Controller
             $totalAmount = 0;
 
             foreach ($details as $detail) {
-                if ($detail->status === 0) {
-                    $detail->status = 1;
+                if ($detail->status == 'pending') {
+                    $detail->status = 'confirmed';
+                    $detail->save();
+                } elseif ($detail->status == 'confirmed') {
+                    $detail->status = 'completed';
                     $detail->save();
 
                     $totalAmount += $detail->price * $detail->quantity;
