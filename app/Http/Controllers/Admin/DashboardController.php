@@ -79,29 +79,58 @@ class DashboardController extends Controller
 
     private function getGuestStatistics($startDate = null, $endDate = null)
     {
-        $query = Table::query();
+        $query = Table::query()
+            ->join('bill_table', 'tables.id', '=', 'bill_table.table_id')
+            ->join('bills', 'bill_table.bill_id', '=', 'bills.id')
+            ->where('bills.order_type', 'in_restaurant')
+            ->where('bills.status', 'completed');
 
         if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $query->whereBetween('bills.created_at', [$startDate, $endDate]);
         }
 
         return [
-            'min_guest' => $query->sum('min_guest'),
-            'max_guest' => $query->sum('max_guest'),
+            'min_guest' => $query->sum('tables.min_guest'),
+            'max_guest' => $query->sum('tables.max_guest'),
         ];
     }
 
+
+
     private function getTotalStatistics()
     {
+        $totalBills = Bill::count();
+        $totalRevenue = Bill::sum('total_amount');
+
+        $completedBills = Bill::where('status', 'completed')->count();
+        $completedRevenue = Bill::where('status', 'completed')->sum('total_amount');
+
+        $failedBills = Bill::where('status', 'failed')->count();
+        $failedRevenue = Bill::where('status', 'failed')->sum('total_amount');
+
         return [
             'users' => User::count(),
             'products' => Product::count(),
             'orders' => TimeOrderTable::count(),
             'tables' => Table::count(),
-            'bills' => Bill::count(),
+            'bills' => [
+                'total' => [
+                    'count' => $totalBills,
+                    'revenue' => $totalRevenue,
+                ],
+                'completed' => [
+                    'count' => $completedBills,
+                    'revenue' => $completedRevenue,
+                ],
+                'failed' => [
+                    'count' => $failedBills,
+                    'revenue' => $failedRevenue,
+                ],
+            ],
             'guests' => $this->getGuestStatistics(),
         ];
     }
+
 
     private function getFilteredStatistics($startDate, $endDate)
     {
@@ -110,10 +139,44 @@ class DashboardController extends Controller
             'products' => $this->getStatistics(Product::class, $startDate, $endDate),
             'orders' => $this->getStatistics(TimeOrderTable::class, $startDate, $endDate),
             'tables' => $this->getStatistics(Table::class, $startDate, $endDate),
-            'bills' => $this->getStatistics(Bill::class, $startDate, $endDate),
+            'bills' => $this->getBillStatistics(Bill::class, $startDate, $endDate),
             'guests' => $this->getGuestStatistics($startDate, $endDate),
         ];
     }
+
+    private function getBillStatistics($startDate = null, $endDate = null)
+    {
+        $query = Bill::query();
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        $totalBills = $query->count();
+
+        $totalRevenue = $query->sum('total_amount');
+
+        $completedBills = $query->where('status', 'completed')->count();
+        $completedRevenue = $query->where('status', 'completed')->sum('total_amount');
+
+        $failedBills = $query->where('status', 'failed')->count();
+        $failedRevenue = $query->where('status', 'failed')->sum('total_amount');
+
+        return [
+            'total_bills' => $totalBills,
+            'total_revenue' => $totalRevenue,
+            'completed_bills' => [
+                'count' => $completedBills,
+                'revenue' => $completedRevenue,
+            ],
+            'failed_bills' => [
+                'count' => $failedBills,
+                'revenue' => $failedRevenue,
+            ],
+        ];
+    }
+
+
 
     private function getStatisticsByRange($dateRange)
     {
@@ -122,7 +185,7 @@ class DashboardController extends Controller
             'products' => $this->getStatistics(Product::class, $dateRange['start'], $dateRange['end']),
             'orders' => $this->getStatistics(TimeOrderTable::class, $dateRange['start'], $dateRange['end']),
             'tables' => $this->getStatistics(Table::class, $dateRange['start'], $dateRange['end']),
-            'bills' => $this->getStatistics(Bill::class, $dateRange['start'], $dateRange['end']),
+            'bills' => $this->getBillStatistics($dateRange['start'], $dateRange['end']),
             'guests' => $this->getGuestStatistics($dateRange['start'], $dateRange['end']),
         ];
     }
