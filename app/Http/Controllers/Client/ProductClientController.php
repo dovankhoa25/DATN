@@ -23,21 +23,13 @@ class ProductClientController extends Controller
         $paginatedProducts = Product::filter($request->all())
             ->paginate($perPage);
 
-        $productIds = $paginatedProducts->pluck('id');
-
-        $products = $productIds->map(function ($id) {
-            return Cache::remember('product:' . $id, 600, function () use ($id) {
-                return Product::getProductWithDetails($id);
+        $formattedProducts = $paginatedProducts->getCollection()->map(function ($product) {
+            return Cache::remember('product:' . $product->id, 600, function () use ($product) {
+                return Product::getProductWithDetails($product->id);
             });
         });
 
-        if ($products->isEmpty()) {
-            return response()->json([
-                'message' => 'Không có sản phẩm nào',
-            ], 404);
-        }
-
-        $formattedProducts = $products->map(function ($product) {
+        $formattedProducts = $formattedProducts->map(function ($product) {
             $minPrice = $product->productDetails->min('price');
             $maxPrice = $product->productDetails->max('price');
 
@@ -45,10 +37,6 @@ class ProductClientController extends Controller
                 'id' => $product->id,
                 'name' => $product->name,
                 'description' => $product->description,
-                // 'category' => [
-                //     'id' => $product->category->id,
-                //     'name' => $product->category->name,
-                // ],
                 'categories' => $product->categories->map(function ($category) {
                     return [
                         'id' => $category->id,
@@ -62,6 +50,12 @@ class ProductClientController extends Controller
             ];
         });
 
+        if ($formattedProducts->isEmpty()) {
+            return response()->json([
+                'message' => 'Không có sản phẩm nào',
+            ], 404);
+        }
+
         return response()->json([
             'data' => $formattedProducts,
             'current_page' => $paginatedProducts->currentPage(),
@@ -72,33 +66,28 @@ class ProductClientController extends Controller
     }
 
 
+
     public function getProductAllWithDetail(FilterProductRequest $request)
     {
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
 
-        $productIds = Product::filter($request->all())
-            ->paginate($perPage)
-            ->pluck('id');
+        $products = Product::filter($request->all())
+            ->paginate($perPage);
 
-        $products = $productIds->map(function ($id) {
-            return Cache::remember('product:' . $id, 600, function () use ($id) {
-                return Product::getProductWithDetails($id);
+        $formattedProducts = $products->getCollection()->map(function ($product) {
+            return Cache::remember('product:' . $product->id, 600, function () use ($product) {
+                return Product::getProductWithDetails($product->id);
             });
         });
 
-        $formattedProducts = $products->map(function ($product) {
+        $formattedProducts = $formattedProducts->map(function ($product) {
             return [
                 'id' => $product->id,
                 'name' => $product->name,
                 'thumbnail' => $product->thumbnail,
                 'description' => $product->description,
                 'status' => $product->status,
-                // 'category' => [
-                //     'id' => $product->category->id,
-                //     'name' => $product->category->name,
-                //     'image' => $product->category->image
-                // ],
                 'categories' => $product->categories->map(function ($category) {
                     return [
                         'id' => $category->id,
@@ -129,21 +118,21 @@ class ProductClientController extends Controller
 
         return response()->json([
             'data' => $formattedProducts,
-            'total' => $productIds->count(),
+            'total' => $products->total(),
             'per_page' => $perPage,
-            'current_page' => $page,
-            'last_page' => ceil($productIds->count() / $perPage),
+            'current_page' => $products->currentPage(),
+            'last_page' => $products->lastPage(),
         ], 200);
     }
 
 
+
     public function getProductWithDetailByID(int $id)
     {
-        // $product = Product::with(['productDetails.size', 'productDetails.images', 'category'])
-        //     ->find($id);
         $product = Cache::remember('product:' . $id, 600, function () use ($id) {
             return Product::getProductWithDetails($id);
         });
+
         if ($product) {
             $data = [
                 'id' => $product->id,
@@ -151,11 +140,7 @@ class ProductClientController extends Controller
                 'thumbnail' => $product->thumbnail,
                 'status' => $product->status,
                 'description' => $product->description,
-                // 'category' => [
-                //     'id' => $product->category->id,
-                //     'name' => $product->category->name,
-                //     'image' => $product->category->image,
-                // ],
+
                 'categories' => $product->categories->map(function ($category) {
                     return [
                         'id' => $category->id,
@@ -194,16 +179,11 @@ class ProductClientController extends Controller
         }
     }
 
-
-
-
     public function getProductByCate(FilterProductRequest $request, int $id)
     {
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
 
-        // $paginatedProducts = Product::filter($request->all())->where('category_id', '=', $id)
-        //     ->paginate($perPage);
         $paginatedProducts = Product::filter($request->all())
             ->whereHas('categories', function ($query) use ($id) {
                 $query->where('categories.id', '=', $id);
@@ -223,7 +203,6 @@ class ProductClientController extends Controller
                 'message' => 'Không có sản phẩm nào',
             ], 404);
         }
-
 
         $data = $products->map(function ($product) {
             return [
