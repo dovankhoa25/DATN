@@ -151,9 +151,28 @@ class VoucherController extends Controller
             ], 404);
         }
 
-        $vouchersWithoutCustomer = $allVouchers->filter(function ($voucher) {
-            return is_null($voucher->customer_id);
+        // $vouchersWithoutCustomer = $allVouchers->filter(function ($voucher) {
+        //     return is_null($voucher->customer_id);
+        // });
+
+        // $usedVoucherIds = DB::table('bill_vouchers')
+        //     ->join('bills', 'bill_vouchers.bill_id', '=', 'bills.id')
+        //     ->where('bills.user_id', $user->id)
+        //     ->pluck('bill_vouchers.voucher_id')
+        //     ->toArray();
+        $usedVoucherIds = DB::table('bill_vouchers')
+            ->join('bills', 'bill_vouchers.bill_id', '=', 'bills.id')
+            ->where(function ($query) use ($user, $customer) {
+                $query->where('bills.user_id', $user->id)
+                    ->orWhere('bills.customer_id', $customer->id);
+            })
+            ->pluck('bill_vouchers.voucher_id')
+            ->toArray();
+
+        $vouchersWithoutCustomer = $allVouchers->filter(function ($voucher) use ($usedVoucherIds) {
+            return is_null($voucher->customer_id) && !in_array($voucher->id, $usedVoucherIds);
         });
+
 
         $vouchersForCustomer = $allVouchers->filter(function ($voucher) use ($customer) {
             return $voucher->customer_id == $customer->id;

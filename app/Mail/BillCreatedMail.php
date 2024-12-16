@@ -24,11 +24,11 @@ class BillCreatedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Bill Created Mail',
+            subject: 'Đơn Hàng của bạn đã được tạo',
         );
     }
 
- 
+
     public function content(): Content
     {
         return new Content(
