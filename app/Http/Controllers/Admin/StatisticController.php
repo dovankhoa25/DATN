@@ -17,7 +17,7 @@ class StatisticController extends Controller
     public function index(StatisticRequest $request)
     {
         $year = $request->year ?? now()->year;
-        $month = $request->month ?? now()->month;
+        $month = $request->month;
 
         $quarter = $request->quarter;
 
@@ -51,6 +51,8 @@ class StatisticController extends Controller
                 'revenue' => "0",
                 'completed_bills' => 0,
                 'failed_bills' => 0,
+                'revenue_online' => "0",
+                'revenue_in_restaurant' => "0",
             ];
         }
 
@@ -58,7 +60,10 @@ class StatisticController extends Controller
         DATE(order_date) as day, 
         SUM(CASE WHEN status = "completed" THEN total_amount ELSE 0 END) as revenue,
         COUNT(CASE WHEN status = "completed" THEN 1 ELSE NULL END) as completed_bills,
-        COUNT(CASE WHEN status = "failed" THEN 1 ELSE NULL END) as failed_bills')
+        COUNT(CASE WHEN status = "failed" THEN 1 ELSE NULL END) as failed_bills,
+        SUM(CASE WHEN status = "completed" AND order_type = "online" THEN total_amount ELSE 0 END) as revenue_online,
+        SUM(CASE WHEN status = "completed" AND order_type = "in_restaurant" THEN total_amount ELSE 0 END) as revenue_in_restaurant
+    ')
             ->whereBetween('order_date', [$startDate, $endDate])
             ->groupBy('day')
             ->get()
@@ -66,7 +71,11 @@ class StatisticController extends Controller
 
         foreach ($allDays as $day => &$data) {
             if (isset($revenueData[$day])) {
-                $data = array_merge($data, $revenueData[$day]->toArray());
+                $data['revenue'] = $revenueData[$day]->revenue ?? "0";
+                $data['completed_bills'] = $revenueData[$day]->completed_bills ?? 0;
+                $data['failed_bills'] = $revenueData[$day]->failed_bills ?? 0;
+                $data['revenue_online'] = $revenueData[$day]->revenue_online ?? "0";
+                $data['revenue_in_restaurant'] = $revenueData[$day]->revenue_in_restaurant ?? "0";
             }
         }
 
@@ -106,6 +115,7 @@ class StatisticController extends Controller
         ];
     }
 
+
     private function getMonthlyStatistics($year)
     {
         $allMonths = [];
@@ -115,12 +125,16 @@ class StatisticController extends Controller
                 'revenue' => 0,
                 'completed_bills' => 0,
                 'failed_bills' => 0,
+                'revenue_online' => 0,
+                'revenue_in_restaurant' => 0,
             ];
         }
 
         $billData = Bill::selectRaw(
             'MONTH(order_date) as month, 
         SUM(total_amount) as revenue, 
+        SUM(CASE WHEN status = "completed" AND order_type = "online" THEN total_amount ELSE 0 END) as revenue_online, 
+        SUM(CASE WHEN status = "completed" AND order_type = "in_restaurant" THEN total_amount ELSE 0 END) as revenue_in_restaurant, 
         COUNT(CASE WHEN status = "completed" THEN 1 END) as completed_bills, 
         COUNT(CASE WHEN status = "failed" THEN 1 END) as failed_bills'
         )
@@ -134,6 +148,8 @@ class StatisticController extends Controller
                 $data['revenue'] = $billData[$month]->revenue ?? 0;
                 $data['completed_bills'] = $billData[$month]->completed_bills ?? 0;
                 $data['failed_bills'] = $billData[$month]->failed_bills ?? 0;
+                $data['revenue_online'] = $billData[$month]->revenue_online ?? 0;
+                $data['revenue_in_restaurant'] = $billData[$month]->revenue_in_restaurant ?? 0;
             }
         }
 
@@ -184,6 +200,7 @@ class StatisticController extends Controller
             'new_customers' => array_values($customerMonths),
         ];
     }
+
 
 
 
