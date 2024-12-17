@@ -16,8 +16,9 @@ class StatisticController extends Controller
 {
     public function index(StatisticRequest $request)
     {
-        $year = $request->year ?? 2024;
-        $month = $request->month;
+        $year = $request->year ?? now()->year;
+        $month = $request->month ?? now()->month;
+
         $quarter = $request->quarter;
 
         if ($month) {
@@ -105,24 +106,44 @@ class StatisticController extends Controller
         ];
     }
 
-
     private function getMonthlyStatistics($year)
     {
         $allMonths = [];
         for ($month = 1; $month <= 12; $month++) {
             $allMonths[$month] = [
-                'month' => $month,
+                'month' => sprintf("%04d-%02d", $year, $month),
                 'revenue' => 0,
-                'new_users' => 0,
-                'new_customers' => 0,
+                'completed_bills' => 0,
+                'failed_bills' => 0,
             ];
         }
 
-        $revenueData = Bill::selectRaw('MONTH(order_date) as month, SUM(total_amount) as revenue')
+        $billData = Bill::selectRaw(
+            'MONTH(order_date) as month, 
+        SUM(total_amount) as revenue, 
+        COUNT(CASE WHEN status = "completed" THEN 1 END) as completed_bills, 
+        COUNT(CASE WHEN status = "failed" THEN 1 END) as failed_bills'
+        )
             ->whereYear('order_date', $year)
             ->groupBy('month')
             ->get()
             ->keyBy('month');
+
+        foreach ($allMonths as $month => &$data) {
+            if (isset($billData[$month])) {
+                $data['revenue'] = $billData[$month]->revenue ?? 0;
+                $data['completed_bills'] = $billData[$month]->completed_bills ?? 0;
+                $data['failed_bills'] = $billData[$month]->failed_bills ?? 0;
+            }
+        }
+
+        $userMonths = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $userMonths[$month] = [
+                'month' => $month,
+                'new_users' => 0
+            ];
+        }
 
         $userData = User::selectRaw('MONTH(created_at) as month, COUNT(*) as new_users')
             ->whereYear('created_at', $year)
@@ -130,31 +151,41 @@ class StatisticController extends Controller
             ->get()
             ->keyBy('month');
 
+        foreach ($userMonths as $month => &$data) {
+            if (isset($userData[$month])) {
+                $data['new_users'] = $userData[$month]->new_users ?? 0;
+            }
+        }
+
+        $customerMonths = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $customerMonths[$month] = [
+                'month' => $month,
+                'new_customers' => 0
+            ];
+        }
+
         $customerData = Customer::selectRaw('MONTH(created_at) as month, COUNT(*) as new_customers')
             ->whereYear('created_at', $year)
             ->groupBy('month')
             ->get()
             ->keyBy('month');
 
-        foreach ($allMonths as $month => &$data) {
-            if (isset($revenueData[$month])) {
-                $data['revenue'] = $revenueData[$month]->revenue;
-            }
-            if (isset($userData[$month])) {
-                $data['new_users'] = $userData[$month]->new_users;
-            }
+        foreach ($customerMonths as $month => &$data) {
             if (isset($customerData[$month])) {
-                $data['new_customers'] = $customerData[$month]->new_customers;
+                $data['new_customers'] = $customerData[$month]->new_customers ?? 0;
             }
         }
 
         return [
             'type' => 'monthly',
             'revenue' => array_values($allMonths),
-            'new_users' => array_map(fn($monthData) => ['month' => $monthData['month'], 'new_users' => $monthData['new_users']], $allMonths),
-            'new_customers' => array_map(fn($monthData) => ['month' => $monthData['month'], 'new_customers' => $monthData['new_customers']], $allMonths),
+            'new_users' => array_values($userMonths),
+            'new_customers' => array_values($customerMonths),
         ];
     }
+
+
 
 
     private function getQuarterlyStatistics($year, $quarter)

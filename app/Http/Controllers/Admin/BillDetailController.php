@@ -34,15 +34,15 @@ class BillDetailController extends Controller
     public function show(string $id)
     {
         try {
-           
+
             $billDetails = BillDetail::with(['productDetail.product'])
                 ->where('bill_id', $id)
                 ->get();
-            
+
             if ($billDetails->isEmpty()) {
                 return response()->json(['error' => 'Chi tiết hóa đơn không tồn tại'], 404);
             }
-    
+
             return response()->json([
                 'data' => BillDetailResource::collection($billDetails),
             ], 200);
@@ -50,6 +50,4 @@ class BillDetailController extends Controller
             return response()->json(['error' => 'Chi tiết hóa đơn không tồn tại'], 404);
         }
     }
-    
-    
 }

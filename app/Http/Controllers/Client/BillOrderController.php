@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Events\ItemAddedToBill;
+use App\Events\ItemCancelledFromBill;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\Client\BillOderRequest;
 use App\Http\Requests\Bill\Client\ItemBillRequest;
@@ -88,6 +89,52 @@ class BillOrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Các sản phẩm đã được thêm vào hóa đơn thành công.',
+        ]);
+    }
+
+    public function cancelItem(Request $request)
+    {
+
+        $request->validate([
+            'ma_bill' => 'required|string|exists:bills,ma_bill',
+            'id_bill_details' => 'array|required|exists:bill_details,id',
+        ]);
+
+        $bill = Bill::where('ma_bill', $request->ma_bill)
+            ->where('order_type', 'in_restaurant')
+            ->where('status', 'pending')
+            ->first();
+
+        if (!$bill) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bill không tồn tại hoặc đã được thanh toán.',
+            ], 404);
+        }
+
+        $billDetails = BillDetail::where('bill_id', $bill->id)
+            ->where('status', 'pending')
+            ->whereIn('id', $request->id_bill_details)
+            ->get();
+
+        if ($billDetails->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có sản phẩm nào có thể hủy trong hóa đơn.',
+            ], 404);
+        }
+
+        BillDetail::whereIn('id', $billDetails->pluck('id'))
+            ->update(['status' => 'cancelled', 'updated_at' => now()]);
+
+        broadcast(new ItemCancelledFromBill([
+            'bill_id' => $bill->id,
+            'cancelled_items' => $billDetails->pluck('id'),
+        ]));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Các sản phẩm đã được hủy thành công.',
         ]);
     }
 

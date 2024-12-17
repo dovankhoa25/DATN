@@ -231,6 +231,7 @@ Route::prefix('client')->group(function () {
 
     // order + bill order
     Route::post('oder_item', [BillOrderController::class, 'addItem']);
+    Route::post('oder_item/cancelItem', [BillOrderController::class, 'cancelItem']);
 
     Route::post('bill_online', [BillOrderController::class, 'getBillOnline']);
     Route::put('pay_bill', [BillOrderController::class, 'saveBill']);
