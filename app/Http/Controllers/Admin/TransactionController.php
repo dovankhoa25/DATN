@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Transaction\TransactionRequest;
+use App\Http\Requests\TransactionHistoryRequest;
+use App\Http\Resources\TransactionHistoryResource;
 use App\Models\Bill;
 use App\Models\TransactionHistory;
 use Illuminate\Http\Request;
@@ -11,6 +13,19 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
+
+
+    public function index(TransactionHistoryRequest $request)
+    {
+        $perPage = $request->get('per_page', 10);
+
+        $list = TransactionHistory::filter($request)
+            ->latest()
+            ->paginate($perPage);
+        return TransactionHistoryResource::collection($list);
+    }
+
+
     public function webhook(TransactionRequest $request)
     {
         $apiKey = $request->header('Authorization');

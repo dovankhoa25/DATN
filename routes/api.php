@@ -81,17 +81,17 @@ Route::prefix('shipper')->middleware(['auth', 'checkRole:qtv,admin,shipper'])->g
 Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(function () {
 
     //dash
-    Route::get('dashboard', [DashboardController::class, 'index'])->middleware('auth', 'checkRole:qtv,admin');
-    Route::get('dashboardfull', [StatisticController::class, 'index'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::get('dashboard', [DashboardController::class, 'index'])->middleware('checkRole:admin');
+    Route::get('dashboardfull', [StatisticController::class, 'index'])->middleware('checkRole:admin');
 
 
     // users
-    Route::apiResource('users', UserController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('users', UserController::class)->middleware('checkRole:qtv,admin');
 
-    Route::apiResource('roles', RoleController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::get('/user/{user}/roles', [UserController::class, 'getUserRoles'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('roles', RoleController::class)->middleware('checkRole:qtv,admin');
+    Route::get('/user/{user}/roles', [UserController::class, 'getUserRoles'])->middleware('checkRole:qtv,admin');
     Route::put('/user/{user}/roles', [UserController::class, 'updateUserRoles'])->middleware('checkRole:admin');
-    Route::put('/user/{user}/locked', [UserController::class, 'is_locked'])->middleware('checkRole:admin');
+    Route::put('/user/{user}/locked', [UserController::class, 'is_locked'])->middleware('checkRole:qtv,admin');
 
 
 
@@ -100,61 +100,63 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(f
     // Route::apiResource('sub_category', SubcategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
 
     // customer
-    Route::apiResource('customers', CustomerController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('customers', CustomerController::class)->middleware('checkRole:qtv,admin,customer');
     // voucher
-    Route::apiResource('vouchers', VoucherController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('vouchers', VoucherController::class)->middleware('checkRole:qtv,admin,voucher');
 
     // sizes
-    Route::apiResource('sizes', SizeController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::put('size_status/{id}', [SizeController::class, 'statusSize'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('sizes', SizeController::class)->middleware('checkRole:qtv,admin,size');
+    Route::put('size_status/{id}', [SizeController::class, 'statusSize'])->middleware('checkRole:qtv,admin,size');
 
     // payments
-    Route::apiResource('payments', PaymentController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('payments', PaymentController::class)->middleware('checkRole:qtv,admin,payment');
 
 
     //cart
-    Route::apiResource('carts', CartController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('carts', CartController::class)->middleware('checkRole:qtv,admin,ctv');
 
 
-    Route::apiResource('products', ProductController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::put('product/{id}/status', [ProductController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
-    Route::post('products/{id}', [ProductController::class, 'update']);
+    Route::apiResource('products', ProductController::class)->middleware('checkRole:qtv,admin,product');
+    Route::put('product/{id}/status', [ProductController::class, 'updateStatus'])->middleware('checkRole:qtv,admin,product');
+    Route::post('products/{id}', [ProductController::class, 'update'])->middleware('checkRole:qtv,admin,product');
 
     // Bills
-    Route::apiResource('bills', BillController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::get('/bill_table/{table_number}', [BillController::class, 'getBillByTableNumber']);
-    Route::put('/acive_item', [BillController::class, 'activeItems']);
-    Route::get('shipping/{id}', [BillController::class, 'showShippingHistory'])->middleware('auth');
+    Route::apiResource('bills', BillController::class)->middleware('checkRole:qtv,admin,bill');
+    Route::get('/bill_table/{table_number}', [BillController::class, 'getBillByTableNumber'])->middleware('checkRole:qtv,admin,bill');
+    Route::put('/acive_item', [BillController::class, 'activeItems'])->middleware('checkRole:qtv,admin,bill');
+    Route::get('shipping/{id}', [BillController::class, 'showShippingHistory'])->middleware('checkRole:qtv,admin,bill');
 
 
     //Bill detail
-    Route::apiResource('billsDetail', BillDetailController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::put('/addtablefrombill', [BillController::class, 'addTableGroupToBill']);
-    Route::put('/remotablefrombill', [BillController::class, 'removedTableFromBill']);
+    Route::apiResource('billsDetail', BillDetailController::class)->middleware('checkRole:qtv,admin,bill');
+    Route::put('/addtablefrombill', [BillController::class, 'addTableGroupToBill'])->middleware('checkRole:qtv,admin,bill');
+    Route::put('/remotablefrombill', [BillController::class, 'removedTableFromBill'])->middleware('checkRole:qtv,admin,bill');
 
 
     // tables
-    Route::apiResource('tables', TablesController::class)->middleware('auth', 'checkRole:qtv,admin');
-    Route::put('table/{id}/status', [TablesController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('tables', TablesController::class)->middleware('checkRole:qtv,admin,table');
+    Route::put('table/{id}/status', [TablesController::class, 'updateStatus'])->middleware('checkRole:qtv,admin,table');
 
 
     // timeOrderTable
-    Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('time_order_table', TimeOrderTableController::class)->middleware('checkRole:qtv,admin');
 
 
     // category admin
-    Route::apiResource('category', AdminCategoryController::class)->middleware('auth', 'checkRole:qtv,admin');
+    Route::apiResource('category', AdminCategoryController::class)->middleware('checkRole:qtv,admin,categories');
 
     // update status category
-    Route::post('category/update/{id}/status', [AdminCategoryController::class, 'updateStatus'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::post('category/update/{id}/status', [AdminCategoryController::class, 'updateStatus'])->middleware('checkRole:qtv,admin,categories');
 
     // all list categories
-    Route::get('list/category', [AdminCategoryController::class, 'listCategories'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::get('list/category', [AdminCategoryController::class, 'listCategories'])->middleware('checkRole:qtv,admin,categories');
 
     // api key client
-    Route::get('api_key', [ClientKeyController::class, 'index'])->middleware('auth', 'checkRole:qtv,admin');
-    Route::post('api_key', [ClientKeyController::class, 'store'])->middleware('auth', 'checkRole:admin');
-    Route::put('api_key_status/{id}', [ClientKeyController::class, 'statusKey'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::get('api_key', [ClientKeyController::class, 'index'])->middleware('checkRole:qtv,admin,ctv');
+    Route::post('api_key', [ClientKeyController::class, 'store'])->middleware('checkRole:qtv,admin,ctv');
+    Route::put('api_key_status/{id}', [ClientKeyController::class, 'statusKey'])->middleware('checkRole:qtv,admin,ctv');
+
+    Route::get('gettransaction', [TransactionController::class, 'index'])->middleware('checkRole:admin');
 });
 
 // ->middleware('check.api.key')
@@ -168,7 +170,7 @@ Route::prefix('client')->group(function () {
 
 
     // Đổi voucher cho customer
-    Route::post('/change_voucher', [ClientVoucherController::class, 'changeVoucher']);
+    Route::post('/change_voucher', [ClientVoucherController::class, 'changeVoucher'])->middleware('auth');
     // vouchers của customer
     Route::get('/vouchers_customer', [ClientVoucherController::class, 'vouchersCustomer'])->middleware('auth');
     Route::get('/vouchers_yagi', [ClientVoucherController::class, 'voucherYagi'])->middleware('auth');
@@ -205,11 +207,11 @@ Route::prefix('client')->group(function () {
 
 
     Route::get('list_tables', [TableController::class, 'getAllTables']);
-    Route::post('open_table', [TableController::class, 'openTable'])->middleware('auth', 'checkRole:qtv,admin');
+    Route::post('open_table', [TableController::class, 'openTable'])->middleware('auth', 'checkRole:qtv,admin,ctv');
     Route::post('open_tables', [TableController::class, 'openTables'])->middleware('auth', 'checkRole:qtv,admin,ctv');
 
 
-    Route::get('list_payments', [ClientPaymentController::class, 'listPaymentTrue']);
+    Route::get('list_payments', [ClientPaymentController::class, 'listPaymentTrue'])->middleware('auth');
 
 
     Route::prefix('profile')->middleware('auth')->group(function () {
@@ -226,13 +228,13 @@ Route::prefix('client')->group(function () {
     Route::post('bill_store', [BillUser::class, 'store'])->middleware('auth');
     Route::put('bills/{id}/cancel', [BillUser::class, 'requestCancelBill'])->middleware('auth');
     Route::get('billdetail/{id}', [BillUser::class, 'showBillDetail'])->middleware('auth');
-    Route::get('shipping/{id}', [BillUser::class, 'showShippingHistory'])->middleware('auth'); // lịch sử đơn
+    Route::get('shipping/{id}', [BillUser::class, 'showShippingHistory'])->middleware('auth');
 
 
     // order + bill order
     Route::post('oder_item', [BillOrderController::class, 'addItem']);
     Route::post('oder_item/cancelItem', [BillOrderController::class, 'cancelItem']);
 
-    Route::post('bill_online', [BillOrderController::class, 'getBillOnline']);
-    Route::put('pay_bill', [BillOrderController::class, 'saveBill']);
+    Route::post('bill_online', [BillOrderController::class, 'getBillOnline'])->middleware('auth');
+    Route::put('pay_bill', [BillOrderController::class, 'saveBill'])->middleware('auth');
 });
