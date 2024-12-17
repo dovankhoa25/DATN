@@ -107,7 +107,7 @@ class AuthController extends Controller
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
             'user' => $user,
-            'expires_in' => JWTAuth::factory()->getTTL() * 60 // 60 phút
+            'expires_in' => JWTAuth::factory()->getTTL() * 360 // 360 phút
         ]);
     }
 

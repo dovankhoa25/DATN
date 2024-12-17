@@ -13,6 +13,7 @@ use App\Http\Requests\Bill\UpdateBillRequest;
 use App\Http\Resources\BillResource;
 use App\Models\Bill;
 use App\Models\BillDetail;
+use App\Models\Customer;
 use App\Models\ShippingHistory;
 use App\Models\Table;
 use App\Models\User;
@@ -250,6 +251,11 @@ class BillController extends Controller
                 $bill->status = 'completed';
                 $bill->payment_status = 'successful';
                 $bill->save();
+                $customer = Customer::where("user_id", $bill->user_id)->first();
+                if ($customer) {
+                    $customer->diemthuong += ($bill->total_amount / 1000);
+                    $customer->save();
+                }
                 $statusUpdated = true;
             }
         }

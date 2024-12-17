@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ResetPasswordMail;
 use App\Models\User;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -21,15 +22,16 @@ class ResetPasswordController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Email not found'], 404);
         }
+
         $token = Str::random(64);
+
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $request->email],
             ['token' => bcrypt($token), 'created_at' => now()]
         );
 
-        // Gửi email với link (không có token trong URL)
         $frontendUrl = 'https://yagii.fun/reset-password';
-        // Mail::to($request->email)->send(new ResetPasswordMail($frontendUrl));
+        Mail::to($request->email)->send(new ResetPasswordMail($frontendUrl));
 
         return response()->json(['token' => $token], 200);
     }
@@ -42,12 +44,11 @@ class ResetPasswordController extends Controller
             'password' => 'required|min:8|confirmed',
         ]);
 
-        $record = DB::table('password_resets')->where('email', $request->email)->first();
+        $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
 
         if (!$record || !Hash::check($request->token, $record->token)) {
             return response()->json(['message' => 'Invalid token'], 400);
         }
-        // Đặt lại mật khẩu
         $user = User::where('email', $request->email)->first();
         $user->update(['password' => Hash::make($request->password)]);
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();

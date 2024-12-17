@@ -86,10 +86,10 @@ Route::prefix('admin')->middleware(['auth', 'checkRole:qtv,admin,ctv'])->group(f
 
 
     // users
-    Route::apiResource('users', UserController::class)->middleware('checkRole:qtv,admin');
+    Route::apiResource('users', UserController::class)->middleware('checkRole:qtv,admin,user');
 
     Route::apiResource('roles', RoleController::class)->middleware('checkRole:qtv,admin');
-    Route::get('/user/{user}/roles', [UserController::class, 'getUserRoles'])->middleware('checkRole:qtv,admin');
+    Route::get('/user/{user}/roles', [UserController::class, 'getUserRoles'])->middleware('checkRole:qtv,admin,user');
     Route::put('/user/{user}/roles', [UserController::class, 'updateUserRoles'])->middleware('checkRole:admin');
     Route::put('/user/{user}/locked', [UserController::class, 'is_locked'])->middleware('checkRole:qtv,admin');
 
