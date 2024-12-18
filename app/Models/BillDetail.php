@@ -13,8 +13,9 @@ class BillDetail extends Model
         'product_detail_id',
         'quantity',
         'price',
+        'status',
     ];
-    
+
     // Định nghĩa quan hệ với Bill
     public function bill()
     {
