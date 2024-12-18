@@ -124,7 +124,7 @@ class OrderCartController extends Controller
         }
 
         $bill = DB::table('bills')
-            ->select('status')
+            ->select('status', 'id')
             ->where('ma_bill', $cartItem->ma_bill)
             ->first();
 
@@ -155,7 +155,7 @@ class OrderCartController extends Controller
             ->update([
                 'quantity' => $request->quantity
             ]);
-
+        broadcast(new ItemAddedToCart($bill));
         if ($res !== false) {
             $updatedCartItem = DB::table('oder_cart')->where('id', $request->id_cart_order)->first();
             $data = collect($updatedCartItem)->except(['created_at', 'updated_at'])->toArray();
@@ -176,6 +176,7 @@ class OrderCartController extends Controller
         $cart = OrderCart::findOrFail($id);
 
         $res = $cart->delete();
+        broadcast(new ItemAddedToCart($id));
         if ($res) {
             return response()->json(['message' => 'success'], 204);
         } else {

@@ -99,7 +99,7 @@ class TimeOrderTableController extends Controller
             'user_id' => $user->id,
             'phone_number' => $request->get('phone_number'),
             'date_oder' => $dateOrder,
-            'time_oder' => $hourOrder[$timeOrderKey], // Lưu khung giờ chính xác
+            'time_oder' => $hourOrder[$timeOrderKey],
             'description' => $request->get('description'),
             'status' => 'pending',
         ]);

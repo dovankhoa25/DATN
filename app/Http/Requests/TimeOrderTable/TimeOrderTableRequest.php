@@ -23,7 +23,7 @@ class TimeOrderTableRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'table_id' => 'required|exists:tables,id',
+            'table_id' => 'required|array|exists:tables,id',
             'user_id' => 'exists:users,id',
             'phone_number' => ['required', 'regex:/^[0-9]{10,15}$/'],
             'date_oder' => 'required|date|after_or_equal:today',
