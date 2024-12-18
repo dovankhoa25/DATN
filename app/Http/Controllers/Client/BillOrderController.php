@@ -118,7 +118,7 @@ class BillOrderController extends Controller
             ->whereIn('id', $request->id_bill_details)
             ->get();
 
-        if (!$billDetails) {
+        if ($billDetails->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không có sản phẩm nào có thể hủy trong hóa đơn.',
