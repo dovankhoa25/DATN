@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Events\DeletedCart;
 use App\Events\ItemAddedToCart;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OrderCart\OrderCartRequest;
@@ -177,7 +178,7 @@ class OrderCartController extends Controller
         $cart = OrderCart::findOrFail($id);
 
         $res = $cart->delete();
-        broadcast(new ItemAddedToCart($id));
+        broadcast(new DeletedCart($id));
         if ($res) {
             return response()->json(['message' => 'success'], 204);
         } else {
