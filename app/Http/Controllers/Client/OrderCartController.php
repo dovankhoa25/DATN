@@ -71,7 +71,7 @@ class OrderCartController extends Controller
             ]);
 
             if ($res) {
-                broadcast(new ItemAddedToCart($res));
+                broadcast(new ItemAddedToCart($bill));
                 $data = $res->makeHidden(['created_at', 'updated_at']);
                 return response()->json([
                     'data' => $data,
