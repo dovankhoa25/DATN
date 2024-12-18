@@ -9,8 +9,9 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
-class ItemAddedToCart implements ShouldBroadcast
+class ItemAddedToCart implements ShouldBroadcastNow
 {
     use SerializesModels;
 
@@ -23,7 +24,7 @@ class ItemAddedToCart implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new Channel('cart.' . $this->bill->id);
+        return new Channel('bill.' . $this->bill->id);
     }
 
     public function broadcastAs()

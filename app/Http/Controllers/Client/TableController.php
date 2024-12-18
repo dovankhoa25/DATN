@@ -34,7 +34,15 @@ class TableController extends Controller
     {
         $perPage = $request['per_page'] ?? 10;
 
-        $tables = Table::where('status', true)->select('id', 'table', 'description', 'status')->paginate($perPage);
+        $tables = Table::where('status', true)->select(
+            'id',
+            'table',
+            'description',
+            'min_guest',
+            'max_guest',
+            'deposit',
+            'status'
+        )->paginate($perPage);
 
         return response()->json([
             'data' => $tables
