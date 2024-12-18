@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Client\ApiCall;
 use App\Http\Controllers\Client\BillOrderController;
 use App\Http\Controllers\Client\BillUser;
 use App\Http\Controllers\Client\VoucherController as ClientVoucherController;
@@ -68,6 +69,7 @@ Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']
 Route::post('refresh', [AuthController::class, 'refreshToken']);
 Route::post('pay_check', [TransactionController::class, 'webhook']);
 
+Route::get('call/{id}', [ApiCall::class, 'goiNhanvien']);
 
 
 Route::prefix('shipper')->middleware(['auth', 'checkRole:qtv,admin,shipper'])->group(function () {
