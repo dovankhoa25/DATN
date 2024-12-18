@@ -14,31 +14,20 @@ class ItemAddedToCart implements ShouldBroadcast
 {
     use SerializesModels;
 
-    public $cartItem;
+    public $bill;
 
-    public function __construct($cartItem)
+    public function __construct($bill)
     {
-        $this->cartItem = $cartItem;
+        $this->bill = $bill;
     }
 
     public function broadcastOn()
     {
-        return new Channel('cart.' . $this->cartItem->ma_bill);
+        return new Channel('cart.' . $this->bill->id);
     }
 
     public function broadcastAs()
     {
         return 'item.addedToCart';
-    }
-
-    public function broadcastWith()
-    {
-        return [
-            'ma_bill' => $this->cartItem->ma_bill,
-            'product_detail_id' => $this->cartItem->product_detail_id,
-            'quantity' => $this->cartItem->quantity,
-            'price' => $this->cartItem->price,
-            'message' => 'Sản phẩm đã được thêm vào giỏ hàng.',
-        ];
     }
 }

@@ -53,7 +53,7 @@ class OrderCartController extends Controller
             }
 
             $existingCartItem->update(['quantity' => $newQuantity]);
-            broadcast(new ItemAddedToCart($existingCartItem));
+            broadcast(new ItemAddedToCart($bill));
             $data = $existingCartItem->makeHidden(['created_at', 'updated_at']);
             return response()->json([
                 'data' => $data,

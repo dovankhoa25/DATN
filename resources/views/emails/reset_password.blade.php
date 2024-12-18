@@ -7,7 +7,7 @@
 <body>
     <p>Xin chào,</p>
     <p>Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng nhấn vào đường link dưới đây để đặt lại mật khẩu:</p>
-    <a href="{{ $url }}">Đặt lại mật khẩu</a>
+    <a href="https://yagii.fun/reset-password">Đặt lại mật khẩu</a>
     <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
 </body>
 </html>

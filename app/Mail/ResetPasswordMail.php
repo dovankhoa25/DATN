@@ -32,7 +32,9 @@ class ResetPasswordMail extends Mailable
     {
         return new Content(
             view: 'emails.reset_password',
-            with: ['url' => $this->url]
+            with: [
+                'url' => $this->url,
+            ],
         );
     }
 
