@@ -169,7 +169,7 @@ class BillOrderController extends Controller
 
         $voucherId = null;
         if ($voucher) {
-            $voucher = Voucher::where('name', $voucher)->first();
+            $voucher = Voucher::where('code', $voucher)->first();
             $voucherId = $voucher->id;
         }
 
@@ -183,6 +183,13 @@ class BillOrderController extends Controller
             $customerId = null;
             if ($phone) {
                 $customer = Customer::where('phone_number', $phone)->first();
+                if (!$customer) {
+                    $customer = Customer::create([
+                        'phone_number' => $phone,
+                        'name' => $request->get('name', 'Khách hàng'),
+                        'email' => $request->get('email'),
+                    ]);
+                }
                 $customerId = $customer->id;
             }
 

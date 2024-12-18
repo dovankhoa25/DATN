@@ -33,11 +33,12 @@ class BillOderRequest extends BaseApiRequest
         if ($this->isMethod('put')) {
             return [
                 'ma_bill' => 'required|string|exists:bills,ma_bill',
-                'phone' => 'nullable|exists:customers,phone_number',
+                'phone' => 'nullable',
                 'payment_id' => 'required|exists:payments,id',
-                'voucher' => 'nullable|exists:vouchers,name',
+                'voucher' => 'nullable|exists:vouchers,code',
                 'note' => 'nullable|string|max:255',
-
+                'email' => 'nullable|email|unique:customers,email',
+                'name' => 'nullable|string|max:255|min:5',
             ];
         }
     }
