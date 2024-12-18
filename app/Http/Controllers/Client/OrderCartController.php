@@ -20,7 +20,7 @@ class OrderCartController extends Controller
     public function store(OrderCartRequest $request)
     {
         $bill = DB::table('bills')
-            ->select('status')
+            ->select('status', 'id')
             ->where('ma_bill', $request->get('ma_bill'))
             ->first();
 
