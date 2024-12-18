@@ -9,6 +9,7 @@ use App\Models\OrderCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Events\NewOrderPlaced;
+use App\Models\Bill;
 
 class OrderCartController extends Controller
 {

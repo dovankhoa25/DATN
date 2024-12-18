@@ -23,15 +23,16 @@ class Voucher extends Model
             $query->where('name', 'like', '%' . $filters['name'] . '%');
         }
 
-        if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
-            $query->whereBetween('start_date', [$filters['start_date'], $filters['end_date']]);
-        } elseif (!empty($filters['end_date'])) {
-            $query->where('start_date', '<=', $filters['end_date']);
-        } elseif (!empty($filters['start_date'])) {
-            $query->where('start_date', '>=', $filters['start_date']);
-        } else {
-            $query->where('start_date', '>=', now()->format('Y-m-d'));
+        if (isset($filters['start_date']) || isset($filters['end_date'])) {
+            if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
+                $query->whereBetween('start_date', [$filters['start_date'], $filters['end_date']]);
+            } elseif (!empty($filters['end_date'])) {
+                $query->where('start_date', '<=', $filters['end_date']);
+            } elseif (!empty($filters['start_date'])) {
+                $query->where('start_date', '>=', $filters['start_date']);
+            }
         }
+
 
         if (!empty($filters['customer_id'])) {
             $query->where('customer_id', $filters['customer_id']);

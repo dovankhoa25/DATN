@@ -21,20 +21,18 @@ class VoucherController extends Controller
     {
         try {
             $perPage = $request->get('per_page', 10);
-
             $filters = $request->all();
 
-            $vouchers = Voucher::filter($filters);
-
-            $paginated = $vouchers
+            $vouchers = Voucher::filter($filters)
                 ->latest()
                 ->paginate($perPage);
 
-            return VoucherResource::collection($paginated);
+            return VoucherResource::collection($vouchers);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Không tìm thấy voucher'], 404);
         }
     }
+
 
 
     protected function storeImage($file, $directory)
@@ -105,10 +103,11 @@ class VoucherController extends Controller
     public function update(VoucherRequest $request, $id)
     {
         $voucher = Voucher::findOrFail($id);
-        $billVoucher = BillVoucher::where('voucher_id', $id)->find();
+        $billVoucher = BillVoucher::where('voucher_id', $id)->first();
+
         if ($billVoucher) {
             return response()->json([
-                'message' => 'vouche đã được sử dụng không thể sủa.',
+                'message' => 'Voucher đã được sử dụng không thể sửa.',
             ], 404);
         }
 
