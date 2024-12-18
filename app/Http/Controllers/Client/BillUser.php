@@ -198,7 +198,7 @@ class BillUser extends Controller
 
             DB::commit();
             dispatch(new CheckBillExpiration($bill->id))->delay(now()->addMinutes(20));
-            // event(new BillCreated($bill));
+            event(new BillCreated($bill));
 
             return response()->json([
                 'message' => 'Đặt hàng thành công',

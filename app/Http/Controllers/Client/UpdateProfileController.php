@@ -70,9 +70,10 @@ class UpdateProfileController extends Controller
             return response()->json(['message' => 'Người dùng chỉ có thể tạo tối đa 5 địa chỉ'], 403);
         }
 
-        $isFirstAddress = $addressCount === 0;
-        if ($isFirstAddress) {
-            $request->merge(['is_default' => 1]);
+        $hasDefaultAddress = UserAddress::where('user_id', $user->id)->where('is_default', 1)->exists();
+
+        if (!$hasDefaultAddress) {
+            $request['is_default'] = 1;
         } elseif ($request->get('is_default') == 1) {
             UserAddress::where('user_id', $user->id)
                 ->where('is_default', 1)
@@ -89,7 +90,7 @@ class UpdateProfileController extends Controller
             'address' => $request->get('address'),
             'postal_code' => $request->get('postal_code') ?? 70000,
             'country' => $request->get('country') ?? 'Việt Nam Fpl',
-            'is_default' => $request->get('is_default') ?? 0,
+            'is_default' => $request->get('is_default') ?? 1,
         ]);
 
         if ($res) {
