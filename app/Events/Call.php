@@ -23,7 +23,7 @@ class Call implements ShouldBroadcastNow
 
     public function broadcastOn()
     {
-        return new Channel('call.' . $this->call);
+        return new Channel('call');
     }
     public function broadcastAs()
     {
