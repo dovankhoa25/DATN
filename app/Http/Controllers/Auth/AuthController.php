@@ -61,7 +61,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'error' => 'Đăng ký không thành công, vui lòng thử lại.',
-                'message' => $e->getMessage(),
+                // 'message' => $e->getMessage(),
             ], 500);
         }
     }

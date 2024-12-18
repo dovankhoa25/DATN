@@ -37,6 +37,7 @@ class BillOrderResource extends JsonResource
             'bill_details' => $this->billDetails->groupBy('productDetail.product_id')->map(function ($details, $productId) {
                 $firstDetail = $details->first();
                 return [
+
                     'product' => [
                         'id' => $firstDetail->productDetail->product->id,
                         'name' => $firstDetail->productDetail->product->name,
@@ -45,6 +46,7 @@ class BillOrderResource extends JsonResource
                         'status' => $firstDetail->productDetail->product->status,
                         'product_details' => $details->map(function ($detail) {
                             return [
+                                'bill_detail_id' => $detail->id,
                                 'id' => $detail->productDetail->id,
                                 'size_name' => $detail->productDetail->size->name,
                                 'price' => $detail->productDetail->price,

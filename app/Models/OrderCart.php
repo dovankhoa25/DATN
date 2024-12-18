@@ -20,6 +20,13 @@ class OrderCart extends Model
 
     public $timestamp = false;
 
+
+    public function productDetail()
+    {
+        return $this->belongsTo(ProductDetail::class, 'product_detail_id');
+    }
+
+
     public function listCart()
     {
         $query = DB::table('oder_cart as od_cart')

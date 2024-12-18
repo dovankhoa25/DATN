@@ -20,7 +20,7 @@ class ProductClientController extends Controller
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
 
-        $paginatedProducts = Product::filter($request->all())
+        $paginatedProducts = Product::filter($request->all())->where('status', 1)
             ->paginate($perPage);
 
         $formattedProducts = $paginatedProducts->getCollection()->map(function ($product) {
@@ -72,7 +72,7 @@ class ProductClientController extends Controller
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
 
-        $products = Product::filter($request->all())
+        $products = Product::filter($request->all())->where('status', 1)
             ->paginate($perPage);
 
         $formattedProducts = $products->getCollection()->map(function ($product) {
@@ -184,7 +184,7 @@ class ProductClientController extends Controller
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
 
-        $paginatedProducts = Product::filter($request->all())
+        $paginatedProducts = Product::filter($request->all())->where('status', 1)
             ->whereHas('categories', function ($query) use ($id) {
                 $query->where('categories.id', '=', $id);
             })
