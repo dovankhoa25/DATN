@@ -20,7 +20,7 @@ class ResetPasswordController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return response()->json(['message' => 'Email not found'], 404);
+            return response()->json(['message' => 'email không tồn tại trong hệ thống'], 404);
         }
 
         $token = Str::random(64);
@@ -47,7 +47,7 @@ class ResetPasswordController extends Controller
         $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
 
         if (!$record || !Hash::check($request->token, $record->token)) {
-            return response()->json(['message' => 'Invalid token'], 400);
+            return response()->json(['message' => 'bạn đang truy cập trái phép'], 400);
         }
         $user = User::where('email', $request->email)->first();
         $user->update(['password' => Hash::make($request->password)]);

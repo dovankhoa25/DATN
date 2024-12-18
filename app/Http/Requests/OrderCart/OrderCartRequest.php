@@ -26,7 +26,7 @@ class OrderCartRequest extends BaseApiRequest
             return [
                 'ma_bill' => ['required', 'string', 'max:255', 'exists:bills,ma_bill'],
                 'product_detail_id' => ['required', 'exists:product_details,id'],
-                'quantity' => ['required', 'integer', 'min:1'],
+                'quantity' => ['required', 'integer', 'min:1', 'max:10'],
             ];
         }
 
@@ -47,8 +47,8 @@ class OrderCartRequest extends BaseApiRequest
 
             'quantity.required' => "Số lượng là bắt buộc",
             'quantity.integer' => "Số lượng là một số nguyên",
-            'quantity.min' => "Số lượng không lớn hơn 1",
-            'quantity.max' => "Số lượng không nhỏ hơn 50",
+            'quantity.min' => "Số lượng lớn hơn 1",
+            'quantity.max' => "Số lượng nhỏ hơn 10",
         ];
     }
 }

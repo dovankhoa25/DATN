@@ -9,37 +9,36 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
-class ItemCancelledFromBill implements ShouldBroadcastNow
+class ItemAddedToCart implements ShouldBroadcast
 {
     use SerializesModels;
 
-    public $billId;
-    public $items;
+    public $cartItem;
 
-    public function __construct($data)
+    public function __construct($cartItem)
     {
-        $this->billId = $data['bill_id'];
-        $this->items = $data['cancelled_items'];
+        $this->cartItem = $cartItem;
     }
 
     public function broadcastOn()
     {
-        return new Channel('bill.' . $this->billId);
+        return new Channel('cart.' . $this->cartItem->ma_bill);
     }
 
     public function broadcastAs()
     {
-        return 'item.cancelled';
+        return 'item.addedToCart';
     }
 
     public function broadcastWith()
     {
         return [
-            'bill_id' => $this->billId,
-            'items' => $this->items,
-            'message' => 'Sản phẩm đã được hủy khỏi hóa đơn.',
+            'ma_bill' => $this->cartItem->ma_bill,
+            'product_detail_id' => $this->cartItem->product_detail_id,
+            'quantity' => $this->cartItem->quantity,
+            'price' => $this->cartItem->price,
+            'message' => 'Sản phẩm đã được thêm vào giỏ hàng.',
         ];
     }
 }

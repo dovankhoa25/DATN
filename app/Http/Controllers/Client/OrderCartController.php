@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Events\ItemAddedToCart;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OrderCart\OrderCartRequest;
 use App\Models\OrderCart;
@@ -52,7 +53,7 @@ class OrderCartController extends Controller
             }
 
             $existingCartItem->update(['quantity' => $newQuantity]);
-
+            broadcast(new ItemAddedToCart($existingCartItem));
             $data = $existingCartItem->makeHidden(['created_at', 'updated_at']);
             return response()->json([
                 'data' => $data,
@@ -68,6 +69,7 @@ class OrderCartController extends Controller
             ]);
 
             if ($res) {
+                broadcast(new ItemAddedToCart($res));
                 $data = $res->makeHidden(['created_at', 'updated_at']);
                 return response()->json([
                     'data' => $data,

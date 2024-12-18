@@ -168,6 +168,7 @@ class BillController extends Controller
             'shipping' => ['completed', 'failed'],
             'completed' => null,
             'failed' => null,
+            'cancellation_requested' => ['cancellation_approved', 'cancellation_rejected'],
         ];
 
         $currentStatus = $bill->status;
@@ -229,8 +230,8 @@ class BillController extends Controller
                 $this->createShippingHistory($bill, $userId, $shipper, $event, $description, $image);
 
                 if ($newStatus === 'cancellation_rejected') {
-                    Log::info('Trạng thái bị từ chối, cập nhật lại trạng thái hóa đơn thành preparing');
-                    $bill->status = 'preparing';
+                    Log::info('Trạng thái bị từ chối, cập nhật lại trạng thái hóa đơn thành xác nhận');
+                    $bill->status = 'confirmed';
                     $bill->save();
                     $statusUpdated = true;
                 }
