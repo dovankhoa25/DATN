@@ -24,21 +24,22 @@ class BillOrderController extends Controller
 {
     public function getBillOnline(BillOderRequest $request)
     {
-
         $bill = Bill::where('ma_bill', $request->ma_bill)
             ->where('order_type', 'in_restaurant')
             ->where('status', 'pending')
             ->first();
 
         if ($bill) {
-            return new BillOrderResource($bill);
+            $tables = $bill->tables;
+            return new BillOrderResource($bill, $tables);
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Bill not fould ok.',
+                'message' => 'Bill not found.',
             ], 404);
         }
     }
+
 
     public function addItem(ItemBillRequest $request)
     {

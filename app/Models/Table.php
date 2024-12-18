@@ -43,4 +43,9 @@ class Table extends Model
     {
         return $this->belongsToMany(Bill::class, 'bill_table');
     }
+
+    public function billTables()
+    {
+        return $this->hasMany(BillTable::class);
+    }
 }

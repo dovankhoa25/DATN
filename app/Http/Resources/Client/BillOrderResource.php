@@ -28,7 +28,7 @@ class BillOrderResource extends JsonResource
             'voucher' => $this->voucher ? $this->voucher->value : null,
             'note' => $this->note,
             'order_type' => $this->order_type,
-            'table_number' => $this->table_number,
+            'table_number' => $this->tables->pluck('table')->toArray(),
             'payment_status' => $this->payment_status,
             'status' => $this->status,
             'qr_expiration' => $this->qr_expiration,

@@ -70,6 +70,10 @@ class Bill extends Model
         return $this->hasMany(ShippingHistory::class, 'bill_id');
     }
 
+    public function billTable()
+    {
+        return $this->hasMany(BillTable::class);
+    }
 
     public function scopeFilter($query, $filters)
     {
