@@ -213,8 +213,8 @@ class BillOrderController extends Controller
             $tableIds = $bill->tables()->pluck('tables.id');
 
 
-            $paymentStatus = ($payment->name == 'ATM') ? 'pending' : 'successful';
-            $qrExpiration = ($payment->name === 'ATM') ? now()->addMinutes(30) : null;
+            $paymentStatus = ($payment->id == 2) ? 'pending' : 'successful';
+            $qrExpiration = ($payment->id === 2) ? now()->addMinutes(30) : null;
             $bill->customer_id = $customerId;
             $bill->payment_id = $paymentId;
             // $bill->voucher_id = $voucherId;

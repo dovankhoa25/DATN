@@ -178,7 +178,7 @@ class OrderCartController extends Controller
         $cart = OrderCart::findOrFail($id);
 
         $res = $cart->delete();
-        broadcast(new DeletedCart($id));
+        // broadcast(new DeletedCart($id));
         if ($res) {
             return response()->json(['message' => 'success'], 204);
         } else {
