@@ -161,7 +161,7 @@ class ShipperController extends Controller
                 return response()->json(['error' => 'Chỉ có thể thử lại khi trạng thái là pending_retry'], 400);
             }
 
-            $bill->status = 'shipping_started';
+            $bill->status = 'shipping';
 
             ShippingHistory::create([
                 'bill_id' => $bill->id,
